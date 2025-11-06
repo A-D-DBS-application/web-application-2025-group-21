@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Consultant detail{% endblock %}
+{% block content %}
+  <h1>{{ profile.display_name_masked }}</h1>
+  {% if profile.headline %}<p><i>{{ profile.headline }}</i></p>{% endif %}
+  {% if profile.skills_text %}<p>{{ profile.skills_text }}</p>{% endif %}
+  <p><small>{{ profile.location_city }}{% if profile.location_city and profile.country %}, {% endif %}{{ profile.country }}</small></p>
+{% endblock %}
+#detailpagina v/ 1 consultant

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Nieuwe job{% endblock %}
+{% block content %}
+  <h1>Nieuwe job plaatsen</h1>
+  <form method="post">
+    <label>Titel</label>
+    <input name="title" required>
+
+    <label>Omschrijving</label>
+    <textarea name="description" rows="5"></textarea>
+
+    <div class="row">
+      <div class="grow">
+        <label>Stad</label>
+        <input name="location_city">
+      </div>
+      <div class="grow">
+        <label>Land</label>
+        <input name="country">
+      </div>
+    </div>
+
+    <label>Contract type</label>
+    <input name="contract_type" placeholder="freelance, full-time, ...">
+
+    <button class="btn" type="submit">Opslaan</button>
+  </form>
+{% endblock %}
+# alleen voor company gebruikers

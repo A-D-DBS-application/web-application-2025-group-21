@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Jobs{% endblock %}
+{% block content %}
+  <h1>Job posts</h1>
+  {% if session.get('user_id') %}
+    <a class="btn" href="{{ url_for('main.job_new') }}">Nieuwe job plaatsen</a>
+  {% endif %}
+  <ul>
+    {% for j in jobs %}
+      <li>
+        <a href="{{ url_for('main.job_detail', job_id=j.id) }}">{{ j.title }}</a>
+        {% if j.location_city or j.country %}
+          — <small>{{ j.location_city }}{% if j.location_city and j.country %}, {% endif %}{{ j.country }}</small>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+  {% if not jobs %}
+    <p>Er zijn nog geen jobs.</p>
+  {% endif %}
+{% endblock %}

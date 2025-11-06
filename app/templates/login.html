@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block content %}
+  <h1>Login (MVP)</h1>
+  <form method="post">
+    <label>Username</label>
+    <input name="username" required>
+
+    <label>Rol</label>
+    <select name="role">
+      <option value="consultant">consultant</option>
+      <option value="company">company</option>
+    </select>
+
+    <button class="btn" type="submit">Inloggen</button>
+  </form>
+  <p><small>Dit maakt bij eerste login automatisch een user + leeg profiel/bedrijf aan.</small></p>
+{% endblock %}
+#loginpagina en doorgestuurd nr dashboard 

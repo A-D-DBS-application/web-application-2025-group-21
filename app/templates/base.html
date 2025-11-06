@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <title>{% block title %}MVP{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; margin: 0; }
+    header, footer { padding: 12px 16px; background: #f3f4f6; }
+    main { padding: 16px; max-width: 900px; margin: 0 auto; }
+    nav a { margin-right: 12px; text-decoration: none; }
+    .flash { background:#fffbdd; border:1px solid #f1e3a8; padding:8px 12px; margin:8px 0; }
+    .card { border:1px solid #e5e7eb; border-radius:12px; padding:12px; margin:12px 0; }
+    .btn { display:inline-block; padding:8px 12px; border:1px solid #111; border-radius:8px; text-decoration:none; }
+    form > * { display:block; margin:8px 0; }
+    .row { display:flex; gap:12px; flex-wrap: wrap; }
+    .grow { flex:1 1 280px; }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="{{ url_for('main.index') }}">Home</a>
+      <a href="{{ url_for('main.consultants_list') }}">Consultants</a>
+      <a href="{{ url_for('main.jobs_list') }}">Jobs</a>
+      <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
+      {% if session.get('user_id') %}
+        <form action="{{ url_for('main.logout') }}" method="post" style="display:inline;">
+          <button class="btn" type="submit">Logout</button>
+        </form>
+      {% else %}
+        <a class="btn" href="{{ url_for('main.login') }}">Login</a>
+      {% endif %}
+    </nav>
+  </header>
+
+  <main>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for m in messages %}<div class="flash">{{ m }}</div>{% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer>
+    <small>MVP demo</small>
+  </footer>
+</body>
+</html>
+#dit is de basis en deze layout voor alle paginas -> schoner

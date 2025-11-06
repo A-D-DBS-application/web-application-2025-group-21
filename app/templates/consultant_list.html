@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Consultants{% endblock %}
+{% block content %}
+  <h1>Consultants</h1>
+  <div class="row">
+    {% for p in profiles %}
+      <div class="card grow">
+        <h3>{{ p.display_name_masked }}</h3>
+        {% if p.headline %}<p>{{ p.headline }}</p>{% endif %}
+        {% if p.location_city or p.country %}
+          <p><small>{{ p.location_city }}{% if p.location_city and p.country %}, {% endif %}{{ p.country }}</small></p>
+        {% endif %}
+        <a class="btn" href="{{ url_for('main.consultant_detail', profile_id=p.id) }}">Bekijk</a>
+      </div>
+    {% endfor %}
+    {% if not profiles %}
+      <p>Geen consultants gevonden.</p>
+    {% endif %}
+  </div>
+{% endblock %}

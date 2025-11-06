@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Job detail{% endblock %}
+{% block content %}
+  <h1>{{ job.title }}</h1>
+  {% if job.company %}<p><b>Company:</b> {{ job.company.company_name_masked }}</p>{% endif %}
+  {% if job.contract_type %}<p><b>Contract:</b> {{ job.contract_type }}</p>{% endif %}
+  {% if job.location_city or job.country %}
+    <p><b>Locatie:</b> {{ job.location_city }}{% if job.location_city and job.country %}, {% endif %}{{ job.country }}</p>
+  {% endif %}
+  {% if job.description %}<div class="card"><p>{{ job.description }}</p></div>{% endif %}
+{% endblock %}
