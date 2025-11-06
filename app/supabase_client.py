@@ -1,6 +1,9 @@
 from supabase import create_client
 import os
 from dotenv import load_dotenv
+from sqlalchemy.orm import declarative_base
+
+Base = declarative_base()
 
 load_dotenv()
 
