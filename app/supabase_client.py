@@ -15,25 +15,7 @@ def get_session():
     return SessionLocal()
 
 
-# Maak tabellen aan (indien niet aanwezig)
-#dit niet zeker denk dat we al tabellen hadden
-#try:
-    #Base.metadata.create_all(engine)
-#except Exception as e:
-    #print("⚠️ Kon tabellen niet automatisch maken:", e)
 
-#als nog niet hebben moeten we dit invoeren in terminal als we willen runnen
-#python
-#>>> from app.supabase_client import engine
-#>>> result = engine.execute("SELECT table_name FROM information_schema.tables WHERE table_schema='public'")
-#>>> for row in result: print(row)
-
-#dit is voor database te linken in terminal en hierna sluiten en trg laden maar vergeet niet alles aan te passen
-#setx DATABASE_URL "postgresql://postgres:password@localhost:5432/yourdb"
-
-#venv act: .\venv\Scripts\Activate.ps1
-
-#app starten: python run.py
 
 
 
