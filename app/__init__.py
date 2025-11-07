@@ -1,31 +1,25 @@
-# app/__init__.py
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-#from flask_migrate import Migrate
-#from .config import Config
-#from .models import db
+from dotenv import load_dotenv
+import os
+from dotenv import load_dotenv
+import os
 
-#migrate = Migrate()
+db = SQLAlchemy()
 
-#import os
-#from flask import Flask
 def create_app():
     app = Flask(__name__)
+
+    # laad .env in
+    load_dotenv()
+
     app.config["SECRET_KEY"] = "wachtwoord"
-    
-    #hebt dit nodig want werken met sessies
-    #app.config.from_object(Config)
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-    #db.init_app(app)
-    #migrate.init_app(app, db)
+    db.init_app(app)
 
-    #with app.app_context():
-        #from .routes import main
-        #app.register_blueprint(main)
-
-    #return app
     from .routes import main
     app.register_blueprint(main)
 
     return app
-
