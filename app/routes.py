@@ -1,36 +1,9 @@
-#companies, jobs, profiles, skills, unlocks, users
-
-#testroute
-from flask import Blueprint, jsonify, request
-from .supabase_client import supabase
-
-main = Blueprint("main", __name__)
-
-@main.route("/")
-def index():
-    return "Welkom bij de Flask + Supabase app!"
-
-@main.route("/users", methods=["GET"])
-def get_users():
-    users = supabase.table("users").select("*").execute()
-    return jsonify(users.data)
-
-@main.route("/users", methods=["POST"])
-def create_user():
-    data = request.json
-    response = supabase.table("users").insert([{
-        "username": data["username"],
-        "role": data["role"]
-    }]).execute()
-    return jsonify(response.data)
-
-# app/routes.py
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
 from datetime import datetime
 
-from .supabase_client import (
-    get_session, User, ConsultantProfile, Company, JobPost, UserRole
-)
+from .supabase_client import get_session
+from .models import User, ConsultantProfile, Company, JobPost, UserRole
+
 
 main = Blueprint("main", __name__)
 
@@ -42,6 +15,7 @@ def get_current_user(db):
     return db.query(User).filter(User.id == user_id).first()
 
 # ------------------ HOME ------------------
+#dit gebeurt vanzelf dus geen registreer nodig
 @main.route("/", methods=["GET"])
 def index():
     return render_template("index.html")
@@ -95,6 +69,7 @@ def logout():
     return redirect(url_for("main.index"))
 
 # ------------------ DASHBOARD ------------------
+#is je persoonlijk profiel
 @main.route("/dashboard", methods=["GET"])
 def dashboard():
     with get_session() as db:

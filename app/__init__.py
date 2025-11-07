@@ -7,9 +7,12 @@ from flask_sqlalchemy import SQLAlchemy
 
 #migrate = Migrate()
 
+#import os
+#from flask import Flask
 def create_app():
     app = Flask(__name__)
-    app.secret_key = "dev-secret"
+    app.config["SECRET_KEY"] = "wachtwoord"
+    
     #hebt dit nodig want werken met sessies
     #app.config.from_object(Config)
 
