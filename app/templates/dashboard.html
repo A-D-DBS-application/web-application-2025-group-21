@@ -3,12 +3,12 @@
 {% block content %}
   <h1>Dashboard</h1>
   {% if user %}
-    <p>Ingelogd als: <b>{{ user.username }}</b> (rol: {{ user.role.value }})</p>
+    <p>Logged in as: <b>{{ user.username }}</b> (rol: {{ user.role.value }})</p>
     {% if user.role.value == "company" %}
       <a class="btn" href="{{ url_for('main.job_new') }}">Nieuwe job plaatsen</a>
     {% endif %}
   {% else %}
-    <p>Niet ingelogd. <a href="{{ url_for('main.login') }}">Login</a></p>
+    <p>Not Logged in. <a href="{{ url_for('main.login') }}">Login</a></p>
   {% endif %}
 {% endblock %}
 #toont wie ingelogd en afh hiervan oftewel jobs bekijken of consultant zoeken
