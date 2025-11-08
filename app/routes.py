@@ -81,7 +81,7 @@ def dashboard():
 def consultants_list():
     with get_session() as db:
         profiles = db.query(ConsultantProfile).all()
-        return render_template("consultants_list.html", profiles=profiles)
+        return render_template("consultant_list.html", profiles=profiles)
 
 @main.route("/consultants/<int:profile_id>", methods=["GET"])
 def consultant_detail(profile_id):
