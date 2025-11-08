@@ -97,7 +97,7 @@ def consultant_detail(profile_id):
 def jobs_list():
     with get_session() as db:
         jobs = db.query(JobPost).all()
-        return render_template("jobs_list.html", jobs=jobs)
+        return render_template("job_list.html", jobs=jobs)
 
 @main.route("/jobs/<int:job_id>", methods=["GET"])
 def job_detail(job_id):
