@@ -1,7 +1,14 @@
 import os
+from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from .models import Base  # zorg dat Base in models.py staat
+from app.models import Base  # zorg dat Base in models.py staat
+
+# ✅ 1. Eerst .env inladen
+load_dotenv()
+
+# ✅ 2. Dan variabele ophalen
+print("DEBUG: DATABASE_URL =", os.getenv("DATABASE_URL"))
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
