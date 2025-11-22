@@ -1,64 +1,42 @@
 {% extends "base.html" %}
 {% block title %}Dashboard{% endblock %}
+
 {% block content %}
-  <h1>Dashboard</h1>
 
-  {% if user %}
-    <p>Logged in as: <b>{{ user.username }}</b> (rol: {{ user.role.value }})</p>
+<h1>Dashboard</h1>
 
-    {% if user.role.value == "consultant" and profile %}
-      {% if profile.location_city or profile.country %}
-        <p>
-          <b>Locatie:</b>
-          {{ profile.location_city }}
-          {% if profile.location_city and profile.country %}, {% endif %}
-          {{ profile.country }}
+<div class="card">
+  <h2>Mijn Profiel</h2>
+
+  <div class="row">
+    <div class="grow">
+      <p><strong>Naam:</strong> {{ user.username }}</p>
+      <p><strong>Rol:</strong> {{ user.role }}</p>
+
+      {% if user.role == "consultant" %}
+        <p><strong>Locatie:</strong> {{ profile.location_city }}, {{ profile.country }}</p>
+        <p><strong>Headline:</strong> {{ profile.headline or "Geen headline ingesteld" }}</p>
+        <p><strong>Beschikbaarheid:</strong> {{ profile.availability or "Onbekend" }}</p>
+        <p><strong>Tarief:</strong> {{ profile.rate_value }} €/uur</p>
+
+        <p><strong>Skills:</strong>
+          {% if skills %}
+            {{ skills | map(attribute="name") | join(", ") }}
+          {% else %}
+            Geen skills ingesteld
+          {% endif %}
         </p>
+
+        <a class="btn" href="{{ url_for('main.consultant_edit_profile') }}">Profiel aanpassen</a>
+
+      {% elif user.role == "company" %}
+        <p><strong>Bedrijf:</strong> {{ company.name }}</p>
+        <p><strong>Locatie:</strong> {{ company.location }}</p>
+
+        <a class="btn" href="{{ url_for('main.jobs_my_posts') }}">Mijn job posts</a>
       {% endif %}
-      <a class="btn" href="{{ url_for('main.edit_consultant_skills') }}">Skills aanpassen</a>
-    {% endif %}
+    </div>
+  </div>
+</div>
 
-    {% if user.role.value == "company" and company %}
-      <hr>
-      <h2>Company profiel</h2>
-
-      <p><b>Bedrijf:</b> {{ company.company_name_masked }}</p>
-
-      <form method="POST" action="{{ url_for('main.update_company_industry') }}">
-        <label for="industry"><b>Industry:</b></label><br>
-
-        <select name="industry" id="industry">
-          <option value="" {% if not company.industry %}selected{% endif %}>
-            Kies een industry
-          </option>
-
-          {% for opt in ["Technology","Finance","Healthcare","Retail","Manufacturing","Consulting"] %}
-            <option value="{{ opt }}" {% if company.industry == opt %}selected{% endif %}>
-              {{ opt }}
-            </option>
-          {% endfor %}
-        </select>
-
-        <button class="btn" type="submit">Opslaan</button>
-      </form>
-
-      {% if company.location_city or company.country %}
-        <p style="margin-top:10px;">
-          <b>Locatie:</b>
-          {{ company.location_city }}
-          {% if company.location_city and company.country %}, {% endif %}
-          {{ company.country }}
-        </p>
-      {% endif %}
-
-      <a class="btn" href="{{ url_for('main.job_new') }}">Nieuwe job plaatsen</a>
-    {% endif %}
-
-  {% else %}
-    <p>Not Logged in. <a href="{{ url_for('main.login') }}">Login</a></p>
-  {% endif %}
 {% endblock %}
-
-
-
-#toont wie ingelogd en afh hiervan oftewel jobs bekijken of consultant zoeken
