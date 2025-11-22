@@ -41,7 +41,6 @@ class ConsultantProfile(Base):
 
     display_name_masked = Column(String(120), nullable=False)
     headline = Column(String(160))
-    skills_text = Column(Text)
     location_city = Column(String(120))
     country = Column(String(120))
     availability = Column(String(120))
@@ -82,7 +81,6 @@ class JobPost(Base):
 
     title = Column(String(200), nullable=False)
     description = Column(Text)
-    skills_required_text = Column(Text)
     location_city = Column(String(120))
     country = Column(String(120))
     contract_type = Column(String(80))
@@ -125,7 +123,7 @@ class ProfileSkill(Base):
     __tablename__ = "profile_skills"
 
     profile_id = Column(Integer, ForeignKey("consultant_profiles.id", ondelete="CASCADE"), primary_key=True)
-    skill_id = Column(Integer, ForeignKey("skills.id", ondelete="CASCADE"), primary_key=True)
+    skill_id = Column(Integer, ForeignKey("skills.id", ondelete="RESTRICT"), primary_key=True)
     created_at = Column(TIMESTAMP, nullable=False, server_default=func.now())
 
 
@@ -137,7 +135,7 @@ class JobSkill(Base):
     __tablename__ = "job_skills"
 
     job_id = Column(Integer, ForeignKey("job_posts.id", ondelete="CASCADE"), primary_key=True)
-    skill_id = Column(Integer, ForeignKey("skills.id", ondelete="CASCADE"), primary_key=True)
+    skill_id = Column(Integer, ForeignKey("skills.id", ondelete="RESTRICT"), primary_key=True)
     created_at = Column(TIMESTAMP, nullable=False, server_default=func.now())
 
 

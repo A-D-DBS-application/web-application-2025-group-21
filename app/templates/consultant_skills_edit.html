@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Skills aanpassen{% endblock %}
+{% block content %}
+  <h1>Kies je skills</h1>
+
+  <form method="post">
+    {% for skill in skills %}
+      <label style="display:block;">
+        <input
+          type="checkbox"
+          name="skills"
+          value="{{ skill.id }}"
+          {% if skill in profile.skills %}checked{% endif %}
+        >
+        {{ skill.name }}
+      </label>
+    {% endfor %}
+
+    <button class="btn" type="submit">Opslaan</button>
+  </form>
+{% endblock %}

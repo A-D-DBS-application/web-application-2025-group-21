@@ -1,8 +1,10 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
 from datetime import datetime
 
+
+
 from .supabase_client import get_session
-from .models import User, ConsultantProfile, Company, JobPost, UserRole
+from .models import User, ConsultantProfile, Company, JobPost, UserRole, Skill
 
 
 main = Blueprint("main", __name__)
@@ -92,6 +94,38 @@ def consultant_detail(profile_id):
             return redirect(url_for("main.consultants_list"))
         return render_template("consultant_detail.html", profile=profile)
 
+@main.route("/dashboard/skills", methods=["GET", "POST"])
+def edit_consultant_skills():
+    with get_session() as db:
+        user = get_current_user(db)
+        if not user or user.role != UserRole.consultant:
+            flash("Alleen consultants kunnen skills aanpassen")
+            return redirect(url_for("main.login"))
+
+        profile = db.query(ConsultantProfile).filter_by(user_id=user.id).first()
+        all_skills = db.query(Skill).order_by(Skill.name).all()
+
+        if request.method == "POST":
+            selected_skill_ids = [int(x) for x in request.form.getlist("skills")]
+
+
+            selected_skills = []
+            if selected_skill_ids:
+                selected_skills = db.query(Skill).filter(Skill.id.in_(selected_skill_ids)).all()
+
+            profile.skills = selected_skills
+            db.commit()
+
+            flash("Skills opgeslagen!")
+            return redirect(url_for("main.dashboard"))
+
+        return render_template(
+            "consultant_skills_edit.html",
+            profile=profile,
+            skills=all_skills
+        )
+
+
 # ------------------ JOB POSTS ------------------
 @main.route("/jobs", methods=["GET"])
 def jobs_list():
@@ -117,6 +151,7 @@ def job_new():
             return redirect(url_for("main.login"))
 
         company = db.query(Company).filter(Company.user_id == user.id).first()
+        all_skills = db.query(Skill).order_by(Skill.name).all()
 
         if request.method == "POST":
             title = request.form.get("title")
@@ -124,6 +159,9 @@ def job_new():
             city = request.form.get("location_city")
             country = request.form.get("country")
             contract_type = request.form.get("contract_type")
+
+            selected_skill_ids = [int(x) for x in request.form.getlist("skills")]
+
 
             if not title:
                 flash("Titel is verplicht")
@@ -137,9 +175,16 @@ def job_new():
                 country=country,
                 contract_type=contract_type,
             )
+
+            # koppel skills aan job (vult job_skills automatisch)
+            if selected_skill_ids:
+                selected_skills = db.query(Skill).filter(Skill.id.in_(selected_skill_ids)).all()
+                job.skills = selected_skills
+
             db.add(job)
             db.commit()
 
             return redirect(url_for("main.job_detail", job_id=job.id))
 
-        return render_template("job_new.html", company=company)
+        return render_template("job_new.html", company=company, skills=all_skills)
+

@@ -2,13 +2,21 @@
 {% block title %}Dashboard{% endblock %}
 {% block content %}
   <h1>Dashboard</h1>
+
   {% if user %}
     <p>Logged in as: <b>{{ user.username }}</b> (rol: {{ user.role.value }})</p>
+
     {% if user.role.value == "company" %}
       <a class="btn" href="{{ url_for('main.job_new') }}">Nieuwe job plaatsen</a>
     {% endif %}
+
+    {% if user.role.value == "consultant" %}
+      <a class="btn" href="{{ url_for('main.edit_consultant_skills') }}">Skills aanpassen</a>
+    {% endif %}
+
   {% else %}
     <p>Not Logged in. <a href="{{ url_for('main.login') }}">Login</a></p>
   {% endif %}
 {% endblock %}
+
 #toont wie ingelogd en afh hiervan oftewel jobs bekijken of consultant zoeken

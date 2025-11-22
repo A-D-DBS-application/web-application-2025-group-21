@@ -2,8 +2,27 @@
 {% block title %}Consultant detail{% endblock %}
 {% block content %}
   <h1>{{ profile.display_name_masked }}</h1>
-  {% if profile.headline %}<p><i>{{ profile.headline }}</i></p>{% endif %}
-  {% if profile.skills_text %}<p>{{ profile.skills_text }}</p>{% endif %}
-  <p><small>{{ profile.location_city }}{% if profile.location_city and profile.country %}, {% endif %}{{ profile.country }}</small></p>
+
+  {% if profile.headline %}
+    <p><i>{{ profile.headline }}</i></p>
+  {% endif %}
+
+  <h3>Skills</h3>
+  {% if profile.skills and profile.skills|length > 0 %}
+    <ul>
+      {% for skill in profile.skills %}
+        <li>{{ skill.name }}</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p><i>Geen skills opgegeven.</i></p>
+  {% endif %}
+
+  <p>
+    <small>
+      {{ profile.location_city }}
+      {% if profile.location_city and profile.country %}, {% endif %}
+      {{ profile.country }}
+    </small>
+  </p>
 {% endblock %}
-#detailpagina v/ 1 consultant
