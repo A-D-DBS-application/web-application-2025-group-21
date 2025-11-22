@@ -56,8 +56,11 @@ class ConsultantProfile(Base):
     rate_value = Column(DECIMAL(10, 2))
     created_at = Column(TIMESTAMP, nullable=False, server_default=func.now())
 
+    profile_image = Column(String(300), nullable=True)   # <--- DIT ONTBREEKT
+
     user = relationship("User", back_populates="consultant_profile")
     skills = relationship("Skill", secondary="profile_skills", back_populates="profiles")
+
 
 
 Index("idx_consultant_profiles_user_id", ConsultantProfile.user_id)

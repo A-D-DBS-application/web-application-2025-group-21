@@ -6,6 +6,11 @@ from datetime import datetime
 from .supabase_client import get_session
 from .models import User, ConsultantProfile, Company, JobPost, UserRole, Skill
 
+import os
+from werkzeug.utils import secure_filename
+
+def allowed_file(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in {"png", "jpg", "jpeg", "gif"}
 
 main = Blueprint("main", __name__)
 
@@ -36,7 +41,6 @@ def login():
         with get_session() as db:
             user = db.query(User).filter(User.username == username).first()
             if not user:
-                # Nieuwe user + profiel/bedrijf
                 user = User(username=username, role=UserRole(role))
                 db.add(user)
                 db.flush()
@@ -59,7 +63,10 @@ def login():
 
                 db.commit()
 
+            # SESSIE SETTEN
             session["user_id"] = user.id
+            session["role"] = user.role.value
+
         return redirect(url_for("main.dashboard"))
 
     return render_template("login.html")
@@ -120,19 +127,6 @@ def update_company_industry():
         return redirect(url_for("main.dashboard"))
 
 # ------------------ CONSULTANTS ------------------
-@main.route("/consultants", methods=["GET"])
-def consultants_list():
-    with get_session() as db:
-        user = get_current_user(db)
-
-        # Alleen companies mogen consultants zien
-        if not user or user.role != UserRole.company:
-            flash("Alleen companies kunnen consultants bekijken")
-            return redirect(url_for("main.dashboard"))
-
-        profiles = db.query(ConsultantProfile).all()
-        return render_template("consultant_list.html", profiles=profiles)
-    
 @main.route("/consultant/edit", methods=["GET", "POST"])
 def edit_consultant_profile():
     with get_session() as db:
@@ -151,44 +145,32 @@ def edit_consultant_profile():
             profile.location_city = request.form.get("location_city")
             profile.country = request.form.get("country")
             profile.headline = request.form.get("headline")
+
+            # ----------------------
+            #   PROFIELFOTO
+            # ----------------------
+            file = request.files.get("profile_image")
+
+            if file and file.filename != "":
+                # Maak een map /static/uploads als die nog niet bestaat
+                upload_folder = os.path.join(current_app.root_path, "static", "uploads")
+                os.makedirs(upload_folder, exist_ok=True)
+
+                # Unieke bestandsnaam
+                filename = f"user_{user.id}.jpg"
+                save_path = os.path.join(upload_folder, filename)
+
+                file.save(save_path)
+
+                # Pad opslaan in database (wat je gebruikt in je template)
+                profile.profile_image = f"/static/uploads/{filename}"
+
             db.commit()
 
             flash("Profiel bijgewerkt")
             return redirect(url_for("main.dashboard"))
 
         return render_template("edit_consultant_profile.html", profile=profile)
-
-    
-@main.route("/consultant/skills/edit", methods=["GET", "POST"])
-def edit_consultant_skills():
-    with get_session() as db:
-        user = get_current_user(db)
-
-        if not user or user.role != UserRole.consultant:
-            flash("Alleen consultants kunnen hun skills aanpassen")
-            return redirect(url_for("main.dashboard"))
-
-        profile = db.query(ConsultantProfile).filter(
-            ConsultantProfile.user_id == user.id
-        ).first()
-
-        if request.method == "POST":
-            selected_ids = list(map(int, request.form.getlist("skills")))
-
-            # Skills leegmaken en nieuwe koppelen
-            profile.skills = db.query(Skill).filter(Skill.id.in_(selected_ids)).all()
-            db.commit()
-
-            flash("Skills bijgewerkt")
-            return redirect(url_for("main.dashboard"))
-
-        all_skills = db.query(Skill).all()
-        return render_template(
-            "edit_consultant_skills.html",
-            profile=profile,
-            skills=all_skills
-        )
-
 
 # ------------------ JOB POSTS ------------------
 @main.route("/jobs", methods=["GET"])
