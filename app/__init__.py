@@ -22,7 +22,7 @@ def create_app():
     app.config["BABEL_SUPPORTED_LOCALES"] = ["en", "nl", "fr"]
     app.config["BABEL_TRANSLATION_DIRECTORIES"] = "translations"
 
-    babel.init_app(app)
+    babel.init_app(app, locale_selector=get_locale)
 
 
     db.init_app(app)
@@ -32,9 +32,10 @@ def create_app():
 
     return app
 
-@babel.localeselector
 def get_locale():
     lang = session.get("language")
     if lang in ["en", "nl", "fr"]:
         return lang
     return "en"
+
+

@@ -3,6 +3,8 @@ from datetime import datetime
 from flask import current_app
 
 
+from flask_babel import gettext as _
+
 
 from .supabase_client import get_session
 from .models import User, ConsultantProfile, Company, JobPost, UserRole, Skill
@@ -23,11 +25,23 @@ def get_current_user(db):
         return None
     return db.query(User).filter(User.id == user_id).first()
 
+
+
 # ------------------ HOME ------------------
 #dit gebeurt vanzelf dus geen registreer nodig
 @main.route("/", methods=["GET"])
 def index():
     return render_template("index.html")
+
+#taalwissel-route:
+@main.route("/set_language", methods=["POST"])
+def set_language():
+    lang = request.form.get("language", "en")
+    if lang not in ["en", "nl", "fr"]:
+        lang = "en"
+    session["language"] = lang
+    return redirect(request.referrer or url_for("main.index"))
+
 
 # ------------------ LOGIN ------------------
 @main.route("/login", methods=["GET", "POST"])
@@ -37,7 +51,7 @@ def login():
         role = request.form.get("role", "consultant")
 
         if not username:
-            flash("Username is verplicht")
+            flash(_("Username is required"))
             return redirect(url_for("main.login"))
 
         with get_session() as db:
@@ -109,12 +123,12 @@ def update_company_industry():
     with get_session() as db:
         user = get_current_user(db)
         if not user or user.role != UserRole.company:
-            flash("Alleen companies kunnen industry aanpassen")
+            flash(_("Only companies can update their industry"))
             return redirect(url_for("main.login"))
 
         company = db.query(Company).filter_by(user_id=user.id).first()
         if not company:
-            flash("Company profiel niet gevonden")
+            flash(_("Company profile not found"))
             return redirect(url_for("main.dashboard"))
 
         industry = request.form.get("industry")
@@ -125,7 +139,7 @@ def update_company_industry():
             company.industry = industry
 
         db.commit()
-        flash("Industry opgeslagen!")
+        flash(_("Industry saved!"))
         return redirect(url_for("main.dashboard"))
 
 # ------------------ CONSULTANTS ------------------
@@ -135,7 +149,7 @@ def edit_consultant_profile():
         user = get_current_user(db)
 
         if not user or user.role != UserRole.consultant:
-            flash("Alleen consultants kunnen hun profiel aanpassen")
+            flash(_("Only consultants can edit their profile"))
             return redirect(url_for("main.dashboard"))
 
         profile = db.query(ConsultantProfile).filter(
@@ -169,7 +183,7 @@ def edit_consultant_profile():
 
             db.commit()
 
-            flash("Profiel bijgewerkt")
+            flash("Profile updated")
             return redirect(url_for("main.dashboard"))
 
         return render_template("edit_consultant_profile.html", profile=profile)
@@ -180,7 +194,7 @@ def edit_consultant_skills():
         user = get_current_user(db)
 
         if not user or user.role != UserRole.consultant:
-            flash("Alleen consultants kunnen hun skills aanpassen")
+            flash(_("Only consultants can update their skills"))
             return redirect(url_for("main.dashboard"))
 
         profile = db.query(ConsultantProfile).filter(
@@ -192,7 +206,7 @@ def edit_consultant_skills():
             profile.skills = db.query(Skill).filter(Skill.id.in_(selected_ids)).all()
             db.commit()
 
-            flash("Skills bijgewerkt")
+            flash(_("Profile updated"))
             return redirect(url_for("main.dashboard"))
 
         all_skills = db.query(Skill).all()
@@ -210,7 +224,7 @@ def consultant_detail(profile_id):
         ).first()
 
         if not profile:
-            flash("Consultant niet gevonden")
+            flash(_("Consultant not found"))
             return redirect(url_for("main.consultants_list"))
 
         return render_template("consultant_detail.html", profile=profile)
@@ -222,7 +236,7 @@ def consultants_list():
         user = get_current_user(db)
 
         if not user or user.role != UserRole.company:
-            flash("Alleen companies kunnen consultants bekijken")
+            flash(_("Only companies can create job posts"))
             return redirect(url_for("main.dashboard"))
 
         profiles = db.query(ConsultantProfile).all()
@@ -246,7 +260,7 @@ def jobs_list():
             jobs = db.query(JobPost).filter(JobPost.company_id == company.id).all()
             return render_template("job_list.html", jobs=jobs)
 
-        flash("Log in om jobs te zien")
+        flash(_("Log in to view jobs"))
         return redirect(url_for("main.login"))
 
 
@@ -257,7 +271,7 @@ def job_detail(job_id):
 
         job = db.query(JobPost).filter(JobPost.id == job_id).first()
         if not job:
-            flash("Job niet gevonden")
+            flash(_("Job not found"))
             return redirect(url_for("main.jobs_list"))
 
         company = None
@@ -279,7 +293,7 @@ def job_new():
     with get_session() as db:
         user = get_current_user(db)
         if not user or user.role != UserRole.company:
-            flash("Alleen companies mogen jobs toevoegen")
+            flash(_("Only companies can create job posts"))
             return redirect(url_for("main.login"))
 
         company = db.query(Company).filter(Company.user_id == user.id).first()
@@ -296,7 +310,7 @@ def job_new():
 
 
             if not title:
-                flash("Titel is verplicht")
+                flash(_("Title is required"))
                 return redirect(url_for("main.job_new"))
 
             job = JobPost(
@@ -326,14 +340,14 @@ def job_edit(job_id):
         user = get_current_user(db)
 
         if not user or user.role != UserRole.company:
-            flash("Alleen companies mogen jobs wijzigen")
+            flash(_("Only companies can edit job posts"))
             return redirect(url_for("main.login"))
 
         company = db.query(Company).filter_by(user_id=user.id).first()
         job = db.query(JobPost).filter_by(id=job_id, company_id=company.id).first()
 
         if not job:
-            flash("Job niet gevonden of je bent niet de eigenaar")
+            flash(_("Job not found or you are not the owner"))
             return redirect(url_for("main.jobs_list"))
 
         all_skills = db.query(Skill).order_by(Skill.name).all()
@@ -349,7 +363,7 @@ def job_edit(job_id):
             job.skills = db.query(Skill).filter(Skill.id.in_(selected_skill_ids)).all()
 
             db.commit()
-            flash("Job bijgewerkt!")
+            flash(_("Job updated!"))
             return redirect(url_for("main.job_detail", job_id=job.id))
 
         return render_template("job_edit.html", job=job, skills=all_skills)
@@ -360,17 +374,17 @@ def job_delete(job_id):
         user = get_current_user(db)
 
         if not user or user.role != UserRole.company:
-            flash("Alleen companies mogen jobs verwijderen")
+            flash(_("Only companies can delete job posts"))
             return redirect(url_for("main.login"))
 
         company = db.query(Company).filter_by(user_id=user.id).first()
         job = db.query(JobPost).filter_by(id=job_id, company_id=company.id).first()
 
         if not job:
-            flash("Job niet gevonden of je bent niet de eigenaar")
+            flash(_("Job not found or you are not the owner"))
             return redirect(url_for("main.jobs_list"))
 
         db.delete(job)
         db.commit()
-        flash("Job verwijderd")
+        flash(_("Job deleted"))
         return redirect(url_for("main.jobs_list"))
