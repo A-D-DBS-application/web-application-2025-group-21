@@ -236,3 +236,57 @@ def job_new():
 
         return render_template("job_new.html", company=company, skills=all_skills)
 
+@main.route("/jobs/<int:job_id>/edit", methods=["GET", "POST"])
+def job_edit(job_id):
+    with get_session() as db:
+        user = get_current_user(db)
+
+        if not user or user.role != UserRole.company:
+            flash("Alleen companies mogen jobs wijzigen")
+            return redirect(url_for("main.login"))
+
+        company = db.query(Company).filter_by(user_id=user.id).first()
+        job = db.query(JobPost).filter_by(id=job_id, company_id=company.id).first()
+
+        if not job:
+            flash("Job niet gevonden of je bent niet de eigenaar")
+            return redirect(url_for("main.jobs_list"))
+
+        all_skills = db.query(Skill).order_by(Skill.name).all()
+
+        if request.method == "POST":
+            job.title = request.form.get("title")
+            job.description = request.form.get("description")
+            job.location_city = request.form.get("location_city")
+            job.country = request.form.get("country")
+            job.contract_type = request.form.get("contract_type")
+
+            selected_skill_ids = [int(x) for x in request.form.getlist("skills")]
+            job.skills = db.query(Skill).filter(Skill.id.in_(selected_skill_ids)).all()
+
+            db.commit()
+            flash("Job bijgewerkt!")
+            return redirect(url_for("main.job_detail", job_id=job.id))
+
+        return render_template("job_edit.html", job=job, skills=all_skills)
+
+@main.route("/jobs/<int:job_id>/delete", methods=["POST"])
+def job_delete(job_id):
+    with get_session() as db:
+        user = get_current_user(db)
+
+        if not user or user.role != UserRole.company:
+            flash("Alleen companies mogen jobs verwijderen")
+            return redirect(url_for("main.login"))
+
+        company = db.query(Company).filter_by(user_id=user.id).first()
+        job = db.query(JobPost).filter_by(id=job_id, company_id=company.id).first()
+
+        if not job:
+            flash("Job niet gevonden of je bent niet de eigenaar")
+            return redirect(url_for("main.jobs_list"))
+
+        db.delete(job)
+        db.commit()
+        flash("Job verwijderd")
+        return redirect(url_for("main.jobs_list"))
