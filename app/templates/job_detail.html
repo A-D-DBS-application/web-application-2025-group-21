@@ -37,7 +37,7 @@
         {% endif %}
     </div>
 
-    {% if user and user.role == UserRole.company and job.company_id == company.id %}
+    {% if user and user.role == UserRole.company and company and job.company_id == company.id %}
         <div class="job-actions">
             <a class="btn btn-primary" href="{{ url_for('main.job_edit', job_id=job.id) }}">
                 Bewerken
