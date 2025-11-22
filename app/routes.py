@@ -76,7 +76,17 @@ def logout():
 def dashboard():
     with get_session() as db:
         user = get_current_user(db)
-        return render_template("dashboard.html", user=user)
+        profile = None
+        company = None
+
+        if user:
+            if user.role == UserRole.consultant:
+                profile = db.query(ConsultantProfile).filter_by(user_id=user.id).first()
+            elif user.role == UserRole.company:
+                company = db.query(Company).filter_by(user_id=user.id).first()
+
+        return render_template("dashboard.html", user=user, profile=profile, company=company)
+
 
 # ------------------ CONSULTANTS ------------------
 @main.route("/consultants", methods=["GET"])

@@ -6,17 +6,26 @@
   {% if user %}
     <p>Logged in as: <b>{{ user.username }}</b> (rol: {{ user.role.value }})</p>
 
-    {% if user.role.value == "company" %}
-      <a class="btn" href="{{ url_for('main.job_new') }}">Nieuwe job plaatsen</a>
+    {% if user.role.value == "consultant" and profile %}
+      {% if profile.location_city or profile.country %}
+        <p>
+          <b>Locatie:</b>
+          {{ profile.location_city }}
+          {% if profile.location_city and profile.country %}, {% endif %}
+          {{ profile.country }}
+        </p>
+      {% endif %}
+      <a class="btn" href="{{ url_for('main.edit_consultant_skills') }}">Skills aanpassen</a>
     {% endif %}
 
-    {% if user.role.value == "consultant" %}
-      <a class="btn" href="{{ url_for('main.edit_consultant_skills') }}">Skills aanpassen</a>
+    {% if user.role.value == "company" %}
+      <a class="btn" href="{{ url_for('main.job_new') }}">Nieuwe job plaatsen</a>
     {% endif %}
 
   {% else %}
     <p>Not Logged in. <a href="{{ url_for('main.login') }}">Login</a></p>
   {% endif %}
 {% endblock %}
+
 
 #toont wie ingelogd en afh hiervan oftewel jobs bekijken of consultant zoeken
