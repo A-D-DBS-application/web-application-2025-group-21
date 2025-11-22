@@ -116,11 +116,19 @@
 <body>
 
   <header>
-    <nav>
-      <a href="{{ url_for('main.index') }}">Home</a>
+  <nav>
+    <a href="{{ url_for('main.index') }}">Home</a>
+
+    {% if session.get('role') == 'company' %}
       <a href="{{ url_for('main.consultants_list') }}">Consultants</a>
+    {% endif %}
+
+    {% if session.get('role') in ['company', 'consultant'] %}
       <a href="{{ url_for('main.jobs_list') }}">Jobs</a>
-      <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
+    {% endif %}
+
+    <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
+
 
       {% if session.get('user_id') %}
         <form action="{{ url_for('main.logout') }}" method="post" style="display:inline;">
