@@ -201,6 +201,19 @@ def edit_consultant_skills():
             skills=all_skills
         )
 
+@main.route("/consultant/<int:profile_id>")
+def consultant_detail(profile_id):
+    with get_session() as db:
+        profile = db.query(ConsultantProfile).filter(
+            ConsultantProfile.id == profile_id
+        ).first()
+
+        if not profile:
+            flash("Consultant niet gevonden")
+            return redirect(url_for("main.consultants_list"))
+
+        return render_template("consultant_detail.html", profile=profile)
+
 
 @main.route("/consultants", methods=["GET"])
 def consultants_list():
