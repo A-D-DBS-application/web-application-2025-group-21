@@ -151,12 +151,12 @@ def consultant_detail(profile_id):
 
         return render_template("consultant_detail.html", profile=profile)
 
+    
 @main.route("/consultant/skills/edit", methods=["GET", "POST"])
 def edit_consultant_skills():
     with get_session() as db:
         user = get_current_user(db)
 
-        # Alleen consultants mogen dit openen
         if not user or user.role != UserRole.consultant:
             flash("Alleen consultants kunnen hun skills aanpassen")
             return redirect(url_for("main.dashboard"))
@@ -166,13 +166,22 @@ def edit_consultant_skills():
         ).first()
 
         if request.method == "POST":
-            selected_skills = request.form.getlist("skills")
-            # skills opslaan...
+            selected_ids = list(map(int, request.form.getlist("skills")))
+
+            # Skills leegmaken en nieuwe koppelen
+            profile.skills = db.query(Skill).filter(Skill.id.in_(selected_ids)).all()
+            db.commit()
+
             flash("Skills bijgewerkt")
             return redirect(url_for("main.dashboard"))
 
         all_skills = db.query(Skill).all()
-        return render_template("edit_consultant_skills.html", profile=profile, skills=all_skills)
+        return render_template(
+            "edit_consultant_skills.html",
+            profile=profile,
+            skills=all_skills
+        )
+
 
 # ------------------ JOB POSTS ------------------
 @main.route("/jobs", methods=["GET"])
