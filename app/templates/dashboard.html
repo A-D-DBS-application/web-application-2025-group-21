@@ -18,7 +18,39 @@
       <a class="btn" href="{{ url_for('main.edit_consultant_skills') }}">Skills aanpassen</a>
     {% endif %}
 
-    {% if user.role.value == "company" %}
+    {% if user.role.value == "company" and company %}
+      <hr>
+      <h2>Company profiel</h2>
+
+      <p><b>Bedrijf:</b> {{ company.company_name_masked }}</p>
+
+      <form method="POST" action="{{ url_for('main.update_company_industry') }}">
+        <label for="industry"><b>Industry:</b></label><br>
+
+        <select name="industry" id="industry">
+          <option value="" {% if not company.industry %}selected{% endif %}>
+            Kies een industry
+          </option>
+
+          {% for opt in ["Technology","Finance","Healthcare","Retail","Manufacturing","Consulting"] %}
+            <option value="{{ opt }}" {% if company.industry == opt %}selected{% endif %}>
+              {{ opt }}
+            </option>
+          {% endfor %}
+        </select>
+
+        <button class="btn" type="submit">Opslaan</button>
+      </form>
+
+      {% if company.location_city or company.country %}
+        <p style="margin-top:10px;">
+          <b>Locatie:</b>
+          {{ company.location_city }}
+          {% if company.location_city and company.country %}, {% endif %}
+          {{ company.country }}
+        </p>
+      {% endif %}
+
       <a class="btn" href="{{ url_for('main.job_new') }}">Nieuwe job plaatsen</a>
     {% endif %}
 
@@ -26,6 +58,7 @@
     <p>Not Logged in. <a href="{{ url_for('main.login') }}">Login</a></p>
   {% endif %}
 {% endblock %}
+
 
 
 #toont wie ingelogd en afh hiervan oftewel jobs bekijken of consultant zoeken
