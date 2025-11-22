@@ -132,24 +132,31 @@ def consultants_list():
 
         profiles = db.query(ConsultantProfile).all()
         return render_template("consultant_list.html", profiles=profiles)
-
-
-@main.route("/consultants/<int:profile_id>", methods=["GET"])
-def consultant_detail(profile_id):
+    
+@main.route("/consultant/edit", methods=["GET", "POST"])
+def edit_consultant_profile():
     with get_session() as db:
         user = get_current_user(db)
 
-        # Alleen companies mogen consultant detail zien
-        if not user or user.role != UserRole.company:
-            flash("Alleen companies kunnen consultantprofielen openen")
+        if not user or user.role != UserRole.consultant:
+            flash("Alleen consultants kunnen hun profiel aanpassen")
             return redirect(url_for("main.dashboard"))
 
-        profile = db.query(ConsultantProfile).filter(ConsultantProfile.id == profile_id).first()
-        if not profile:
-            flash("Consultant niet gevonden")
-            return redirect(url_for("main.consultants_list"))
+        profile = db.query(ConsultantProfile).filter(
+            ConsultantProfile.user_id == user.id
+        ).first()
 
-        return render_template("consultant_detail.html", profile=profile)
+        if request.method == "POST":
+            profile.display_name = request.form.get("display_name")
+            profile.location_city = request.form.get("location_city")
+            profile.country = request.form.get("country")
+            profile.headline = request.form.get("headline")
+            db.commit()
+
+            flash("Profiel bijgewerkt")
+            return redirect(url_for("main.dashboard"))
+
+        return render_template("edit_consultant_profile.html", profile=profile)
 
     
 @main.route("/consultant/skills/edit", methods=["GET", "POST"])
