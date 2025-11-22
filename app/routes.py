@@ -169,11 +169,26 @@ def jobs_list():
 @main.route("/jobs/<int:job_id>", methods=["GET"])
 def job_detail(job_id):
     with get_session() as db:
+        user = get_current_user(db)
+
         job = db.query(JobPost).filter(JobPost.id == job_id).first()
         if not job:
             flash("Job niet gevonden")
             return redirect(url_for("main.jobs_list"))
-        return render_template("job_detail.html", job=job)
+
+        company = None
+        if user and user.role == UserRole.company:
+            company = db.query(Company).filter(Company.user_id == user.id).first()
+
+        return render_template(
+            "job_detail.html",
+            job=job,
+            user=user,
+            company=company,
+            UserRole=UserRole
+        )
+
+
 
 @main.route("/jobs/new", methods=["GET", "POST"])
 def job_new():
