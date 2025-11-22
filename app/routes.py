@@ -171,6 +171,19 @@ def edit_consultant_profile():
             return redirect(url_for("main.dashboard"))
 
         return render_template("edit_consultant_profile.html", profile=profile)
+    
+@main.route("/consultants", methods=["GET"])
+def consultants_list():
+    with get_session() as db:
+        user = get_current_user(db)
+
+        if not user or user.role != UserRole.company:
+            flash("Alleen companies kunnen consultants bekijken")
+            return redirect(url_for("main.dashboard"))
+
+        profiles = db.query(ConsultantProfile).all()
+        return render_template("consultant_list.html", profiles=profiles)
+
 
 # ------------------ JOB POSTS ------------------
 @main.route("/jobs", methods=["GET"])
