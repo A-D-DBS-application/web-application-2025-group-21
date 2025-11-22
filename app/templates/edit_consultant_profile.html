@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Profiel aanpassen{% endblock %}
+
+{% block content %}
+  <h1>Profiel aanpassen</h1>
+
+  <form method="post" enctype="multipart/form-data">
+
+    <label style="display:block; margin-bottom: 10px;">
+      Naam zichtbaar voor anderen:
+      <input
+        type="text"
+        name="display_name"
+        value="{{ profile.display_name }}"
+        style="width: 300px;"
+        required
+      >
+    </label>
+
+    <label style="display:block; margin-bottom: 10px;">
+      Stad:
+      <input
+        type="text"
+        name="location_city"
+        value="{{ profile.location_city }}"
+        style="width: 300px;"
+      >
+    </label>
+
+    <label style="display:block; margin-bottom: 10px;">
+      Land:
+      <input
+        type="text"
+        name="country"
+        value="{{ profile.country }}"
+        style="width: 300px;"
+      >
+    </label>
+
+    <label style="display:block; margin-bottom: 10px;">
+      Headline:
+      <input
+        type="text"
+        name="headline"
+        value="{{ profile.headline }}"
+        style="width: 300px;"
+      >
+    </label>
+    <label style="display:block; margin-bottom: 10px;">
+      Profielfoto:
+      <input
+        type="file"
+        name="profile_picture"
+        accept="image/*"
+      >
+    </label>
+
+    <button class="btn" type="submit">Opslaan</button>
+  </form>
+{% endblock %}
