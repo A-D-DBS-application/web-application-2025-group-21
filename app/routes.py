@@ -172,7 +172,36 @@ def edit_consultant_profile():
             return redirect(url_for("main.dashboard"))
 
         return render_template("edit_consultant_profile.html", profile=profile)
-    
+
+@main.route("/consultant/skills/edit", methods=["GET", "POST"])
+def edit_consultant_skills():
+    with get_session() as db:
+        user = get_current_user(db)
+
+        if not user or user.role != UserRole.consultant:
+            flash("Alleen consultants kunnen hun skills aanpassen")
+            return redirect(url_for("main.dashboard"))
+
+        profile = db.query(ConsultantProfile).filter(
+            ConsultantProfile.user_id == user.id
+        ).first()
+
+        if request.method == "POST":
+            selected_ids = list(map(int, request.form.getlist("skills")))
+            profile.skills = db.query(Skill).filter(Skill.id.in_(selected_ids)).all()
+            db.commit()
+
+            flash("Skills bijgewerkt")
+            return redirect(url_for("main.dashboard"))
+
+        all_skills = db.query(Skill).all()
+        return render_template(
+            "edit_consultant_skills.html",
+            profile=profile,
+            skills=all_skills
+        )
+
+
 @main.route("/consultants", methods=["GET"])
 def consultants_list():
     with get_session() as db:
