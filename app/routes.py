@@ -116,56 +116,55 @@ def update_company_industry():
 @main.route("/consultants", methods=["GET"])
 def consultants_list():
     with get_session() as db:
+        user = get_current_user(db)
+
+        # Alleen companies mogen consultants zien
+        if not user or user.role != UserRole.company:
+            flash("Alleen companies kunnen consultants bekijken")
+            return redirect(url_for("main.dashboard"))
+
         profiles = db.query(ConsultantProfile).all()
         return render_template("consultant_list.html", profiles=profiles)
+
 
 @main.route("/consultants/<int:profile_id>", methods=["GET"])
 def consultant_detail(profile_id):
     with get_session() as db:
+        user = get_current_user(db)
+
+        # Alleen companies mogen consultant detail zien
+        if not user or user.role != UserRole.company:
+            flash("Alleen companies kunnen consultantprofielen openen")
+            return redirect(url_for("main.dashboard"))
+
         profile = db.query(ConsultantProfile).filter(ConsultantProfile.id == profile_id).first()
         if not profile:
             flash("Consultant niet gevonden")
             return redirect(url_for("main.consultants_list"))
+
         return render_template("consultant_detail.html", profile=profile)
-
-@main.route("/dashboard/skills", methods=["GET", "POST"])
-def edit_consultant_skills():
-    with get_session() as db:
-        user = get_current_user(db)
-        if not user or user.role != UserRole.consultant:
-            flash("Alleen consultants kunnen skills aanpassen")
-            return redirect(url_for("main.login"))
-
-        profile = db.query(ConsultantProfile).filter_by(user_id=user.id).first()
-        all_skills = db.query(Skill).order_by(Skill.name).all()
-
-        if request.method == "POST":
-            selected_skill_ids = [int(x) for x in request.form.getlist("skills")]
-
-
-            selected_skills = []
-            if selected_skill_ids:
-                selected_skills = db.query(Skill).filter(Skill.id.in_(selected_skill_ids)).all()
-
-            profile.skills = selected_skills
-            db.commit()
-
-            flash("Skills opgeslagen!")
-            return redirect(url_for("main.dashboard"))
-
-        return render_template(
-            "consultant_skills_edit.html",
-            profile=profile,
-            skills=all_skills
-        )
 
 
 # ------------------ JOB POSTS ------------------
 @main.route("/jobs", methods=["GET"])
 def jobs_list():
     with get_session() as db:
-        jobs = db.query(JobPost).all()
-        return render_template("job_list.html", jobs=jobs)
+        user = get_current_user(db)
+
+        # Consultants zien ALLE jobs
+        if user and user.role == UserRole.consultant:
+            jobs = db.query(JobPost).all()
+            return render_template("job_list.html", jobs=jobs)
+
+        # Companies zien alleen hun eigen jobs
+        if user and user.role == UserRole.company:
+            company = db.query(Company).filter(Company.user_id == user.id).first()
+            jobs = db.query(JobPost).filter(JobPost.company_id == company.id).all()
+            return render_template("job_list.html", jobs=jobs)
+
+        flash("Log in om jobs te zien")
+        return redirect(url_for("main.login"))
+
 
 @main.route("/jobs/<int:job_id>", methods=["GET"])
 def job_detail(job_id):

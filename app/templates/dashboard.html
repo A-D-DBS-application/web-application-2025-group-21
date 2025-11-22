@@ -2,41 +2,37 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-
 <h1>Dashboard</h1>
 
 <div class="card">
-  <h2>Mijn Profiel</h2>
+    <h2>Profiel</h2>
 
-  <div class="row">
-    <div class="grow">
-      <p><strong>Naam:</strong> {{ user.username }}</p>
-      <p><strong>Rol:</strong> {{ user.role }}</p>
+    <p><strong>Ingelogd als:</strong> {{ user.username }}</p>
+    <p><strong>Rol:</strong> {{ user.role.value }}</p>
 
-      {% if user.role == "consultant" %}
-        <p><strong>Locatie:</strong> {{ profile.location_city }}, {{ profile.country }}</p>
-        <p><strong>Headline:</strong> {{ profile.headline or "Geen headline ingesteld" }}</p>
-        <p><strong>Beschikbaarheid:</strong> {{ profile.availability or "Onbekend" }}</p>
-        <p><strong>Tarief:</strong> {{ profile.rate_value }} €/uur</p>
+    {% if user.role == "consultant" %}
+        <p><strong>Naam:</strong> {{ profile.display_name_masked }}</p>
+        <p><strong>Locatie:</strong> {{ profile.location_city }} , {{ profile.country }}</p>
+        <p><strong>Opmerking:</strong> {{ profile.headline or "Geen headline" }}</p>
 
         <p><strong>Skills:</strong>
-          {% if skills %}
-            {{ skills | map(attribute="name") | join(", ") }}
-          {% else %}
-            Geen skills ingesteld
-          {% endif %}
+            {% if profile.skills %}
+                {{ profile.skills | map(attribute='name') | join(', ') }}
+            {% else %}
+                Geen skills geselecteerd
+            {% endif %}
         </p>
 
-        <a class="btn" href="{{ url_for('main.consultant_edit_profile') }}">Profiel aanpassen</a>
+        <a class="btn" href="{{ url_for('main.edit_consultant_skills') }}">Skills aanpassen</a>
+        <a class="btn" href="{{ url_for('main.dashboard') }}">Profiel aanpassen</a>
+    {% endif %}
 
-      {% elif user.role == "company" %}
-        <p><strong>Bedrijf:</strong> {{ company.name }}</p>
-        <p><strong>Locatie:</strong> {{ company.location }}</p>
+    {% if user.role == "company" %}
+        <p><strong>Bedrijfsnaam:</strong> {{ company.company_name_masked }}</p>
+        <p><strong>Sector:</strong> {{ company.industry or "Niet ingevuld" }}</p>
 
-        <a class="btn" href="{{ url_for('main.jobs_my_posts') }}">Mijn job posts</a>
-      {% endif %}
-    </div>
-  </div>
+        <a class="btn" href="{{ url_for('main.job_new') }}">Nieuwe job posten</a>
+        <a class="btn" href="{{ url_for('main.jobs_list') }}">Mijn job posts</a>
+    {% endif %}
 </div>
-
 {% endblock %}
