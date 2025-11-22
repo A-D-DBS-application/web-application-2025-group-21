@@ -52,7 +52,7 @@ class ConsultantProfile(Base):
     headline = Column(String(160))
     location_city = Column(String(120))
     country = Column(String(120))
-    availability = Column(String(120))
+    availability = Column(Boolean, nullable=False, default=True)
     rate_value = Column(DECIMAL(10, 2))
     created_at = Column(TIMESTAMP, nullable=False, server_default=func.now())
 
