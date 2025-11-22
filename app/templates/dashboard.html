@@ -24,7 +24,7 @@
         </p>
 
         <a class="btn" href="{{ url_for('main.edit_consultant_skills') }}">Skills aanpassen</a>
-        <a class="btn" href="{{ url_for('main.dashboard') }}">Profiel aanpassen</a>
+        <a class="btn" href="{{ url_for('main.edit_consultant_profile') }}">Profiel aanpassen</a>
     {% endif %}
 
     {% if user.role == UserRole.company %}
