@@ -10,6 +10,29 @@ from .models import User, ConsultantProfile, Company, JobPost, UserRole, Skill
 import os
 from werkzeug.utils import secure_filename
 
+# Dictionary met vertalingen (meertaligeheid Home page)
+translations = {
+    "en": {
+        "home_title": "Welcome! Use the navigation above.",
+        "login_button": "Login",
+        "skills": "Skills",
+        "jobs": "Jobs"
+    },
+    "nl": {
+        "home_title": "Welkom! Gebruik de navigatie hierboven.",
+        "login_button": "Inloggen",
+        "skills": "Vaardigheden",
+        "jobs": "Jobs"
+    },
+    "fr": {
+        "home_title": "Bienvenue! Utilisez la navigation ci-dessus.",
+        "login_button": "Connexion",
+        "skills": "Compétences",
+        "jobs": "Emplois"
+    }
+}
+
+
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in {"png", "jpg", "jpeg", "gif"}
 
@@ -26,7 +49,18 @@ def get_current_user(db):
 #dit gebeurt vanzelf dus geen registreer nodig
 @main.route("/", methods=["GET"])
 def index():
-    return render_template("index.html")
+    lang = session.get("language", "en")
+    return render_template("index.html", t=translations[lang])
+
+
+#--------------------------------------------
+#meertalig
+@main.route("/set_language", methods=["POST"])
+def set_language():
+    lang = request.form.get("language", "en")
+    session["language"] = lang
+    return redirect(request.referrer or url_for("main.index"))
+
 
 # ------------------ LOGIN ------------------
 @main.route("/login", methods=["GET", "POST"])
