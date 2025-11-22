@@ -14,6 +14,15 @@ class UserRole(enum.Enum):
     company = "company"
     admin = "admin"
 
+class IndustryEnum(enum.Enum):
+    Technology = "Technology"
+    Finance = "Finance"
+    Healthcare = "Healthcare"
+    Retail = "Retail"
+    Manufacturing = "Manufacturing"
+    Consulting = "Consulting"
+
+
 
 class UnlockTarget(enum.Enum):
     consultant = "consultant"
@@ -61,7 +70,7 @@ class Company(Base):
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
 
     company_name_masked = Column(String(160), nullable=False)
-    industry = Column(String(160))
+    industry = Column(Enum(IndustryEnum, name="industry_enum"), nullable=True)
     location_city = Column(String(120))
     country = Column(String(120))
     created_at = Column(TIMESTAMP, nullable=False, server_default=func.now())

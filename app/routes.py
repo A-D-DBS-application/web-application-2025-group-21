@@ -87,6 +87,29 @@ def dashboard():
 
         return render_template("dashboard.html", user=user, profile=profile, company=company)
 
+@main.route("/dashboard/company/industry", methods=["POST"])
+def update_company_industry():
+    with get_session() as db:
+        user = get_current_user(db)
+        if not user or user.role != UserRole.company:
+            flash("Alleen companies kunnen industry aanpassen")
+            return redirect(url_for("main.login"))
+
+        company = db.query(Company).filter_by(user_id=user.id).first()
+        if not company:
+            flash("Company profiel niet gevonden")
+            return redirect(url_for("main.dashboard"))
+
+        industry = request.form.get("industry")
+
+        if industry == "" or industry is None:
+            company.industry = None
+        else:
+            company.industry = industry
+
+        db.commit()
+        flash("Industry opgeslagen!")
+        return redirect(url_for("main.dashboard"))
 
 # ------------------ CONSULTANTS ------------------
 @main.route("/consultants", methods=["GET"])
