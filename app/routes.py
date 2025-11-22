@@ -86,7 +86,14 @@ def dashboard():
             elif user.role == UserRole.company:
                 company = db.query(Company).filter_by(user_id=user.id).first()
 
-        return render_template("dashboard.html", user=user, profile=profile, company=company)
+        return render_template(
+    "dashboard.html",
+    user=user,
+    profile=profile,
+    company=company,
+    UserRole=UserRole
+)
+
 
 @main.route("/dashboard/company/industry", methods=["POST"])
 def update_company_industry():
