@@ -1,21 +1,72 @@
 {% extends "base.html" %}
 {% block title %}Jobs{% endblock %}
 {% block content %}
-  <h1>Job posts</h1>
-  {% if session.get('user_id') %}
-    <a class="btn" href="{{ url_for('main.job_new') }}">Add a new job</a>
-  {% endif %}
-  <ul>
-    {% for j in jobs %}
-      <li>
-        <a href="{{ url_for('main.job_detail', job_id=j.id) }}">{{ j.title }}</a>
-        {% if j.location_city or j.country %}
-          — <small>{{ j.location_city }}{% if j.location_city and j.country %}, {% endif %}{{ j.country }}</small>
-        {% endif %}
-      </li>
-    {% endfor %}
-  </ul>
-  {% if not jobs %}
-    <p>There are no jobs yet.</p>
-  {% endif %}
-{% endblock %}
+
+<h1 class="page-title">Job Posts</h1>
+
+{% if user and user.role == 'company' %}
+  <a class="btn btn-primary" href="{{ url_for('main.job_new') }}">Nieuwe job</a>
+{% endif %}
+
+<div class="job-grid">
+  {% for j in jobs %}
+    <div class="job-card">
+      <h3><a href="{{ url_for('main.job_detail', job_id=j.id) }}">{{ j.title }}</a></h3>
+
+      {% if j.location_city or j.country %}
+        <p class="job-location">
+          {{ j.location_city }}{% if j.location_city and j.country %}, {% endif %}{{ j.country }}
+        </p>
+      {% endif %}
+
+      <a class="btn btn-secondary" href="{{ url_for('main.job_detail', job_id=j.id) }}">Bekijk</a>
+    </div>
+  {% endfor %}
+</div>
+
+{% if not jobs %}
+  <p>Geen jobs beschikbaar.</p>
+{% endif %}
+
+<style>
+  .page-title {
+    margin-bottom: 20px;
+  }
+
+  .job-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+  }
+
+  .job-card {
+    background: #ffffff;
+    border: 1px solid #dce6f5;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+
+  .job-card h3 {
+    margin: 0 0 6px;
+  }
+
+  .job-location {
+    font-size: 0.9rem;
+    color: #4a6fa1;
+    margin: 6px 0 12px;
+  }
+
+  .btn-primary {
+    background: #2b63c6;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    display: inline-block;
+    margin-bottom: 16px;
+  }
+
+  .btn-secondary {
+    background: #e9f0ff;
+    borde

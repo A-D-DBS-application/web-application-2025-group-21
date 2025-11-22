@@ -1,38 +1,113 @@
 {% extends "base.html" %}
-{% block title %}Job detail{% endblock %}
+{% block title %}{{ job.title }}{% endblock %}
 {% block content %}
-  <h1>{{ job.title }}</h1>
 
-  {% if job.company %}
-    <p><b>Company:</b> {{ job.company.company_name_masked }}</p>
-  {% endif %}
+<h1 class="page-title">{{ job.title }}</h1>
 
-  {% if job.contract_type %}
-    <p><b>Contract:</b> {{ job.contract_type }}</p>
-  {% endif %}
+<div class="job-detail-card">
+    <div class="job-section">
+        <h3>Beschrijving</h3>
+        <p>{{ job.description or "Geen beschrijving beschikbaar." }}</p>
+    </div>
 
-  {% if job.location_city or job.country %}
-    <p>
-      <b>Locatie:</b>
-      {{ job.location_city }}
-      {% if job.location_city and job.country %}, {% endif %}
-      {{ job.country }}
-    </p>
-  {% endif %}
+    <div class="job-section">
+        <h3>Locatie</h3>
+        <p>
+            {{ job.location_city }}
+            {% if job.location_city and job.country %}, {% endif %}
+            {{ job.country }}
+        </p>
+    </div>
 
-  <h3>Required skills</h3>
-  {% if job.skills and job.skills|length > 0 %}
-    <ul>
-      {% for skill in job.skills %}
-        <li>{{ skill.name }}</li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p><i>Geen skills opgegeven.</i></p>
-  {% endif %}
+    <div class="job-section">
+        <h3>Contracttype</h3>
+        <p>{{ job.contract_type or "Niet opgegeven" }}</p>
+    </div>
 
-  {% if job.description %}
-    <div class="card"><p>{{ job.description }}</p></div>
-  {% endif %}
+    <div class="job-section">
+        <h3>Vereiste skills</h3>
+        {% if job.skills %}
+            <div class="skill-list">
+                {% for s in job.skills %}
+                    <span class="skill-tag">{{ s.name }}</span>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>Geen specifieke skills opgegeven.</p>
+        {% endif %}
+    </div>
+
+    {% if user and user.role == UserRole.company and job.company_id == company.id %}
+        <div class="job-actions">
+            <a class="btn btn-primary" href="{{ url_for('main.job_edit', job_id=job.id) }}">
+                Bewerken
+            </a>
+
+            <form action="{{ url_for('main.job_delete', job_id=job.id) }}" method="post" style="display:inline;">
+                <button class="btn btn-danger" onclick="return confirm('Zeker verwijderen?')">
+                    Verwijderen
+                </button>
+            </form>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+    .job-detail-card {
+        background: #ffffff;
+        border: 1px solid #dce6f5;
+        border-radius: 14px;
+        padding: 24px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .job-section h3 {
+        margin-bottom: 6px;
+        color: #2b63c6;
+    }
+
+    .skill-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .skill-tag {
+        background: #e9f0ff;
+        border: 1px solid #c5d6f5;
+        padding: 4px 10px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        color: #2b63c6;
+    }
+
+    .job-actions {
+        margin-top: 12px;
+        display: flex;
+        gap: 10px;
+    }
+
+    .btn-primary {
+        background: #2b63c6;
+        color: white;
+        padding: 8px 14px;
+        border-radius: 8px;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-danger {
+        background: #e24b4b;
+        color: white;
+        padding: 8px 14px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+    }
+</style>
+
 {% endblock %}
-
