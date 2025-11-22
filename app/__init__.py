@@ -10,14 +10,12 @@ def create_app():
 
     load_dotenv()
 
-    # laad configuratie uit Config class
-    from .config import Config
-    app.config.from_object(Config)
+    app.config["SECRET_KEY"] = "wachtwoord"
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-    # database
     db.init_app(app)
 
-    # blueprint
     from .routes import main
     app.register_blueprint(main)
 
