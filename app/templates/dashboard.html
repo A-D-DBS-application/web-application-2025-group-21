@@ -10,7 +10,7 @@
     <p><strong>Ingelogd als:</strong> {{ user.username }}</p>
     <p><strong>Rol:</strong> {{ user.role.value }}</p>
 
-    {% if user.role == "consultant" %}
+    {% if user.role == UserRole.consultant %}
         <p><strong>Naam:</strong> {{ profile.display_name_masked }}</p>
         <p><strong>Locatie:</strong> {{ profile.location_city }} , {{ profile.country }}</p>
         <p><strong>Opmerking:</strong> {{ profile.headline or "Geen headline" }}</p>
@@ -27,7 +27,7 @@
         <a class="btn" href="{{ url_for('main.dashboard') }}">Profiel aanpassen</a>
     {% endif %}
 
-    {% if user.role == "company" %}
+    {% if user.role == UserRole.company %}
         <p><strong>Bedrijfsnaam:</strong> {{ company.company_name_masked }}</p>
         <p><strong>Sector:</strong> {{ company.industry or "Niet ingevuld" }}</p>
 
