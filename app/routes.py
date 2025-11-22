@@ -45,7 +45,7 @@ def login():
                     prof = ConsultantProfile(
                         user_id=user.id,
                         display_name_masked=username,
-                        availability=True
+                        availability=True,
                         created_at=datetime.utcnow()
                     )
                     db.add(prof)
