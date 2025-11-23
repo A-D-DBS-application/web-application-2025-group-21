@@ -7,175 +7,175 @@
 {% set current_sort = sort_by if sort_by is defined else 'relevance' %}
 
 <div class="mode-selector-container">
-    <h2 class="h5">Kies uw zoekmodus:</h2>
-    
-    <a href="{{ url_for('main.consultants_list', sort_by='relevance') }}" 
-        class="mode-btn {% if current_sort == 'relevance' %}active-mode{% else %}inactive-mode{% endif %}">
-        🧠 IConsult Match (Beste Relevantie)
-    </a>
+    <h2 class="h5">Kies uw zoekmodus:</h2>
+    
+    <a href="{{ url_for('main.consultants_list', sort_by='relevance') }}" 
+        class="mode-btn {% if current_sort == 'relevance' %}active-mode{% else %}inactive-mode{% endif %}">
+        🧠 IConsult Match (Beste Relevantie)
+    </a>
 
-    <a href="{{ url_for('main.consultants_list', sort_by='title') }}" 
-        class="mode-btn {% if current_sort != 'relevance' %}active-mode{% else %}inactive-mode{% endif %}">
-        🔧 Handmatige Filter & Sortering
-    </a>
+    <a href="{{ url_for('main.consultants_list', sort_by='title') }}" 
+        class="mode-btn {% if current_sort != 'relevance' %}active-mode{% else %}inactive-mode{% endif %}">
+        🔧 Handmatige Filter & Sortering
+    </a>
 </div>
 
 <form method="GET" action="{{ url_for('main.consultants_list') }}" class="filter-form">
-    
-    <input type="hidden" name="sort_by" value="{{ current_sort }}">
+    
+    <input type="hidden" name="sort_by" value="{{ current_sort }}">
 
-    
-    {% if current_sort != 'relevance' %}
-        <p class="form-instruction">Gebruik onderstaande velden om handmatig te filteren. Resultaten worden gesorteerd op Naam (A-Z).</p>
+    
+    {% if current_sort != 'relevance' %}
+        <p class="form-instruction">Gebruik onderstaande velden om handmatig te filteren. Resultaten worden gesorteerd op Naam (A-Z).</p>
 
-        <div class="input-grid manual-filter-grid">
-            <input type="text" name="q" placeholder="Zoek op Naam/Specialisatie/Bio" value="{{ request.args.get('q', '') }}">
-            <input type="text" name="city" placeholder="Stad" value="{{ request.args.get('city', '') }}">
-            <input type="text" name="country" placeholder="Land" value="{{ request.args.get('country', '') }}">
-            <div class="empty-col"></div> {# Extra lege kolom voor layout #}
-        </div>
+        <div class="input-grid manual-filter-grid">
+            <input type="text" name="q" placeholder="Zoek op Naam/Specialisatie/Bio" value="{{ request.args.get('q', '') }}">
+            <input type="text" name="city" placeholder="Stad" value="{{ request.args.get('city', '') }}">
+            <input type="text" name="country" placeholder="Land" value="{{ request.args.get('country', '') }}">
+            <div class="empty-col"></div>
+        </div>
 
-        <div class="skills-filter">
-            <label class="skills-label">Skills (filteren - *Consultant moet alle aangevinkte skills bezitten*):</label>
-            <div class="skills-checkboxes">
-                {% for skill in skills %}
-                    <label class="skill-label">
-                        <input type="checkbox" name="skills" value="{{ skill.id }}"
-                            {% if request.args.getlist('skills') and skill.id|string in request.args.getlist('skills') %}checked{% endif %}>
-                        {{ skill.name }}
-                    </label>
-                {% endfor %}
-            </div>
-        </div>
-        <button type="submit" class="btn btn-primary apply-btn">Filters Toepassen</button>
-        <a href="{{ url_for('main.consultants_list', sort_by='title') }}" class="btn btn-secondary reset-btn">Reset Filters</a>
+        <div class="skills-filter">
+            <label class="skills-label">Skills (filteren - *Consultant moet alle aangevinkte skills bezitten*):</label>
+            <div class="skills-checkboxes">
+                {% for skill in skills %}
+                    <label class="skill-label">
+                        <input type="checkbox" name="skills" value="{{ skill.id }}"
+                            {% if request.args.getlist('skills') and skill.id|string in request.args.getlist('skills') %}checked{% endif %}>
+                        {{ skill.name }}
+                    </label>
+                {% endfor %}
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary apply-btn">Filters Toepassen</button>
+        <a href="{{ url_for('main.consultants_list', sort_by='title') }}" class="btn btn-secondary reset-btn">Reset Filters</a>
 
-    {% else %}
-        <p class="alert alert-info">
-            De **IConsult Match** rangschikt consultants automatisch op basis van de relevantie voor **uw meest recente Job Post**. Gebruik het zoekveld om handmatig te verfijnen.
-        </p>
-        
-        <div class="input-group">
-             <input type="text" name="q" placeholder="Verfijn zoekopdracht (wordt meegenomen in de score)" value="{{ request.args.get('q', '') }}">
-             <button type="submit" class="btn btn-primary">Zoek & Herbereken Score</button>
-        </div>
-        
-    {% endif %}
+    {% else %}
+        <p class="alert alert-info">
+            **Voor een gedetailleerde uitleg over de toegepaste filter- en scoringsmethodologie, verwijzen wij u naar de informatie onderaan deze pagina.**
+        </p>
+        
+        <div class="input-group">
+             <input type="text" name="q" placeholder="Verfijn zoekopdracht (wordt meegenomen in de score)" value="{{ request.args.get('q', '') }}">
+             <button type="submit" class="btn btn-primary">Zoek & Herbereken Score</button>
+        </div>
+        
+    {% endif %}
 
 </form>
 
 <div class="job-grid" style="margin-top: 20px;">
-    {% for c in consultants %}
+    {% for c in consultants %}
     
-    {# Bepaal de klasse voor de badge op basis van de score #}
-    {% if current_sort == 'relevance' and c.score is defined %}
-        {% set match_score_perc = (c.score * 100) | round(0) %}
-        {% set match_class = 'match-high' %}
-        {% if match_score_perc < 20 %}
-            {% set match_class = 'match-low' %}
-        {% elif match_score_perc >= 20 and match_score_perc <= 40 %}
-            {% set match_class = 'match-medium' %}
-        {% endif %}
-    {% endif %}
+    {# Bepaal de klasse voor de badge op basis van de score #}
+    {% if current_sort == 'relevance' and c.score is defined %}
+        {% set match_score_perc = (c.score * 100) | round(0) %}
+        {% set match_class = 'match-high' %}
+        {% if match_score_perc < 20 %}
+            {% set match_class = 'match-low' %}
+        {% elif match_score_perc >= 20 and match_score_perc <= 30 %}
+            {% set match_class = 'match-medium' %}
+        {% endif %}
+    {% endif %}
     
-    <div class="job-card">
-            
-        <div class="job-meta-top">
+    <div class="job-card">
+            
+        <div class="job-meta-top">
             {# VASTE BADGE VOOR CONSULTANT #}
             <span class="contract-type-tag"><i class="fas fa-user-tie"></i> Consultant</span> 
             
             {% if c.location_city or c.country %}
-                <span class="job-location">
-                    <i class="fas fa-map-marker-alt"></i> {{ c.location_city }}{% if c.location_city and c.country %}, {% endif %}{{ c.country }}
-                </span>
-            {% endif %}
+                <span class="job-location">
+                    <i class="fas fa-map-marker-alt"></i> {{ c.location_city }}{% if c.location_city and c.country %}, {% endif %}{{ c.country }}
+                </span>
+            {% endif %}
         </div>
 
-            <h3 class="job-title-link">
-            <a href="{{ url_for('main.consultant_detail', profile_id=c.id) }}">{{ c.display_name }}</a>
-          </h3> 
-        
+        <h3 class="job-title-link">
+            <a href="{{ url_for('main.consultant_detail', profile_id=c.id) }}">{{ c.display_name or c.display_name_masked }}</a>
+        </h3> 
+        
         {% if c.specialisation %}
-        <p class="company-name">Specialisatie: {{ c.specialisation }}</p>
+            <p class="company-name">Specialisatie: {{ c.specialisation }}</p>
         {% endif %}
 
-            <div class="required-skills-summary">
-            <label class="skills-label-small"><i class="fas fa-tools"></i> Skills Consultant:</label>
-            <div class="skill-tags-wrapper">
-                {% for skill in c.skills[:3] %}
-                    <span class="required-skill-tag">{{ skill.name }}</span>
-                {% endfor %}
-                {% if c.skills|length > 3 %}
-                    <span class="required-skill-tag more-skills"><i class="fas fa-plus-circle"></i> {{ c.skills|length - 3 }} meer</span>
-                {% endif %}
-            </div>
-        </div>
-        
-            {% if current_sort == 'relevance' and c.score is defined %}
-            <div class="score-summary">
-                
-                {# KLASSE IS DYNAMISCH #}
-                <span class="relevance-badge {{ match_class }}">
-                    <i class="fas fa-check-circle"></i> Match: **{{ match_score_perc }}%**
-                </span>
-                
-                <details class="breakdown-details">
-                    <summary><i class="fas fa-chart-bar"></i> Score Uitsplitsing</summary>
-                    <div class="score-breakdown">
-                        
-                        {% set total_score_perc = (c.score * 100) %}
-                        
-                        {# SKILLS (50%) #}
-                        <div class="bar-item">
-                            <span class="bar-label"><i class="fas fa-star"></i> Skills (50%):</span>
-                            {# Unweighted score (0-100) voor de breedte van de balk #}
-                            {% set skill_unweighted_perc = (c.score_breakdown.skill * 100) if c.score_breakdown.skill is defined else 0 %}
+        <div class="required-skills-summary">
+            <label class="skills-label-small"><i class="fas fa-tools"></i> Skills Consultant:</label>
+            <div class="skill-tags-wrapper">
+                {% for skill in c.skills[:3] %}
+                    <span class="required-skill-tag">{{ skill.name }}</span>
+                {% endfor %}
+                {% if c.skills|length > 3 %}
+                    <span class="required-skill-tag more-skills"><i class="fas fa-plus-circle"></i> {{ c.skills|length - 3 }} meer</span>
+                {% endif %}
+            </div>
+        </div>
+        
+        {% if current_sort == 'relevance' and c.score is defined %}
+            <div class="score-summary">
+                
+                {# KLASSE IS DYNAMISCH #}
+                <span class="relevance-badge {{ match_class }}">
+                    <i class="fas fa-check-circle"></i> Match: **{{ match_score_perc }}%**
+                </span>
+                
+                <details class="breakdown-details">
+                    <summary><i class="fas fa-chart-bar"></i> Score Uitsplitsing</summary>
+                    <div class="score-breakdown">
+                        
+                        {% set total_score_perc = (c.score * 100) %}
+                        
+                        {# SKILLS (50%) #}
+                        <div class="bar-item">
+                            <span class="bar-label"><i class="fas fa-star"></i> Skills (50%):</span>
+                            {# Unweighted score (0-100) voor de breedte van de balk #}
+                            {% set skill_unweighted_perc = (c.score_breakdown.skill_factor * 100) if c.score_breakdown.skill_factor is defined else 0 %}
                             {# Weighted score (0-50) voor de weergegeven waarde #}
-                            {% set skill_weighted_perc = (c.score_breakdown.skill * 50) if c.score_breakdown.skill is defined else 0 %}
-                            <div class="progress-bar-container">
-                                <div class="progress-bar skill-bar" style="width: {{ skill_unweighted_perc | round(0) }}%;"></div>
-                            </div>
-                            <span class="bar-value">{{ skill_weighted_perc | round(1) }}%</span>
-                        </div>
+                            {% set skill_weighted_perc = (c.score_breakdown.skill * 100) if c.score_breakdown.skill is defined else 0 %}
+                            <div class="progress-bar-container">
+                                <div class="progress-bar skill-bar" style="width: {{ skill_unweighted_perc | round(0) }}%;"></div>
+                            </div>
+                            <span class="bar-value">{{ skill_weighted_perc | round(0) }}%</span>
+                        </div>
 
-                        {# ZOEKTERM (30%) #}
-                        <div class="bar-item">
-                            <span class="bar-label"><i class="fas fa-search"></i> Zoekterm (30%):</span>
-                            {# Unweighted score (0-100) voor de breedte van de balk #}
-                            {% set text_unweighted_perc = (c.score_breakdown.text * 100) if c.score_breakdown.text is defined else 0 %}
+                        {# ZOEKTERM (30%) #}
+                        <div class="bar-item">
+                            <span class="bar-label"><i class="fas fa-search"></i> Zoekterm (30%):</span>
+                            {# Unweighted score (0-100) voor de breedte van de balk #}
+                            {% set text_unweighted_perc = (c.score_breakdown.text_factor * 100) if c.score_breakdown.text_factor is defined else 0 %}
                             {# Weighted score (0-30) voor de weergegeven waarde #}
-                            {% set text_weighted_perc = (c.score_breakdown.text * 30) if c.score_breakdown.text is defined else 0 %}
-                            <div class="progress-bar-container">
-                                <div class="progress-bar text-bar" style="width: {{ text_unweighted_perc | round(0) }}%;"></div>
-                            </div>
-                            <span class="bar-value">{{ text_weighted_perc | round(1) }}%</span>
-                        </div>
+                            {% set text_weighted_perc = (c.score_breakdown.text * 100) if c.score_breakdown.text is defined else 0 %}
+                            <div class="progress-bar-container">
+                                <div class="progress-bar text-bar" style="width: {{ text_unweighted_perc | round(0) }}%;"></div>
+                            </div>
+                            <span class="bar-value">{{ text_weighted_perc | round(0) }}%</span>
+                        </div>
 
-                        {# RECENTHEID (20%) #}
-                        <div class="bar-item">
-                            <span class="bar-label"><i class="fas fa-clock"></i> Recentheid (20%):</span>
-                            {# Unweighted score (0-100) voor de breedte van de balk #}
-                            {% set recency_unweighted_perc = (c.score_breakdown.recency * 100) if c.score_breakdown.recency is defined else 0 %}
+                        {# RECENTHEID (20%) #}
+                        <div class="bar-item">
+                            <span class="bar-label"><i class="fas fa-clock"></i> Recentheid (20%):</span>
+                            {# Unweighted score (0-100) voor de breedte van de balk #}
+                            {% set recency_unweighted_perc = (c.score_breakdown.recency_factor * 100) if c.score_breakdown.recency_factor is defined else 0 %}
                             {# Weighted score (0-20) voor de weergegeven waarde #}
-                            {% set recency_weighted_perc = (c.score_breakdown.recency * 20) if c.score_breakdown.recency is defined else 0 %}
-                            <div class="progress-bar-container">
-                                <div class="progress-bar recency-bar" style="width: {{ recency_unweighted_perc | round(0) }}%;"></div>
-                            </div>
-                            <span class="bar-value">{{ recency_weighted_perc | round(1) }}%</span>
-                        </div>
-                        
-                        <p class="score-total">Totaal: {{ total_score_perc | round(1) }}%</p>
-                    </div>
-                </details>
-            </div>
-          {% endif %}
-            <a class="btn btn-primary-card" href="{{ url_for('main.consultant_detail', profile_id=c.id) }}">Bekijk Profiel</a>
-    </div>
-    {% endfor %}
+                            {% set recency_weighted_perc = (c.score_breakdown.recency * 100) if c.score_breakdown.recency is defined else 0 %}
+                            <div class="progress-bar-container">
+                                <div class="progress-bar recency-bar" style="width: {{ recency_unweighted_perc | round(0) }}%;"></div>
+                            </div>
+                            <span class="bar-value">{{ recency_weighted_perc | round(0) }}%</span>
+                        </div>
+                        
+                        <p class="score-total">Totaal: {{ total_score_perc | round(0) }}%</p>
+                    </div>
+                </details>
+            </div>
+        {% endif %}
+        <a class="btn btn-primary-card" href="{{ url_for('main.consultant_detail', profile_id=c.id) }}">Bekijk Profiel</a>
+    </div>
+    {% endfor %}
 </div>
 
 {% if not consultants %}
-    <p class="alert alert-warning">Geen consultants gevonden die overeenkomen met de criteria.</p>
+    <p class="alert alert-warning">Geen consultants gevonden die overeenkomen met de criteria.</p>
 {% endif %}
 
 <style>
@@ -185,55 +185,54 @@
 
 /* 🎯 STIJLEN VOOR MATCH KLEUREN */
 .relevance-badge.match-low { 
-    background: #dc3545 !important; /* Rood */
-    border: 1px solid #c82333;
+    background: #dc3545 !important; /* Rood */
+    border: 1px solid #c82333;
 }
 .relevance-badge.match-medium { 
-    background: #ffc107 !important; /* Oranje */
-    color: #333 !important; /* Tekstkleur aanpassen voor zichtbaarheid */
-    border: 1px solid #e0a800;
+    background: #ffc107 !important; /* Oranje */
+    color: #333 !important; /* Tekstkleur aanpassen voor zichtbaarheid */
+    border: 1px solid #e0a800;
 }
 .relevance-badge.match-high { 
-    background: #28a745 !important; /* Groen */
-    border: 1px solid #1e7e34;
+    background: #28a745 !important; /* Groen */
+    border: 1px solid #1e7e34;
 }
 /* Standaard .relevance-badge behoudt zijn algemene layout */
 .relevance-badge { 
-    background: #2b63c6; /* Fallback kleur */
-    padding: 10px 18px; 
-    border-radius: 8px; 
-    font-size: 1.1rem; 
-    font-weight: 800; 
-    display: inline-flex; 
-    align-items: center; 
-    margin-bottom: 15px; 
-    box-shadow: 0 4px 6px rgba(0,0,0,0.15); 
-    margin-left: 0; 
-    color: white; /* Standaard tekstkleur */
+    padding: 10px 18px; 
+    border-radius: 8px; 
+    font-size: 1.1rem; 
+    font-weight: 800; 
+    display: inline-flex; 
+    align-items: center; 
+    margin-bottom: 15px; 
+    box-shadow: 0 4px 6px rgba(0,0,0,0.15); 
+    margin-left: 0; 
+    color: white; /* Standaard tekstkleur */
 }
 
 
 /* --- SCORE BREAKDOWN STYLES (Kleur/Balken) --- */
 .bar-item {
-    display: grid; 
-    grid-template-columns: 140px 1fr 45px; 
-    align-items: center; 
-    gap: 5px; 
-    margin-bottom: 10px;
+    display: grid; 
+    grid-template-columns: 140px 1fr 40px; 
+    align-items: center; 
+    gap: 5px; 
+    margin-bottom: 10px;
 }
 .progress-bar-container {
-    height: 14px; 
-    border-radius: 7px;
-    background-color: #e9ecef; 
-    overflow: hidden; 
-    box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+    height: 14px; 
+    border-radius: 7px;
+    background-color: #e9ecef; 
+    overflow: hidden; 
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
 }
 .progress-bar {
-    height: 100%; 
-    border-radius: 7px;
-    transition: width 0.4s ease;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1); 
-    min-width: 5px; /* Zorgt dat balken met 0% of 1% toch zichtbaar zijn */
+    height: 100%; 
+    border-radius: 7px;
+    transition: width 0.4s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1); 
+    min-width: 5px; /* Zorgt dat balken met 0% of 1% toch zichtbaar zijn */
 }
 
 /* Kleuren voor de progress bars */
@@ -242,20 +241,20 @@
 .recency-bar { background-color: #17a2b8 !important; } /* Cyaan/Blauw */
 
 .bar-value { 
-    font-weight: 700; 
-    text-align: right; 
-    font-size: 1.05rem; 
+    font-weight: 700; 
+    text-align: right; 
+    font-size: 1.05rem; 
 }
 
 
-/* --- Consultant Kaart & Layout (Gekopieerd van Job Card) --- */
+/* --- Job Kaart & Layout (Uitlijning) --- */
 
 .job-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; }
 .job-card {
-    background: #ffffff; border: 1px solid #dce6f5; border-radius: 12px; padding: 25px; box-shadow: 0 6px 15px rgba(0,0,0,0.08); transition: transform 0.2s, box-shadow 0.2s; 
-    display: flex; 
-    flex-direction: column; 
-    align-items: flex-start; /* Dwingt links uitlijning af */
+    background: #ffffff; border: 1px solid #dce6f5; border-radius: 12px; padding: 25px; box-shadow: 0 6px 15px rgba(0,0,0,0.08); transition: transform 0.2s, box-shadow 0.2s; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: flex-start; /* Dwingt links uitlijning af */
 }
 .job-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.12); }
 .job-meta-top { display: flex; justify-content: space-between; width: 100%; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #f0f4f9; }
@@ -265,23 +264,23 @@
 .contract-type-tag i { margin-right: 5px; }
 
 .job-title-link, .company-name { 
-    width: 100%; 
-    text-align: left; 
+    width: 100%; 
+    text-align: left; 
 }
 .job-title-link a { 
-    color: #2b63c6 !important; text-decoration: none; font-weight: 800; font-size: 1.5rem; 
-    display: block; 
+    color: #2b63c6 !important; text-decoration: none; font-weight: 800; font-size: 1.5rem; 
+    display: block; 
 }
 .company-name { font-size: 1.05rem; color: #555; margin-bottom: 15px; font-weight: 600; border-bottom: 1px dashed #e0e0e0; padding-bottom: 15px; }
 
 /* Score Summary */
 .score-summary { 
-    margin-top: auto; 
-    padding-top: 15px; 
-    border-top: 1px solid #e0e0e0; 
-    margin-bottom: 15px; 
-    text-align: left; 
-    width: 100%; 
+    margin-top: auto; 
+    padding-top: 15px; 
+    border-top: 1px solid #e0e0e0; 
+    margin-bottom: 15px; 
+    text-align: left; 
+    width: 100%; 
 }
 
 .relevance-badge i { margin-right: 8px; font-size: 1.1em; }
@@ -296,7 +295,7 @@
 .required-skill-tag { background: #e9f0ff; color: #2b63c6; border: 1px solid #bcd0ff; padding: 5px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; }
 .more-skills { background: #f0f4f9; border: 1px solid #dce6f5; color: #4a6fa1; }
 
-/* Filter & Mode Stijlen (Niet gewijzigd t.o.v. Job List) */
+/* Filter & Mode Stijlen (Niet gewijzigd) */
 .page-title { margin-bottom: 20px; }
 .mode-selector-container { margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #e0e0e0; }
 .mode-selector-container h2 { margin-bottom: 15px; font-weight: 600; color: #333; }
@@ -328,11 +327,7 @@
 .breakdown-details summary { cursor: pointer; font-weight: 600; color: #4a6fa1; padding: 5px 0; list-style: none; display: flex; align-items: center; }
 .breakdown-details summary i { margin-right: 8px; color: #2b63c6; }
 .breakdown-details summary::-webkit-details-marker { display: none; }
-.breakdown-details summary::before { 
-    content: '►'; display: inline-block; font-size: 0.8em; margin-right: 8px; transition: transform 0.2s;
-    /* Essentieel voor de juiste positie */
-    line-height: 1;
-}
+.breakdown-details summary::before { content: '►'; display: inline-block; font-size: 0.8em; margin-right: 8px; transition: transform 0.2s; }
 .breakdown-details[open] summary::before { content: '▼'; transform: rotate(0deg); }
 .score-breakdown { padding-top: 10px; padding-left: 0px; }
 .bar-label { font-weight: 600; color: #333; display: flex; align-items: center; }
