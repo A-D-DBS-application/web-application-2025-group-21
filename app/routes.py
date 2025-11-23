@@ -188,7 +188,6 @@ def edit_consultant_profile():
             return redirect(url_for("main.dashboard"))
 
         return render_template("edit_consultant_profile.html", profile=profile)
-
 @main.route("/consultant/skills/edit", methods=["GET", "POST"])
 def edit_consultant_skills():
     with get_session() as db:
@@ -231,35 +230,121 @@ def consultant_detail(profile_id):
         return render_template("consultant_detail.html", profile=profile)
 
 
+
 @main.route("/consultants", methods=["GET"])
 def consultants_list():
+    from datetime import datetime, timezone
     with get_session() as db:
         user = get_current_user(db)
-        profiles = db.query(ConsultantProfile).all()
 
+        # --- Filters ophalen uit query params ---
+        query_skills = request.args.get("skills")  # bv. "1,2,3"
+        if query_skills:
+            query_skills = list(map(int, query_skills.split(",")))
+        city = request.args.get("city")
+        country = request.args.get("country")
+        text_query = request.args.get("q", None)
+
+        # --- Basisquery ---
+        query = db.query(ConsultantProfile)
+
+        # Filter op locatie
+        if city:
+            query = query.filter(ConsultantProfile.location_city.ilike(f"%{city}%"))
+        if country:
+            query = query.filter(ConsultantProfile.country.ilike(f"%{country}%"))
+
+        # Filter op skills
+        if query_skills:
+            query = query.join(ConsultantProfile.skills).filter(Skill.id.in_(query_skills))
+
+        profiles = query.all()
+
+        # --- Bereken relevance score ---
+        now = datetime.now(timezone.utc)
+
+        def compute_score(profile):
+            score = 0.0
+            # skills
+            if query_skills:
+                matched = len(set(s.id for s in profile.skills) & set(query_skills))
+                score += (matched / max(len(query_skills), 1)) * 0.5
+            # text match
+            if text_query:
+                text_fields = " ".join(filter(None, [profile.display_name_masked, profile.headline, profile.location_city, profile.country]))
+                if text_query.lower() in text_fields.lower():
+                    score += 0.3
+            # recency
+            days_old = (now - profile.created_at).days
+            score += max(0, 0.2 - days_old * 0.01)
+            return score
+
+        profiles = sorted(profiles, key=compute_score, reverse=True)
 
         return render_template("consultant_list.html", profiles=profiles)
+
+
 
 
 # ------------------ JOB POSTS ------------------
 @main.route("/jobs", methods=["GET"])
 def jobs_list():
+    from datetime import datetime, timezone
     with get_session() as db:
         user = get_current_user(db)
 
-        # Consultants zien ALLE jobs
-        if user and user.role == UserRole.consultant:
-            jobs = db.query(JobPost).all()
-            return render_template("job_list.html", jobs=jobs)
+        query_skills = request.args.get("skills")
+        if query_skills:
+            query_skills = list(map(int, query_skills.split(",")))
+        city = request.args.get("city")
+        country = request.args.get("country")
+        contract_type = request.args.get("contract_type")
+        text_query = request.args.get("q", None)
 
-        # Companies zien alleen hun eigen jobs
+        # Basisquery
+        query = db.query(JobPost)
+
+        # Voor companies: zie alleen eigen jobs
         if user and user.role == UserRole.company:
             company = db.query(Company).filter(Company.user_id == user.id).first()
-            jobs = db.query(JobPost).filter(JobPost.company_id == company.id).all()
-            return render_template("job_list.html", jobs=jobs)
+            query = query.filter(JobPost.company_id == company.id)
 
-        flash(_("Log in to view jobs"))
-        return redirect(url_for("main.login"))
+        # Filters
+        if city:
+            query = query.filter(JobPost.location_city.ilike(f"%{city}%"))
+        if country:
+            query = query.filter(JobPost.country.ilike(f"%{country}%"))
+        if contract_type:
+            query = query.filter(JobPost.contract_type.ilike(f"%{contract_type}%"))
+        if query_skills:
+            query = query.join(JobPost.skills).filter(Skill.id.in_(query_skills))
+
+        jobs = query.all()
+
+        # --- Relevance scoring ---
+        now = datetime.now(timezone.utc)
+
+        def compute_score(job):
+            score = 0.0
+            # skills
+            if query_skills:
+                matched = len(set(s.id for s in job.skills) & set(query_skills))
+                score += (matched / max(len(query_skills), 1)) * 0.5
+            # text match
+            if text_query:
+                text_fields = " ".join(filter(None, [job.title, job.description, job.location_city, job.country]))
+                if text_query.lower() in text_fields.lower():
+                    score += 0.3
+            # recency
+            days_old = (now - job.created_at).days
+            score += max(0, 0.2 - days_old * 0.01)
+            return score
+
+        jobs = sorted(jobs, key=compute_score, reverse=True)
+
+        return render_template("job_list.html", jobs=jobs)
+
+
 
 
 @main.route("/jobs/<int:job_id>", methods=["GET"])
