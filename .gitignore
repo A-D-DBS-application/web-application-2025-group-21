@@ -1,10 +1,7 @@
 venv/
+.venv
 .env
 __pycache__/
 *.pyc
 *.db
 .vscode/
-app.__pycache__
-app/__pycache__/__init__.cpython-313.pyc
-app/__pycache__/models.cpython-313.pyc
-/app/__pycache__
