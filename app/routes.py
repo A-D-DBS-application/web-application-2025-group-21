@@ -546,19 +546,19 @@ from datetime import datetime, timezone
 # from .utils import get_session, get_current_user
 # from flask_babel import _ # Indien je gebruik maakt van i18n
 
+# In app/routes.py, de functie jobs_list
 @main.route("/jobs", methods=["GET"])
 def jobs_list():
+    from datetime import datetime, timezone
     with get_session() as db:
         user = get_current_user(db)
 
-        # 1. Beveiligingscontrole (US-JOB-01)
-        # Zorg ervoor dat je UserRole.consultant correct importeert.
+        # 1. Beveiligingscontrole (Moet een Consultant zijn)
         if not user or user.role != UserRole.consultant:
             flash(_("Only consultants can browse job posts."))
             return redirect(url_for("main.dashboard")) 
 
         # 2. Parameters Ophalen
-        # Standaard is 'relevance' (IConsult Filter)
         sort_by = request.args.get("sort_by", "relevance") 
         
         # Handmatige filters ophalen
@@ -568,100 +568,49 @@ def jobs_list():
 
         city = request.args.get("city")
         country = request.args.get("country")
+        # 💡 HAAL DE CONTRACT_TYPE WAARDE OP
         contract_type = request.args.get("contract_type")
         text_query = request.args.get("q", None)
         
-        # 3. Consultant Skills Ophalen (voor Relevantieberekening)
-        current_consultant_profile = db.query(ConsultantProfile).filter_by(user_id=user.id).first()
-        consultant_skill_ids = set(s.id for s in current_consultant_profile.skills) if current_consultant_profile else set()
-
-        # 4. Basisquery en Filters Toepassen
-        query = db.query(JobPost)
+        # ... (Stap 3 en 4: Haal Consultant Skills op en stel Basisquery in)
 
         # LET OP: Filters worden ALLEEN toegepast in de 'Handmatige Filter' modus
+        query = db.query(JobPost)
         if sort_by != "relevance":
-            if city:
-                query = query.filter(JobPost.location_city.ilike(f"%{city}%"))
-            if country:
-                query = query.filter(JobPost.country.ilike(f"%{country}%"))
+            # ... (filters voor city, country)
             if contract_type:
-                query = query.filter(JobPost.contract_type.ilike(f"%{contract_type}%"))
+                # 💡 Gebruik exacte match voor dropdown filtering
+                query = query.filter(JobPost.contract_type == contract_type)
             
-            # Handmatige skill-filter
-            if query_skills:
-                # Belangrijk: De join zorgt ervoor dat alleen jobs met ALLE geselecteerde skills getoond worden
-                # Als je OR wilt, moet je de query anders formuleren. Hier gaan we uit van een AND-achtige join:
-                for skill_id in query_skills:
-                    query = query.filter(JobPost.skills.any(Skill.id == skill_id))
+            # ... (Handmatige skill-filter)
 
         # Haal alle jobs op die voldoen aan de (eventuele) filters
         jobs = query.all()
 
-        # 5. Sortering & Relevantie Berekening (US-SRCH-01)
-        if sort_by == "relevance":
-            # Dit is de complexe IConsult Filter
-            now = datetime.now(timezone.utc)
-
-            def compute_score(job):
-                # A. Skill Similarity (Gewicht 0.5)
-                job_required_skill_ids = set(s.id for s in job.skills)
-                matched = len(job_required_skill_ids & consultant_skill_ids)
-                max_skills = max(len(job_required_skill_ids), 1)
-                skill_similarity = (matched / max_skills) # 0 tot 1
-                skill_weighted_score = skill_similarity * 0.5 
-                
-                # B. Text Match (Gewicht 0.3)
-                text_match = 0
-                if text_query:
-                    # Zoek naar de term in titel, omschrijving, stad of land
-                    text_fields = " ".join(filter(None, [job.title, job.description, job.location_city, job.country]))
-                    if text_query.lower() in text_fields.lower():
-                        text_match = 1 # 0 of 1
-                text_weighted_score = text_match * 0.3
-                
-                # C. Recency (Gewicht 0.2)
-                # Max 0.2 score voor de meest recente jobs (daling over 30 dagen)
-                days_old = (now - job.created_at).days
-                recency_factor = max(0, 1 - days_old / 30) # 1 voor < 30 dagen, daalt naar 0
-                recency_weighted_score = recency_factor * 0.2
-                
-                final_score = skill_weighted_score + text_weighted_score + recency_weighted_score
-                
-                return {
-                    'total': final_score,
-                    'skill': skill_weighted_score, 
-                    'text': text_weighted_score,  
-                    'recency': recency_weighted_score,
-                    # De ongewogen factoren (voor weergave in de uitsplitsing)
-                    'skill_factor': skill_similarity,
-                    'text_factor': text_match,
-                    'recency_factor': recency_factor
-                }
-
-            scored_jobs = [] 
-            for job in jobs:
-                score_data = compute_score(job)
-                # Voeg de totale score en de uitsplitsing toe aan het job-object
-                job.score = score_data['total']
-                job.score_breakdown = score_data
-                scored_jobs.append(job)
-
-            # Sorteer de jobs op de berekende score
-            jobs = sorted(scored_jobs, key=lambda j: j.score, reverse=True)
-            
-        elif sort_by == "title":
-            # Alfabetische sortering (Handmatige Modus)
-            jobs = sorted(jobs, key=lambda job: job.title)
-
+        # ... (Stap 5: Sortering & Relevantie Berekening)
+        
         # 6. Template Renderen
         all_skills = db.query(Skill).order_by(Skill.name).all()
+
+        # 🌟 NIEUW: Definieer de mogelijke contracttypes 🌟
+        # De sleutel (value) is wat naar de database wordt gestuurd
+        possible_contract_types = [
+            ("Freelance", _("Freelance")),
+            ("Full-time", _("Full-time")),
+            ("Part-time", _("Part-time")),
+            ("Project-based", _("Project-based")),
+            # Voeg 'Internship' toe indien nodig, of andere types
+        ]
 
         return render_template(
             "job_list.html", 
             jobs=jobs, 
             skills=all_skills, 
             user=user,
-            sort_by=sort_by
+            sort_by=sort_by,
+            # 🌟 NIEUW: Geef de types en de huidige selectie mee 🌟
+            possible_contract_types=possible_contract_types,
+            current_contract_type=contract_type 
         )
 
 
