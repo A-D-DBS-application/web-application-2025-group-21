@@ -1,14 +1,12 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
 from datetime import datetime
 from flask import current_app
-
-
+from functools import wraps
 
 from flask_babel import gettext as _
 
-
 from .supabase_client import get_session
-from .models import User, ConsultantProfile, Company, JobPost, UserRole, Skill
+from .models import User, ConsultantProfile, Company, JobPost, UserRole, Skill, Unlock, UnlockTarget
 
 import os
 from werkzeug.utils import secure_filename
@@ -26,6 +24,24 @@ def get_current_user(db):
         return None
     return db.query(User).filter(User.id == user_id).first()
 
+def login_required(f): # <--- ESSENTIEEL: Vangt de 'login_required not defined' fout op
+    """Controleert of de gebruiker is ingelogd via de sessie."""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if session.get("user_id") is None:
+            flash(_("Gelieve in te loggen om deze actie uit te voeren."))
+            return redirect(url_for("main.login"))
+        return f(*args, **kwargs)
+    return decorated_function
+
+# helper voor unlock
+def is_unlocked(db, unlocking_user_id, target_type, target_id):
+    """Controleert of een gebruiker al de contactgegevens van een target heeft unlocked."""
+    return db.query(Unlock).filter(
+        Unlock.user_id == unlocking_user_id,
+        Unlock.target_type == target_type,
+        Unlock.target_id == target_id
+    ).first() is not None
 
 
 # ------------------ HOME ------------------
@@ -265,6 +281,9 @@ def edit_consultant_skills():
         )
 
 @main.route("/consultant/<int:profile_id>")
+# in app/routes.py (Vervang de bestaande consultant_detail functie)
+
+@main.route("/consultant/<int:profile_id>")
 def consultant_detail(profile_id):
     with get_session() as db:
         profile = db.query(ConsultantProfile).filter(
@@ -275,8 +294,21 @@ def consultant_detail(profile_id):
             flash(_("Consultant not found"))
             return redirect(url_for("main.consultants_list"))
 
-        return render_template("consultant_detail.html", profile=profile)
+        user = get_current_user(db)
+        is_owner = user and user.id == profile.user_id
+        is_unlocked_status = False
 
+        if user:
+            is_unlocked_status = is_unlocked(db, user.id, UnlockTarget.consultant, profile_id)
+
+        return render_template(
+            "consultant_detail.html", 
+            profile=profile,
+            user=user,               # <-- FIX: user doorgeven
+            UserRole=UserRole,       # <-- FIX: UserRole doorgeven
+            is_owner=is_owner,
+            is_unlocked=is_unlocked_status
+        )
 
 
 # In app/routes.py (Vervang uw bestaande consultants_list functie)
@@ -440,6 +472,68 @@ def edit_company_profile():
 
         return render_template("edit_company_profile.html", company=company)
 
+# ------------------ UNLOCK LOGICA ------------------
+
+# Unlock Consultant (Bedrijf -> Consultant)
+@main.route("/unlock/consultant/<int:profile_id>")
+@login_required
+def unlock_consultant(profile_id):
+    with get_session() as db:
+        user = get_current_user(db)
+        
+        if user.role != UserRole.company:
+            flash(_("Alleen bedrijven kunnen contactgegevens van consultants vrijgeven."), "error")
+            return redirect(url_for("main.consultant_detail", profile_id=profile_id))
+        # Gebruik filter_by voor betere compatibiliteit met Pylance
+        consultant_profile = db.query(ConsultantProfile).filter_by(id=profile_id).first()
+        if not consultant_profile:
+            flash(_("Consultant profiel niet gevonden."), "error")
+            return redirect(url_for("main.dashboard"))
+
+        if is_unlocked(db, user.id, UnlockTarget.consultant, profile_id):
+            flash(_("Contactgegevens zijn al vrijgegeven."), "info")
+            return redirect(url_for("main.consultant_detail", profile_id=profile_id))
+
+        new_unlock = Unlock(
+            user_id=user.id,
+            target_type=UnlockTarget.consultant,
+            target_id=profile_id
+        )
+        db.add(new_unlock)
+        db.commit()
+        
+        flash(_("Contactgegevens succesvol vrijgegeven!"), "success")
+        return redirect(url_for("main.consultant_detail", profile_id=profile_id))
+
+# Unlock Job/Company (Consultant -> Company)
+@main.route("/unlock/job/<int:job_id>")
+@login_required
+def unlock_job(job_id):
+    with get_session() as db:
+        user = get_current_user(db)
+        
+        if user.role != UserRole.consultant:
+            flash(_("Alleen consultants kunnen contactgegevens van bedrijven vrijgeven."), "error")
+            return redirect(url_for("main.job_detail", job_id=job_id))
+        job_post = db.query(JobPost).filter_by(id=job_id).first()
+        if not job_post:
+            flash(_("Job post niet gevonden."), "error")
+            return redirect(url_for("main.dashboard"))
+
+        if is_unlocked(db, user.id, UnlockTarget.job, job_id):
+            flash(_("Contactgegevens zijn al vrijgegeven."), "info")
+            return redirect(url_for("main.job_detail", job_id=job_id))
+
+        new_unlock = Unlock(
+            user_id=user.id,
+            target_type=UnlockTarget.job,
+            target_id=job_id
+        )
+        db.add(new_unlock)
+        db.commit()
+
+        flash(_("Contactgegevens succesvol vrijgegeven!"), "success")
+        return redirect(url_for("main.job_detail", job_id=job_id))
 
 # ------------------ JOB POSTS ------------------
 # In app/routes.py (of waar je routes zijn gedefinieerd)
@@ -530,18 +624,24 @@ def job_detail(job_id):
         if not job:
             flash(_("Job not found"))
             return redirect(url_for("main.jobs_list"))
+        
+        company_posting = job.company # Haalt het Company object op
 
-        company = None
-        if user and user.role == UserRole.company:
-            company = db.query(Company).filter(Company.user_id == user.id).first()
+        is_owner = user and company_posting and user.id == company_posting.user_id
+        is_unlocked_status = False
+        
+        if user:
+            is_unlocked_status = is_unlocked(db, user.id, UnlockTarget.job, job_id)
 
         return render_template(
             "job_detail.html",
             job=job,
-            user=user,
-            company=company,
-            UserRole=UserRole
-        )
+            user=user,             # <-- FIX: user doorgeven
+            company=company_posting,
+            UserRole=UserRole,      # <-- FIX: UserRole doorgeven
+            is_owner=is_owner,
+            is_unlocked=is_unlocked_status
+            )
 
 
 
