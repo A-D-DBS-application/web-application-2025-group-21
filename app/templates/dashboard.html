@@ -28,6 +28,9 @@
         <p><strong>Locatie:</strong> {{ profile.location_city }} , {{ profile.country }}</p>
         <p><strong>Opmerking:</strong> {{ profile.headline or "Geen headline" }}</p>
 
+        <p><strong>E-mail:</strong> {{ profile.contact_email or "Niet ingevuld" }}</p>
+        <p><strong>Telefoon:</strong> {{ profile.phone_number or "Niet ingevuld" }}</p>
+
         <p><strong>Skills:</strong>
             {% if profile.skills %}
                 {{ profile.skills | map(attribute='name') | join(', ') }}
@@ -44,8 +47,12 @@
         <p><strong>Bedrijfsnaam:</strong> {{ company.company_name_masked }}</p>
         <p><strong>Sector:</strong> {{ company.industry or "Niet ingevuld" }}</p>
 
+        <p><strong>E-mail:</strong> {{ company.contact_email or "Niet ingevuld" }}</p>
+        <p><strong>Telefoon:</strong> {{ company.phone_number or "Niet ingevuld" }}</p>
+
         <a class="btn" href="{{ url_for('main.job_new') }}">Nieuwe job posten</a>
         <a class="btn" href="{{ url_for('main.jobs_list') }}">Mijn job posts</a>
+        <a class="btn" href="{{ url_for('main.edit_company_profile') }}">Profiel aanpassen</a>
     {% endif %}
 </div>
 {% endblock %}
