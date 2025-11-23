@@ -153,4 +153,3 @@ class JobSkill(Base):
 
 Index("idx_job_skills_job_id", JobSkill.job_id)
 Index("idx_job_skills_skill_id", JobSkill.skill_id)
-

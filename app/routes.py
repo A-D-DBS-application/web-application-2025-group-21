@@ -3,6 +3,7 @@ from datetime import datetime
 from flask import current_app
 
 
+
 from flask_babel import gettext as _
 
 
@@ -234,12 +235,9 @@ def consultant_detail(profile_id):
 def consultants_list():
     with get_session() as db:
         user = get_current_user(db)
-
-        if not user or user.role != UserRole.company:
-            flash(_("Only companies can create job posts"))
-            return redirect(url_for("main.dashboard"))
-
         profiles = db.query(ConsultantProfile).all()
+
+
         return render_template("consultant_list.html", profiles=profiles)
 
 
