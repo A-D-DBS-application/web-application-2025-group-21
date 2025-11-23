@@ -165,6 +165,7 @@ def edit_consultant_profile():
             # ----------------------
             #   PROFIELFOTO
             # ----------------------
+            # ----------------------
             file = request.files.get("profile_image")
 
             if file and file.filename != "":
@@ -172,14 +173,21 @@ def edit_consultant_profile():
                 upload_folder = os.path.join(current_app.root_path, "static", "uploads")
                 os.makedirs(upload_folder, exist_ok=True)
 
-                # Unieke bestandsnaam
-                filename = f"user_{user.id}.jpg"
+                # Unieke bestandsnaam en bep toegestaande bestanden
+                if not allowed_file(file.filename):
+                    flash(_("Only png/jpg/jpeg/gif allowed"))
+                    return redirect(url_for("main.edit_consultant_profile"))
+
+                ext = file.filename.rsplit(".", 1)[1].lower()
+                filename = f"user_{user.id}.{ext}"
                 save_path = os.path.join(upload_folder, filename)
+
 
                 file.save(save_path)
 
                 # Pad opslaan in database (wat je gebruikt in je template)
                 profile.profile_image = f"/static/uploads/{filename}"
+
 
             db.commit()
 
