@@ -51,8 +51,9 @@
         <a href="{{ url_for('main.jobs_list', sort_by='title') }}" class="btn btn-secondary reset-btn">Reset Filters</a>
 
     {% else %}
+        {# 🎯 AANGEPASTE TEKST VOOR PROFESSIONELE REFERENTIE #}
         <p class="alert alert-info">
-            De **IConsult Match** rangschikt vacatures automatisch op basis van de relevantie voor **uw opgeslagen profiel skills** (Skills 50%, Zoekterm 30%, Recentheid 20%).
+            **Voor een gedetailleerde uitleg over de toegepaste filter- en scoringsmethodologie, verwijzen wij u naar de informatie onderaan deze pagina.**
         </p>
         
         <div class="input-group">
@@ -67,7 +68,7 @@
 <div class="job-grid" style="margin-top: 20px;">
     {% for job in jobs %}
     
-    {# 🎯 AANGEPAST: Alle score-logica is nu geplaatst binnen de relevante check. #}
+    {# Opgeloste logica: Alle score-logica is binnen de relevante check geplaatst. #}
     {% if current_sort == 'relevance' and job.score is defined %}
         {% set match_score_perc = (job.score * 100) | round(0) %}
         {% set match_class = 'match-high' %}
@@ -77,7 +78,6 @@
             {% set match_class = 'match-medium' %}
         {% endif %}
     {% endif %}
-    {# EINDE AANGEPASTE LOGICA #}
     
     <div class="job-card">
             
@@ -116,7 +116,7 @@
             {% if current_sort == 'relevance' and job.score is defined %}
             <div class="score-summary">
                 
-                {# KLASSE IS NU DYNAMISCH #}
+                {# KLASSE IS DYNAMISCH #}
                 <span class="relevance-badge {{ match_class }}">
                     <i class="fas fa-check-circle"></i> Match: **{{ match_score_perc }}%**
                 </span>
