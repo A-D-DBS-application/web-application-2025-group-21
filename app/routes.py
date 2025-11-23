@@ -45,24 +45,44 @@ def set_language():
 
 
 # ------------------ LOGIN ------------------
+# In app/routes.py (Vervang de bestaande login functie)
+# In app/routes.py (Vervang de bestaande login functie)
 @main.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
         username = request.form.get("username", "").strip().lower()
-        role = request.form.get("role", "consultant")
-
+        role_str = request.form.get("role", "consultant")
+        requested_role = UserRole(role_str)
+        
         if not username:
-            flash(_("Username is required"))
+            flash(_("Gebruikersnaam is vereist."))
             return redirect(url_for("main.login"))
 
         with get_session() as db:
             user = db.query(User).filter(User.username == username).first()
-            if not user:
-                user = User(username=username, role=UserRole(role))
+            
+            if user:
+                # --- LOGICA VOOR BESTAANDE GEBRUIKER ---
+                # Check of de gevraagde rol overeenkomt met de bestaande rol
+                if user.role == requested_role:
+                    # ROL KOMT OVEREEN: Inloggen
+                    session["user_id"] = user.id
+                    session["role"] = user.role.value
+                    flash(_(f"Welkom terug, {username}."))
+                    return redirect(url_for("main.dashboard"))
+                else:
+                    # ROL CONFLICT: Geen login, geef een generieke foutmelding
+                    # Dit voorkomt het onthullen van de bestaande rol (veiligheid)
+                    flash(_("Deze gebruikersnaam bestaat al en is gekoppeld aan een andere rol. Kies een andere gebruikersnaam of log in met de juiste rol."))
+                    return redirect(url_for("main.login"))
+                
+            else:
+                # --- LOGICA VOOR NIEUWE GEBRUIKER ---
+                user = User(username=username, role=requested_role)
                 db.add(user)
                 db.flush()
 
-                if role == "consultant":
+                if requested_role == UserRole.consultant:
                     prof = ConsultantProfile(
                         user_id=user.id,
                         display_name_masked=username,
@@ -70,7 +90,7 @@ def login():
                         created_at=datetime.utcnow()
                     )
                     db.add(prof)
-                else:
+                else: # UserRole.company
                     comp = Company(
                         user_id=user.id,
                         company_name_masked=f"{username} BV",
@@ -79,12 +99,12 @@ def login():
                     db.add(comp)
 
                 db.commit()
+                flash(_(f"Welkom, {username}. U bent geregistreerd en ingelogd als {role_str}."))
 
-            # SESSIE SETTEN
-            session["user_id"] = user.id
-            session["role"] = user.role.value
-
-        return redirect(url_for("main.dashboard"))
+                # SESSIE SETTEN voor de nieuwe gebruiker
+                session["user_id"] = user.id
+                session["role"] = user.role.value
+                return redirect(url_for("main.dashboard"))
 
     return render_template("login.html")
 

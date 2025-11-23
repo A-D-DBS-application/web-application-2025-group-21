@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 import os
 from flask_babel import Babel
 from flask import session
+from datetime import datetime # NIEUW: Nodig voor now() in templates
 
 
 db = SQLAlchemy()
@@ -26,6 +27,15 @@ def create_app():
 
 
     db.init_app(app)
+
+    # NIEUWE SECTIE: CONTEXT PROCESSOR
+    # Registreert de 'now' functie voor gebruik in alle Jinja2 templates.
+    @app.context_processor
+    def inject_now():
+        """Maakt de datetime.now functie beschikbaar in Jinja templates."""
+        return {'now': datetime.now}
+    # EINDE NIEUWE SECTIE
+
 
     from .routes import main
     app.register_blueprint(main)
