@@ -66,6 +66,16 @@
 
 <div class="job-grid" style="margin-top: 20px;">
     {% for job in jobs %}
+    
+    {# 🎯 NIEUWE JINJA LOGICA VOOR MATCH KLEUREN #}
+    {% set match_score_perc = (job.score * 100) | round(0) %}
+    {% set match_class = 'match-high' %}
+    {% if match_score_perc < 20 %}
+        {% set match_class = 'match-low' %}
+    {% elif match_score_perc >= 20 and match_score_perc <= 30 %}
+        {% set match_class = 'match-medium' %}
+    {% endif %}
+    
     <div class="job-card">
             
             <div class="job-meta-top">
@@ -102,8 +112,10 @@
         
             {% if current_sort == 'relevance' and job.score is defined %}
             <div class="score-summary">
-                <span class="relevance-badge">
-                    <i class="fas fa-check-circle"></i> Match: **{{ (job.score * 100) | round(0) }}%**
+                
+                {# 🎯 KLASSE IS NU DYNAMISCH #}
+                <span class="relevance-badge {{ match_class }}">
+                    <i class="fas fa-check-circle"></i> Match: **{{ match_score_perc }}%**
                 </span>
                 
                 <details class="breakdown-details">
@@ -158,9 +170,38 @@
 /* --- VERNIEUWDE EN GEOPTIMALISEERDE CSS --- */
 /* ------------------------------------------- */
 
-/* --- SCORE BREAKDOWN STYLES (Focus op de lege balken & kleuren) --- */
+/* 🎯 NIEUWE STIJLEN VOOR MATCH KLEUREN */
+.relevance-badge.match-low { 
+    background: #dc3545 !important; /* Rood */
+    border: 1px solid #c82333;
+}
+.relevance-badge.match-medium { 
+    background: #ffc107 !important; /* Oranje */
+    color: #333 !important; /* Tekstkleur aanpassen voor zichtbaarheid */
+    border: 1px solid #e0a800;
+}
+.relevance-badge.match-high { 
+    background: #28a745 !important; /* Groen */
+    border: 1px solid #1e7e34;
+}
+/* Standaard .relevance-badge behoudt zijn algemene layout */
+.relevance-badge { 
+    padding: 10px 18px; 
+    border-radius: 8px; 
+    font-size: 1.1rem; 
+    font-weight: 800; 
+    display: inline-flex; 
+    align-items: center; 
+    margin-bottom: 15px; 
+    box-shadow: 0 4px 6px rgba(0,0,0,0.15); 
+    margin-left: 0; 
+    color: white; /* Standaard tekstkleur */
+}
+
+
+/* --- SCORE BREAKDOWN STYLES (Kleur/Balken) --- */
 .bar-item {
-    display: grid; /* Zorgt ervoor dat de kolommen netjes naast elkaar staan */
+    display: grid; 
     grid-template-columns: 140px 1fr 40px; 
     align-items: center; 
     gap: 5px; 
@@ -169,8 +210,8 @@
 .progress-bar-container {
     height: 14px; 
     border-radius: 7px;
-    background-color: #e9ecef; /* Zorgt voor een grijze achtergrondbalk */
-    overflow: hidden; /* Belangrijk: zorgt dat de progress-bar binnen de container blijft */
+    background-color: #e9ecef; 
+    overflow: hidden; 
     box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
 }
 .progress-bar {
@@ -178,13 +219,10 @@
     border-radius: 7px;
     transition: width 0.4s ease;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1); 
-    /* Basiskleur - de specifieke klassen hieronder MOETEN sterker zijn */
-    background-color: #000; 
-    /* Nieuw: Zorgt dat de balk zichtbaar is, zelfs bij lage score (bv. 1%) */
-    min-width: 5px; 
+    min-width: 5px; /* Zorgt dat balken met 0% of 1% toch zichtbaar zijn */
 }
 
-/* 🎯 KLEUREN ZIJN VERSTERKT DOOR !important TOE TE VOEGEN OM OVERSCHRIJVING TE VOORKOMEN */
+/* Kleuren voor de progress bars */
 .skill-bar { background-color: #38c172 !important; } /* Groen */
 .text-bar { background-color: #ffc107 !important; } /* Geel/Oranje */
 .recency-bar { background-color: #17a2b8 !important; } /* Cyaan/Blauw */
@@ -196,25 +234,25 @@
 }
 
 
-/* --- Job Kaart & Layout (AANGEPAST voor strikte links uitlijning) --- */
+/* --- Job Kaart & Layout (Uitlijning) --- */
 
 .job-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; }
 .job-card {
     background: #ffffff; border: 1px solid #dce6f5; border-radius: 12px; padding: 25px; box-shadow: 0 6px 15px rgba(0,0,0,0.08); transition: transform 0.2s, box-shadow 0.2s; 
     display: flex; 
     flex-direction: column; 
-    /* 🎯 NIEUW: Dwingt alle items in de kolom-flexbox om links uit te lijnen */
-    align-items: flex-start; 
+    align-items: flex-start; /* Dwingt links uitlijning af */
 }
 .job-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.12); }
+.job-meta-top { display: flex; justify-content: space-between; width: 100%; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #f0f4f9; }
+.job-location { font-size: 0.95rem; color: #4a6fa1; display: flex; align-items: center; font-weight: 500; }
+.job-location i { margin-right: 5px; color: #2b63c6; }
+.contract-type-tag { font-size: 0.9rem; background: #dce6f5; color: #2b63c6; padding: 5px 10px; border-radius: 6px; display: inline-flex; align-items: center; font-weight: 600; }
+.contract-type-tag i { margin-right: 5px; }
 
-/* Zorgt dat de bovenste meta data de volledige breedte inneemt */
-.job-meta-top { display: flex; justify-content: space-between; **width: 100%;** margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #f0f4f9; }
-
-/* Zorgt dat de titel en bedrijfsnaam niet gecentreerd worden door de parent */
 .job-title-link, .company-name { 
-    width: 100%; /* Zorg dat het de volle breedte inneemt */
-    text-align: left; /* Dwing links uitlijning af */
+    width: 100%; 
+    text-align: left; 
 }
 .job-title-link a { 
     color: #2b63c6 !important; text-decoration: none; font-weight: 800; font-size: 1.5rem; 
@@ -222,35 +260,21 @@
 }
 .company-name { font-size: 1.05rem; color: #555; margin-bottom: 15px; font-weight: 600; border-bottom: 1px dashed #e0e0e0; padding-bottom: 15px; }
 
-
-/* Score Summary AANGEPAST voor strikte links uitlijning van de hele kader */
+/* Score Summary */
 .score-summary { 
     margin-top: auto; 
     padding-top: 15px; 
     border-top: 1px solid #e0e0e0; 
     margin-bottom: 15px; 
     text-align: left; 
-    width: 100%; /* Dwingt het volledige kader om links uit te lijnen en breedte te nemen */
+    width: 100%; 
 }
-.relevance-badge { 
-    background: #38c172; 
-    color: white; 
-    padding: 10px 18px; 
-    border-radius: 8px; 
-    font-size: 1.1rem; 
-    font-weight: 800; 
-    display: inline-flex; 
-    align-items: center; 
-    margin-bottom: 15px; 
-    box-shadow: 0 4px 6px rgba(0,0,0,0.15); 
-    margin-left: 0; 
-}
-.score-breakdown { padding-top: 10px; padding-left: 0px; } /* Links uitlijnen van uitsplitsing */
-.score-total { text-align: right; } /* Alleen de totaalscore rechts houden */
 
+.relevance-badge i { margin-right: 8px; font-size: 1.1em; }
+.btn-primary-card { background: #2b63c6; color: white; border: 1px solid #1a4f99; padding: 12px 20px; border-radius: 8px; text-decoration: none; font-weight: 700; margin-top: 10px; text-align: center; transition: background 0.2s; align-self: stretch; }
+.btn-primary-card:hover { background: #1a4f99; }
 
-/* De rest van de stijlen (Skills tags, Knoppen, Filters) zijn ongewijzigd */
-
+/* Skills tags */
 .required-skills-summary { margin-bottom: 20px; border-top: 1px dashed #f0f0f0; padding-top: 15px; width: 100%; }
 .skills-label-small { font-weight: 700; display: block; margin-bottom: 8px; color: #333; font-size: 0.95rem; }
 .skills-label-small i { margin-right: 5px; color: #f6993f; }
@@ -258,16 +282,7 @@
 .required-skill-tag { background: #e9f0ff; color: #2b63c6; border: 1px solid #bcd0ff; padding: 5px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; }
 .more-skills { background: #f0f4f9; border: 1px solid #dce6f5; color: #4a6fa1; }
 
-.job-location { font-size: 0.95rem; color: #4a6fa1; display: flex; align-items: center; font-weight: 500; }
-.job-location i { margin-right: 5px; color: #2b63c6; }
-.contract-type-tag { font-size: 0.9rem; background: #dce6f5; color: #2b63c6; padding: 5px 10px; border-radius: 6px; display: inline-flex; align-items: center; font-weight: 600; }
-.contract-type-tag i { margin-right: 5px; }
-
-.relevance-badge i { margin-right: 8px; font-size: 1.1em; }
-.btn-primary-card { background: #2b63c6; color: white; border: 1px solid #1a4f99; padding: 12px 20px; border-radius: 8px; text-decoration: none; font-weight: 700; margin-top: 10px; text-align: center; transition: background 0.2s; align-self: stretch; }
-.btn-primary-card:hover { background: #1a4f99; }
-
-/* Filter & Mode Stijlen */
+/* Filter & Mode Stijlen (Niet gewijzigd) */
 .page-title { margin-bottom: 20px; }
 .mode-selector-container { margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #e0e0e0; }
 .mode-selector-container h2 { margin-bottom: 15px; font-weight: 600; color: #333; }
@@ -293,7 +308,6 @@
 .reset-btn { color: #555; border: 1px solid #ccc; background: #f0f0f0; margin-top: 10px; align-self: unset; }
 .apply-btn { margin-top: 10px; }
 
-
 /* Score Breakdown details */
 .breakdown-details { margin-top: 10px; margin-bottom: 15px; padding: 5px 0; border-top: 1px dashed #e0e0e0; border-bottom: 1px dashed #e0e0e0; font-size: 0.9rem; width: 100%; }
 .breakdown-details summary { cursor: pointer; font-weight: 600; color: #4a6fa1; padding: 5px 0; list-style: none; display: flex; align-items: center; }
@@ -301,9 +315,10 @@
 .breakdown-details summary::-webkit-details-marker { display: none; }
 .breakdown-details summary::before { content: '►'; display: inline-block; font-size: 0.8em; margin-right: 8px; transition: transform 0.2s; }
 .breakdown-details[open] summary::before { content: '▼'; transform: rotate(0deg); }
+.score-breakdown { padding-top: 10px; padding-left: 0px; }
 .bar-label { font-weight: 600; color: #333; display: flex; align-items: center; }
 .bar-label i { margin-right: 5px; color: #2b63c6; }
-.score-total { font-weight: 700; margin-top: 10px; padding-top: 5px; border-top: 1px solid #e0e0e0; color: #2b63c6; }
+.score-total { font-weight: 700; margin-top: 10px; padding-top: 5px; border-top: 1px solid #e0e0e0; text-align: right; color: #2b63c6; }
 </style>
 
 {% endblock %}
