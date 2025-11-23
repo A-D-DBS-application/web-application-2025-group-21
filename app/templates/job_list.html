@@ -67,14 +67,17 @@
 <div class="job-grid" style="margin-top: 20px;">
     {% for job in jobs %}
     
-    {# 🎯 NIEUWE JINJA LOGICA VOOR MATCH KLEUREN #}
-    {% set match_score_perc = (job.score * 100) | round(0) %}
-    {% set match_class = 'match-high' %}
-    {% if match_score_perc < 20 %}
-        {% set match_class = 'match-low' %}
-    {% elif match_score_perc >= 20 and match_score_perc <= 30 %}
-        {% set match_class = 'match-medium' %}
+    {# 🎯 AANGEPAST: Alle score-logica is nu geplaatst binnen de relevante check. #}
+    {% if current_sort == 'relevance' and job.score is defined %}
+        {% set match_score_perc = (job.score * 100) | round(0) %}
+        {% set match_class = 'match-high' %}
+        {% if match_score_perc < 20 %}
+            {% set match_class = 'match-low' %}
+        {% elif match_score_perc >= 20 and match_score_perc <= 30 %}
+            {% set match_class = 'match-medium' %}
+        {% endif %}
     {% endif %}
+    {# EINDE AANGEPASTE LOGICA #}
     
     <div class="job-card">
             
@@ -113,7 +116,7 @@
             {% if current_sort == 'relevance' and job.score is defined %}
             <div class="score-summary">
                 
-                {# 🎯 KLASSE IS NU DYNAMISCH #}
+                {# KLASSE IS NU DYNAMISCH #}
                 <span class="relevance-badge {{ match_class }}">
                     <i class="fas fa-check-circle"></i> Match: **{{ match_score_perc }}%**
                 </span>
@@ -170,7 +173,7 @@
 /* --- VERNIEUWDE EN GEOPTIMALISEERDE CSS --- */
 /* ------------------------------------------- */
 
-/* 🎯 NIEUWE STIJLEN VOOR MATCH KLEUREN */
+/* 🎯 STIJLEN VOOR MATCH KLEUREN */
 .relevance-badge.match-low { 
     background: #dc3545 !important; /* Rood */
     border: 1px solid #c82333;
@@ -307,6 +310,7 @@
 .btn-secondary { background: #e9f0ff; border: 1px solid #bcd0ff; padding: 8px 14px; border-radius: 8px; text-decoration: none; color: #2b63c6; font-weight: 600; }
 .reset-btn { color: #555; border: 1px solid #ccc; background: #f0f0f0; margin-top: 10px; align-self: unset; }
 .apply-btn { margin-top: 10px; }
+
 
 /* Score Breakdown details */
 .breakdown-details { margin-top: 10px; margin-bottom: 15px; padding: 5px 0; border-top: 1px dashed #e0e0e0; border-bottom: 1px dashed #e0e0e0; font-size: 0.9rem; width: 100%; }
