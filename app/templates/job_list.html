@@ -8,6 +8,25 @@
   <a class="btn btn-primary" href="{{ url_for('main.job_new') }}">Nieuwe job</a>
 {% endif %}
 
+<!-- FILTER FORMULIER -->
+<form method="GET" action="{{ url_for('main.jobs_list') }}" class="filter-form">
+  <input type="text" name="q" placeholder="Zoek..." value="{{ request.args.get('q', '') }}">
+  <input type="text" name="city" placeholder="Stad" value="{{ request.args.get('city', '') }}">
+  <input type="text" name="country" placeholder="Land" value="{{ request.args.get('country', '') }}">
+  <input type="text" name="contract_type" placeholder="Contract type" value="{{ request.args.get('contract_type', '') }}">
+
+  <div class="skills-filter">
+    <label>Skills:</label><br>
+    {% for skill in skills %}
+      <input type="checkbox" name="skills" value="{{ skill.id }}"
+        {% if request.args.getlist('skills') and skill.id|string in request.args.getlist('skills') %}checked{% endif %}>
+      {{ skill.name }}<br>
+    {% endfor %}
+  </div>
+
+  <button type="submit" class="btn btn-secondary">Filter</button>
+</form>
+
 <div class="job-grid">
   {% for j in jobs %}
     <div class="job-card">
@@ -31,6 +50,25 @@
 <style>
   .page-title {
     margin-bottom: 20px;
+  }
+
+  .filter-form {
+    margin-bottom: 20px;
+    padding: 12px;
+    border: 1px solid #dce6f5;
+    border-radius: 12px;
+    background: #f9fafe;
+  }
+
+  .filter-form input[type="text"] {
+    margin: 4px 6px 10px 0;
+    padding: 6px;
+    border-radius: 6px;
+    border: 1px solid #bcd0ff;
+  }
+
+  .skills-filter {
+    margin: 8px 0;
   }
 
   .job-grid {
