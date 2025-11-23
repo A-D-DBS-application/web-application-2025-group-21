@@ -101,47 +101,31 @@ def logout():
 def dashboard():
     with get_session() as db:
         user = get_current_user(db)
+        
+        # NIEUWE CONTROLE: Als er geen gebruiker is, stuur naar login.
+        if not user:
+            flash(_("Please log in to view your dashboard."))
+            return redirect(url_for("main.login"))
+        # EINDE NIEUWE CONTROLE
+        
         profile = None
         company = None
 
-        if user:
-            if user.role == UserRole.consultant:
-                profile = db.query(ConsultantProfile).filter_by(user_id=user.id).first()
-            elif user.role == UserRole.company:
-                company = db.query(Company).filter_by(user_id=user.id).first()
+        # Dit blok wordt nu alleen uitgevoerd als 'user' NIET None is.
+        # De 'if user:' die hier eerder stond, is nu overbodig geworden 
+        # door de 'if not user:' check erboven.
+        if user.role == UserRole.consultant:
+            profile = db.query(ConsultantProfile).filter_by(user_id=user.id).first()
+        elif user.role == UserRole.company:
+            company = db.query(Company).filter_by(user_id=user.id).first()
 
         return render_template(
-    "dashboard.html",
-    user=user,
-    profile=profile,
-    company=company,
-    UserRole=UserRole
-)
-
-
-@main.route("/dashboard/company/industry", methods=["POST"])
-def update_company_industry():
-    with get_session() as db:
-        user = get_current_user(db)
-        if not user or user.role != UserRole.company:
-            flash(_("Only companies can update their industry"))
-            return redirect(url_for("main.login"))
-
-        company = db.query(Company).filter_by(user_id=user.id).first()
-        if not company:
-            flash(_("Company profile not found"))
-            return redirect(url_for("main.dashboard"))
-
-        industry = request.form.get("industry")
-
-        if industry == "" or industry is None:
-            company.industry = None
-        else:
-            company.industry = industry
-
-        db.commit()
-        flash(_("Industry saved!"))
-        return redirect(url_for("main.dashboard"))
+            "dashboard.html",
+            user=user,
+            profile=profile,
+            company=company,
+            UserRole=UserRole
+        )
 
 # ------------------ CONSULTANTS ------------------
 @main.route("/consultant/edit", methods=["GET", "POST"])
