@@ -29,6 +29,50 @@ def get_current_user(db):
 
 
 # ------------------ HOME ------------------
+# NIEUW: Toont alle Job Posts die door het ingelogde bedrijf zijn aangemaakt
+@main.route("/company/jobs", methods=["GET"])
+def company_jobs_list():
+    # Zorg ervoor dat de imports bovenaan de file staan:
+    # from datetime import datetime, timezone
+    # from flask_babel import gettext as _ 
+    
+    with get_session() as db:
+        user = get_current_user(db)
+
+        # 1. Beveiligingscontrole
+        if not user or user.role != UserRole.company:
+            flash(_("Only companies can view their own job posts."))
+            # Stuur naar het algemene job overzicht (indien consultant) of dashboard
+            return redirect(url_for("main.dashboard")) 
+        
+        # Zoek het Company profiel
+        company = db.query(Company).filter_by(user_id=user.id).first()
+        
+        if not company:
+            flash(_("Company profile not found."))
+            return redirect(url_for("main.dashboard"))
+
+        # 2. Haal alle Job Posts van DIT bedrijf op
+        # Sorteer op meest recent aangemaakt
+        jobs = db.query(JobPost).filter(
+            JobPost.company_id == company.id
+        ).order_by(JobPost.created_at.desc()).all()
+        
+        # 3. Template Renderen
+        # We gebruiken de bestaande job_list.html template.
+        # We geven alle skills mee, zodat de filterbalk correct wordt weergegeven
+        all_skills = db.query(Skill).order_by(Skill.name).all()
+
+        return render_template(
+            "job_list.html", 
+            jobs=jobs, 
+            user=user,
+            skills=all_skills,
+            # Belangrijk: De 'sort_by' instellen op een waarde die GEEN relevance is (bijv. 'none')
+            # Dit zorgt ervoor dat de relevance-scorelogica in de template wordt omzeild.
+            sort_by='none', 
+            page_title=_("Mijn Vacatures"),
+        )
 #dit gebeurt vanzelf dus geen registreer nodig
 @main.route("/", methods=["GET"])
 def index():

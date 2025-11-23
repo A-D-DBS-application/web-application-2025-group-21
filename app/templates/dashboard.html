@@ -51,7 +51,8 @@
         <p><strong>Telefoon:</strong> {{ company.phone_number or "Niet ingevuld" }}</p>
 
         <a class="btn" href="{{ url_for('main.job_new') }}">Nieuwe job posten</a>
-        <a class="btn" href="{{ url_for('main.jobs_list') }}">Mijn job posts</a>
+        <a href="{{ url_for('main.company_jobs_list') }}">Mijn job posts</a>
+
         <a class="btn" href="{{ url_for('main.edit_company_profile') }}">Profiel aanpassen</a>
     {% endif %}
 </div>
