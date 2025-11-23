@@ -38,7 +38,7 @@ class User(Base):
     username = Column(String(80), unique=True, nullable=False)
     role = Column(Enum(UserRole), nullable=False)
     created_at = Column(TIMESTAMP, nullable=False, server_default=func.now())
-
+    unlocks = relationship("Unlock", back_populates="user")
     consultant_profile = relationship("ConsultantProfile", back_populates="user", uselist=False)
     company = relationship("Company", back_populates="user", uselist=False)
 
@@ -112,16 +112,16 @@ class JobPost(Base):
 
 Index("idx_job_posts_company_id", JobPost.company_id)
 
-
 class Unlock(Base):
     __tablename__ = "unlocks"
-
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-
+    # 3. Zorg dat de Enum wordt gebruikt
     target_type = Column(Enum(UnlockTarget), nullable=False)
     target_id = Column(Integer, nullable=False)
     created_at = Column(TIMESTAMP, nullable=False, server_default=func.now())
+    # 4. Zorg dat de relatie bestaat
+    user = relationship("User", back_populates="unlocks")
 
 
 Index("idx_unlocks_user_id", Unlock.user_id)
