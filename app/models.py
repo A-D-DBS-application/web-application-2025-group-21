@@ -8,7 +8,6 @@ import enum
 Base = declarative_base()
 
 
-
 # ---- ENUM TYPES ----
 class UserRole(enum.Enum):
     consultant = "consultant"
@@ -38,7 +37,7 @@ class User(Base):
     username = Column(String(80), unique=True, nullable=False)
     role = Column(Enum(UserRole), nullable=False)
     created_at = Column(TIMESTAMP, nullable=False, server_default=func.now())
-    unlocks = relationship("Unlock", back_populates="user")
+
     consultant_profile = relationship("ConsultantProfile", back_populates="user", uselist=False)
     company = relationship("Company", back_populates="user", uselist=False)
 
@@ -59,9 +58,6 @@ class ConsultantProfile(Base):
 
     profile_image = Column(String(300), nullable=True)   # <--- DIT ONTBREEKT
 
-    contact_email = Column(String(120), nullable=True)
-    phone_number = Column(String(50), nullable=False)
-
     user = relationship("User", back_populates="consultant_profile")
     skills = relationship("Skill", secondary="profile_skills", back_populates="profiles")
 
@@ -81,9 +77,6 @@ class Company(Base):
     location_city = Column(String(120))
     country = Column(String(120))
     created_at = Column(TIMESTAMP, nullable=False, server_default=func.now())
-
-    contact_email = Column(String(120), nullable=True)
-    phone_number = Column(String(50), nullable=False)
 
     user = relationship("User", back_populates="company")
     jobs = relationship("JobPost", back_populates="company")
@@ -112,16 +105,16 @@ class JobPost(Base):
 
 Index("idx_job_posts_company_id", JobPost.company_id)
 
+
 class Unlock(Base):
     __tablename__ = "unlocks"
+
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    # 3. Zorg dat de Enum wordt gebruikt
+
     target_type = Column(Enum(UnlockTarget), nullable=False)
     target_id = Column(Integer, nullable=False)
     created_at = Column(TIMESTAMP, nullable=False, server_default=func.now())
-    # 4. Zorg dat de relatie bestaat
-    user = relationship("User", back_populates="unlocks")
 
 
 Index("idx_unlocks_user_id", Unlock.user_id)
@@ -160,3 +153,6 @@ class JobSkill(Base):
 
 Index("idx_job_skills_job_id", JobSkill.job_id)
 Index("idx_job_skills_skill_id", JobSkill.skill_id)
+
+
+
