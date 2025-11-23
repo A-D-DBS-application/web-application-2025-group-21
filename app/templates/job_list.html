@@ -5,134 +5,331 @@
 <h1 class="page-title">Job Posts</h1>
 
 {% if user and user.role == 'company' %}
-  <a class="btn btn-primary" href="{{ url_for('main.job_new') }}">Nieuwe job</a>
+  <a class="btn btn-primary" href="{{ url_for('main.job_new') }}">Nieuwe job aanmaken</a>
 {% endif %}
 
-<!-- FILTER FORMULIER -->
+{% set current_sort = sort_by if sort_by is defined else 'relevance' %}
+
+<div class="mode-selector-container">
+    <h2 class="h5">Kies uw zoekmodus:</h2>
+    
+    <a href="{{ url_for('main.jobs_list', sort_by='relevance') }}" 
+       class="mode-btn {% if current_sort == 'relevance' %}active-mode{% else %}inactive-mode{% endif %}">
+        🧠 IConsult Filter (Beste Match)
+    </a>
+
+    <a href="{{ url_for('main.jobs_list', sort_by='title') }}" 
+       class="mode-btn {% if current_sort != 'relevance' %}active-mode{% else %}inactive-mode{% endif %}">
+        🔧 Handmatige Filter & Sortering
+    </a>
+</div>
+
 <form method="GET" action="{{ url_for('main.jobs_list') }}" class="filter-form">
-  <input type="text" name="q" placeholder="Zoek..." value="{{ request.args.get('q', '') }}">
-  <input type="text" name="city" placeholder="Stad" value="{{ request.args.get('city', '') }}">
-  <input type="text" name="country" placeholder="Land" value="{{ request.args.get('country', '') }}">
-  <input type="text" name="contract_type" placeholder="Contract type" value="{{ request.args.get('contract_type', '') }}">
+    
+    <input type="hidden" name="sort_by" value="{{ current_sort }}">
 
-  <div class="skills-filter">
-    <label>Skills:</label>
-    <div class="skills-checkboxes">
-      {% for skill in skills %}
-        <label class="skill-label">
-          <input type="checkbox" name="skills" value="{{ skill.id }}"
-            {% if request.args.getlist('skills') and skill.id|string in request.args.getlist('skills') %}checked{% endif %}>
-          {{ skill.name }}
-        </label>
-      {% endfor %}
-    </div>
-  </div>
+    
+    {% if current_sort != 'relevance' %}
+        <p class="form-instruction">Gebruik onderstaande velden om handmatig te filteren. Resultaten worden gesorteerd op Job Titel (A-Z).</p>
 
-  <button type="submit" class="btn btn-secondary">Filter</button>
+        <div class="input-grid">
+            <input type="text" name="q" placeholder="Zoek op Job Titel/Omschrijving" value="{{ request.args.get('q', '') }}">
+            <input type="text" name="city" placeholder="Stad" value="{{ request.args.get('city', '') }}">
+            <input type="text" name="country" placeholder="Land" value="{{ request.args.get('country', '') }}">
+            <input type="text" name="contract_type" placeholder="Contract type" value="{{ request.args.get('contract_type', '') }}">
+        </div>
+
+        <div class="skills-filter">
+            <label class="skills-label">Skills (filteren):</label>
+            <div class="skills-checkboxes">
+                {% for skill in skills %}
+                    <label class="skill-label">
+                        <input type="checkbox" name="skills" value="{{ skill.id }}"
+                            {% if request.args.getlist('skills') and skill.id|string in request.args.getlist('skills') %}checked{% endif %}>
+                        {{ skill.name }}
+                    </label>
+                {% endfor %}
+            </div>
+        </div>
+        <button type="submit" class="btn btn-secondary apply-btn">Filters Toepassen</button>
+
+    {% else %}
+        <p class="alert alert-info">
+            De **IConsult Filter** rangschikt alle jobs automatisch op basis van de relevantie voor uw profiel (skills, recentheid, etc.).
+        </p>
+        
+        <div class="input-group">
+             <input type="text" name="q" placeholder="Verfijn zoekopdracht (wordt meegenomen in de score)" value="{{ request.args.get('q', '') }}">
+             <button type="submit" class="btn btn-secondary">Zoek</button>
+        </div>
+        
+    {% endif %}
+
 </form>
 
-<div class="job-grid">
-  {% for j in jobs %}
-    <div class="job-card">
-      <h3><a href="{{ url_for('main.job_detail', job_id=j.id) }}">{{ j.title }}</a></h3>
+<div class="job-grid" style="margin-top: 20px;">
+  {% for j in jobs %}
+    <div class="job-card">
+      <h3><a href="{{ url_for('main.job_detail', job_id=j.id) }}">{{ j.title }}</a></h3>
 
-      {% if j.location_city or j.country %}
-        <p class="job-location">
-          {{ j.location_city }}{% if j.location_city and j.country %}, {% endif %}{{ j.country }}
-        </p>
+      {% if j.location_city or j.country %}
+        <p class="job-location">
+          {{ j.location_city }}{% if j.location_city and j.country %}, {% endif %}{{ j.country }}
+        </p>
+      {% endif %}
+      
+      {% if current_sort == 'relevance' and j.score is defined %}
+        <div class="score-summary">
+            <span class="relevance-badge">
+                Relevantie: **{{ (j.score * 100) | round(0) }}%**
+            </span>
+            
+            <details class="breakdown-details">
+                <summary>Score Uitsplitsing (klik voor details)</summary>
+                <div class="score-breakdown">
+                    
+                    {% set total_score_perc = (j.score * 100) %}
+                    
+                    <div class="bar-item">
+                        <span class="bar-label">Skills (max 50%):</span>
+                        {% set score_perc = (j.score_breakdown.skill * 100) %}
+                        <div class="progress-bar-container">
+                            <div class="progress-bar skill-bar" style="width: {{ score_perc | round(0) }}%;"></div>
+                        </div>
+                        <span class="bar-value">{{ score_perc | round(0) }}%</span>
+                    </div>
+
+                    <div class="bar-item">
+                        <span class="bar-label">Zoekterm (max 30%):</span>
+                        {% set score_perc = (j.score_breakdown.text * 100) %}
+                        <div class="progress-bar-container">
+                            <div class="progress-bar text-bar" style="width: {{ score_perc | round(0) }}%;"></div>
+                        </div>
+                        <span class="bar-value">{{ score_perc | round(0) }}%</span>
+                    </div>
+
+                    <div class="bar-item">
+                        <span class="bar-label">Recentheid (max 20%):</span>
+                        {% set score_perc = (j.score_breakdown.recency * 100) %}
+                        <div class="progress-bar-container">
+                            <div class="progress-bar recency-bar" style="width: {{ score_perc | round(0) }}%;"></div>
+                        </div>
+                        <span class="bar-value">{{ score_perc | round(0) }}%</span>
+                    </div>
+                    
+                    <p class="score-total">Totaal: {{ total_score_perc | round(0) }}%</p>
+                </div>
+            </details>
+        </div>
       {% endif %}
 
-      <a class="btn btn-secondary" href="{{ url_for('main.job_detail', job_id=j.id) }}">Bekijk</a>
-    </div>
-  {% endfor %}
+      <a class="btn btn-secondary" href="{{ url_for('main.job_detail', job_id=j.id) }}">Bekijk</a>
+    </div>
+  {% endfor %}
 </div>
 
 {% if not jobs %}
-  <p>Geen jobs beschikbaar.</p>
+  <p>Geen jobs beschikbaar.</p>
 {% endif %}
 
 <style>
-  .page-title {
-    margin-bottom: 20px;
+/* --- Algemene & Kaart Stijlen --- */
+  .page-title { margin-bottom: 20px; }
+  .job-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+  }
+  .job-card {
+    background: #ffffff;
+    border: 1px solid #dce6f5;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+    transition: transform 0.2s;
+  }
+  .job-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
   }
-
-  .filter-form {
-    margin-bottom: 20px;
-    padding: 12px;
-    border: 1px solid #dce6f5;
-    border-radius: 12px;
-    background: #f9fafe;
+  .job-card h3 a {
+      color: #2b63c6;
+      text-decoration: none;
+      font-weight: 700;
   }
-
-  .filter-form input[type="text"] {
-    margin: 4px 6px 10px 0;
-    padding: 6px;
-    border-radius: 6px;
-    border: 1px solid #bcd0ff;
-  }
-
-  .skills-filter {
-    margin: 8px 0;
-  }
-
-  .skills-checkboxes {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .skill-label {
-    display: flex;
-    align-items: center;
-    background: #e9f0ff;
-    border: 1px solid #bcd0ff;
-    padding: 4px 8px;
-    border-radius: 6px;
-    font-size: 0.9rem;
-  }
-
-  .job-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 16px;
-  }
-
-  .job-card {
-    background: #ffffff;
-    border: 1px solid #dce6f5;
-    border-radius: 12px;
-    padding: 16px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  }
-
-  .job-card h3 {
-    margin: 0 0 6px;
-  }
-
-  .job-location {
-    font-size: 0.9rem;
-    color: #4a6fa1;
-    margin: 6px 0 12px;
-  }
-
-  .btn-primary {
+  .job-location {
+    font-size: 0.95rem;
+    color: #4a6fa1;
+    margin: 6px 0 15px;
+  }
+  .relevance-badge {
     background: #2b63c6;
     color: white;
-    padding: 8px 12px;
-    border-radius: 8px;
-    text-decoration: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
     display: inline-block;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
   }
+  .relevance-badge strong {
+      font-size: 1.1rem;
+  }
+  .btn-secondary {
+    background: #e9f0ff;
+    border: 1px solid #bcd0ff;
+    padding: 8px 14px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #2b63c6;
+    font-weight: 600;
+  }
+  
+/* --- SCORE BREAKDOWN STYLES (De "Grafiek") --- */
+    .breakdown-details {
+        margin-top: 10px;
+        margin-bottom: 15px;
+        padding: 5px 0;
+        border-top: 1px dashed #e0e0e0;
+        border-bottom: 1px dashed #e0e0e0;
+        font-size: 0.9rem;
+    }
+    .breakdown-details summary {
+        cursor: pointer;
+        font-weight: 600;
+        color: #4a6fa1;
+        padding: 5px 0;
+        list-style: none; /* Verberg standaard pijl */
+    }
+    .breakdown-details summary::-webkit-details-marker {
+        display: none; /* Verberg standaard marker in Chrome/Safari */
+    }
+    /* Voeg handmatig een driehoekje toe aan de summary */
+    .breakdown-details summary::before {
+        content: '►';
+        display: inline-block;
+        font-size: 0.8em;
+        margin-right: 8px;
+        transition: transform 0.2s;
+    }
+    .breakdown-details[open] summary::before {
+        content: '▼';
+        transform: rotate(0deg);
+    }
 
-  .btn-secondary {
-    background: #e9f0ff;
-    border: 1px solid #bcd0ff;
-    padding: 6px 10px;
-    border-radius: 8px;
-    text-decoration: none;
-    color: #2b63c6;
-  }
+    .score-breakdown {
+        padding-top: 10px;
+        padding-left: 5px;
+    }
+    .bar-item {
+        display: grid;
+        grid-template-columns: 130px 1fr 40px;
+        align-items: center;
+        gap: 5px;
+        margin-bottom: 5px;
+    }
+    .bar-label {
+        font-weight: 500;
+        color: #555;
+    }
+    .progress-bar-container {
+        height: 10px;
+        background-color: #e0e6f2;
+        border-radius: 5px;
+        overflow: hidden;
+    }
+    .progress-bar {
+        height: 100%;
+        transition: width 0.4s ease;
+        border-radius: 5px;
+    }
+    .skill-bar { background-color: #38c172; } /* Groen */
+    .text-bar { background-color: #f6993f; } /* Oranje */
+    .recency-bar { background-color: #6cb2eb; } /* Lichtblauw */
+    .bar-value {
+        font-weight: 700;
+        text-align: right;
+    }
+    .score-total {
+        font-weight: 700;
+        margin-top: 10px;
+        padding-top: 5px;
+        border-top: 1px solid #e0e0e0;
+        text-align: right;
+        color: #2b63c6;
+    }
+
+/* --- Modus Selector & Filter Formulier Stijlen --- */
+    .mode-selector-container {
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    .mode-selector-container h2 {
+        margin-bottom: 15px;
+        font-weight: 600;
+        color: #333;
+    }
+    .mode-btn { 
+        padding: 12px 25px;
+        border-radius: 10px; 
+        transition: transform 0.2s, box-shadow 0.2s;
+        font-weight: 700;
+        margin-right: 15px;
+        border: 2px solid transparent;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        font-size: 1.05rem;
+    }
+    .active-mode {
+        background: #2b63c6; 
+        color: white;
+        border-color: #1a4f99;
+        box-shadow: 0 4px 8px rgba(43, 99, 198, 0.4);
+    }
+    .inactive-mode {
+        background: #f0f4f9; 
+        color: #2b63c6;
+        border-color: #dce6f5;
+    }
+    .inactive-mode:hover {
+        background: #e9f0ff;
+        border-color: #bcd0ff;
+        transform: translateY(-1px);
+    }
+  .filter-form {
+    padding: 25px; 
+    border: 1px solid #dce6f5;
+    border-radius: 12px;
+    background: #f9fafe;
+    margin-bottom: 30px;
+  }
+    .form-instruction { color: #555; margin-bottom: 15px; font-size: 0.95rem; }
+    .input-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    .filter-form input[type="text"] {
+        padding: 12px;
+        border-radius: 8px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .input-group { gap: 15px; display: flex; }
+    .input-group input[type="text"] { flex-grow: 1; padding: 12px; margin: 0;}
+    .alert-info { padding: 18px; margin-bottom: 25px; font-size: 1.05rem; background: #d9e9ff; }
+    .skills-filter { margin-top: 15px; margin-bottom: 20px;}
+    .skills-label { font-weight: 700; display: block; margin-bottom: 10px; color: #333; }
+    .skills-checkboxes { display: flex; flex-wrap: wrap; gap: 10px; }
+    .skill-label {
+        display: flex; align-items: center; background: #e9f0ff; border: 1px solid #bcd0ff;
+        padding: 6px 10px; border-radius: 20px; font-size: 0.9rem; cursor: pointer;
+    }
+    .skill-label input[type="checkbox"] { margin-right: 5px; }
+    .apply-btn { margin-top: 10px; padding: 10px 20px; }
 </style>
 
 {% endblock %}
