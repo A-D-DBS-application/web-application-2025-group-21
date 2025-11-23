@@ -166,7 +166,6 @@ def edit_consultant_profile():
             # ----------------------
             #   PROFIELFOTO
             # ----------------------
-            # ----------------------
             file = request.files.get("profile_image")
 
             if file and file.filename != "":
@@ -174,21 +173,14 @@ def edit_consultant_profile():
                 upload_folder = os.path.join(current_app.root_path, "static", "uploads")
                 os.makedirs(upload_folder, exist_ok=True)
 
-                # Unieke bestandsnaam en bep toegestaande bestanden
-                if not allowed_file(file.filename):
-                    flash(_("Only png/jpg/jpeg/gif allowed"))
-                    return redirect(url_for("main.edit_consultant_profile"))
-
-                ext = file.filename.rsplit(".", 1)[1].lower()
-                filename = f"user_{user.id}.{ext}"
+                # Unieke bestandsnaam
+                filename = f"user_{user.id}.jpg"
                 save_path = os.path.join(upload_folder, filename)
-
 
                 file.save(save_path)
 
                 # Pad opslaan in database (wat je gebruikt in je template)
                 profile.profile_image = f"/static/uploads/{filename}"
-
 
             db.commit()
 
@@ -245,10 +237,24 @@ def consultants_list():
     with get_session() as db:
         user = get_current_user(db)
 
+        # ---------------------------------
+        # NIEUWE SECURITY CHECK
+        # ---------------------------------
+        if not user or user.role != UserRole.company:
+            flash(_("Only companies can view consultants."))
+            return redirect(url_for("main.dashboard"))
+        # ---------------------------------
+
         # --- Filters ophalen uit query params ---
-        query_skills = request.args.get("skills")  # bv. "1,2,3"
+        
+        # --- AANGEPASTE SKILL FILTER ---
+        # Gebruik .getlist() om alle 'skills' parameters te krijgen (bv: ['1', '3'])
+        query_skills = request.args.getlist("skills")
         if query_skills:
-            query_skills = list(map(int, query_skills.split(",")))
+            # Converteer de lijst van strings naar een lijst van integers
+            query_skills = list(map(int, query_skills))
+        # --- EINDE AANPASSING ---
+            
         city = request.args.get("city")
         country = request.args.get("country")
         text_query = request.args.get("q", None)
@@ -264,6 +270,7 @@ def consultants_list():
 
         # Filter op skills
         if query_skills:
+            # Deze join-logica was al correct
             query = query.join(ConsultantProfile.skills).filter(Skill.id.in_(query_skills))
 
         profiles = query.all()
@@ -288,9 +295,15 @@ def consultants_list():
             return score
 
         profiles = sorted(profiles, key=compute_score, reverse=True)
+        
+        # Zorg dat je all_skills meegeeft aan de template (net als bij jobs)
+        all_skills = db.query(Skill).order_by(Skill.name).all()
 
-        return render_template("consultant_list.html", profiles=profiles)
-
+        return render_template(
+            "consultant_list.html", 
+            profiles=profiles, 
+            skills=all_skills # VOEG DEZE TOE
+        )
 
 
 
@@ -301,23 +314,36 @@ def jobs_list():
     with get_session() as db:
         user = get_current_user(db)
 
-        query_skills = request.args.get("skills")
+        # ---------------------------------
+        # NIEUWE SECURITY CHECK
+        # ---------------------------------
+        if not user or user.role != UserRole.consultant:
+            flash(_("Only consultants can view job posts."))
+            return redirect(url_for("main.dashboard"))
+        # ---------------------------------
+
+        # --- Filters ophalen uit query params ---
+
+        # --- AANGEPASTE SKILL FILTER ---
+        # Gebruik .getlist() om alle 'skills' parameters te krijgen (bv: ['1', '3'])
+        query_skills = request.args.getlist("skills")
         if query_skills:
-            query_skills = list(map(int, query_skills.split(",")))
+            # Converteer de lijst van strings naar een lijst van integers
+            query_skills = list(map(int, query_skills))
+        # --- EINDE AANPASSING ---
+
         city = request.args.get("city")
         country = request.args.get("country")
         contract_type = request.args.get("contract_type")
         text_query = request.args.get("q", None)
 
-        # Basisquery
+        # Basisquery (haalt ALLE jobs op)
         query = db.query(JobPost)
 
-        # Voor companies: zie alleen eigen jobs
-        if user and user.role == UserRole.company:
-            company = db.query(Company).filter(Company.user_id == user.id).first()
-            query = query.filter(JobPost.company_id == company.id)
+        # OUDE CODEBLOK VOOR COMPANIES IS VERWIJDERD
+        # (De check hierboven vangt dit al af)
 
-        # Filters
+        # Filters (worden nu op alle jobs toegepast)
         if city:
             query = query.filter(JobPost.location_city.ilike(f"%{city}%"))
         if country:
@@ -325,6 +351,7 @@ def jobs_list():
         if contract_type:
             query = query.filter(JobPost.contract_type.ilike(f"%{contract_type}%"))
         if query_skills:
+            # Deze join-logica was al correct
             query = query.join(JobPost.skills).filter(Skill.id.in_(query_skills))
 
         jobs = query.all()
@@ -350,7 +377,15 @@ def jobs_list():
 
         jobs = sorted(jobs, key=compute_score, reverse=True)
 
-        return render_template("job_list.html", jobs=jobs)
+        # --- Hier haal je alle skills op voor het filterformulier ---
+        all_skills = db.query(Skill).order_by(Skill.name).all()
+
+        return render_template(
+            "job_list.html", 
+            jobs=jobs, 
+            skills=all_skills, 
+            user=user # Geef user ook mee
+        )
 
 
 
