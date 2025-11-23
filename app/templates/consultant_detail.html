@@ -2,6 +2,20 @@
 {% block title %}Consultant detail{% endblock %}
 {% block content %}
   <h1>{{ profile.display_name_masked }}</h1>
+  {# --------- Profielfoto --------- #}
+  {% if profile.profile_image %}
+    <img 
+      src="{{ profile.profile_image }}" 
+      alt="Profielfoto" 
+      style="width:140px;height:140px;border-radius:50%;object-fit:cover;margin-bottom:15px;"
+    >
+  {% else %}
+    <img 
+      src="{{ url_for('static', filename='img/default-avatar.png') }}" 
+      alt="Geen profielfoto"
+      style="width:140px;height:140px;border-radius:50%;object-fit:cover;margin-bottom:15px;"
+    >
+  {% endif %}
 
   {% if profile.headline %}
     <p><i>{{ profile.headline }}</i></p>

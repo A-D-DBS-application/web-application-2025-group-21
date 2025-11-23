@@ -8,6 +8,7 @@ import enum
 Base = declarative_base()
 
 
+
 # ---- ENUM TYPES ----
 class UserRole(enum.Enum):
     consultant = "consultant"
