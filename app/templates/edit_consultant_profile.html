@@ -46,6 +46,29 @@
         style="width: 300px;"
       >
     </label>
+    <hr style="margin: 20px 0;">
+    <h3>Contactinformatie (wordt verborgen getoond)</h3>
+
+    <label style="display:block; margin-bottom: 10px;">
+      E-mailadres:
+      <input
+        type="email"
+        name="contact_email"
+        value="{{ profile.contact_email or '' }}"
+        style="width: 300px;"
+      >
+    </label>
+
+    <label style="display:block; margin-bottom: 10px;">
+      Telefoonnummer:
+      <input
+        type="tel"
+        name="phone_number"
+        value="{{ profile.phone_number or '' }}"
+        style="width: 300px;"
+      >
+    </label>
+    <hr style="margin: 20px 0;">
     <label style="display:block; margin-bottom: 10px;">
       Profielfoto:
       <input

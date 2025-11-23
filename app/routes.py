@@ -146,6 +146,10 @@ def edit_consultant_profile():
             profile.location_city = request.form.get("location_city")
             profile.country = request.form.get("country")
             profile.headline = request.form.get("headline")
+            # --- NIEUW: Contactvelden opslaan ---
+            profile.contact_email = request.form.get("contact_email")
+            profile.phone_number = request.form.get("phone_number")
+            # ------------------------------------
 
             # ----------------------
             #   PROFIELFOTO
@@ -289,6 +293,34 @@ def consultants_list():
             skills=all_skills # VOEG DEZE TOE
         )
 
+# ------------------ COMPANY ------------------
+@main.route("/company/edit", methods=["GET", "POST"])
+def edit_company_profile():
+    with get_session() as db:
+        user = get_current_user(db)
+
+        if not user or user.role != UserRole.company:
+            flash(_("Only companies can edit their profile"))
+            return redirect(url_for("main.dashboard"))
+
+        company = db.query(Company).filter(
+            Company.user_id == user.id
+        ).first()
+
+        if request.method == "POST":
+            company.company_name_masked = request.form.get("company_name")
+            company.location_city = request.form.get("location_city")
+            company.country = request.form.get("country")
+            # NIEUW: Contactvelden opslaan
+            company.contact_email = request.form.get("contact_email")
+            company.phone_number = request.form.get("phone_number")
+
+            db.commit()
+
+            flash(_("Company profile updated"))
+            return redirect(url_for("main.dashboard"))
+
+        return render_template("edit_company_profile.html", company=company)
 
 
 # ------------------ JOB POSTS ------------------

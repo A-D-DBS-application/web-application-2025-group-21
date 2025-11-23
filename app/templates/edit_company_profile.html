@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Bedrijfsprofiel aanpassen{% endblock %}
+
+{% block content %}
+  <h1>Bedrijfsprofiel aanpassen</h1>
+
+  <form method="post">
+        
+    <label style="display:block; margin-bottom: 10px;">
+      Bedrijfsnaam:
+      <input
+        type="text"
+        name="company_name"
+        value="{{ company.company_name_masked }}"
+        style="width: 300px;"
+        required
+      >
+    </label>
+
+    <label style="display:block; margin-bottom: 10px;">
+      Stad:
+      <input
+        type="text"
+        name="location_city"
+        value="{{ company.location_city or '' }}"
+        style="width: 300px;"
+      >
+    </label>
+
+    <label style="display:block; margin-bottom: 10px;">
+      Land:
+      <input
+        type="text"
+        name="country"
+        value="{{ company.country or '' }}"
+        style="width: 300px;"
+      >
+    </label>
+    
+    <hr style="margin: 20px 0;">
+    <h3>Contactinformatie (wordt verborgen getoond)</h3>
+
+    <label style="display:block; margin-bottom: 10px;">
+      Contact E-mailadres:
+      <input
+        type="email"
+        name="contact_email"
+        value="{{ company.contact_email or '' }}"
+        style="width: 300px;"
+      >
+    </label>
+
+    <label style="display:block; margin-bottom: 10px;">
+      Contact Telefoonnummer:
+      <input
+        type="tel"
+        name="phone_number"
+        value="{{ company.phone_number or '' }}"
+        style="width: 300px;"
+      >
+    </label>
+    <hr style="margin: 20px 0;">
+
+
+    <button class="btn" type="submit">Opslaan</button>
+  </form>
+{% endblock %}
