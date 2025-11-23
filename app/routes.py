@@ -215,78 +215,136 @@ def consultant_detail(profile_id):
 
 
 
+# In app/routes.py (Vervang uw bestaande consultants_list functie)
+
 @main.route("/consultants", methods=["GET"])
 def consultants_list():
     from datetime import datetime, timezone
     with get_session() as db:
         user = get_current_user(db)
 
-        # ---------------------------------
-        # NIEUWE SECURITY CHECK
-        # ---------------------------------
+        # 1. Beveiligingscontrole (Moet een Company zijn)
         if not user or user.role != UserRole.company:
-            flash(_("Only companies can view consultants."))
-            return redirect(url_for("main.dashboard"))
-        # ---------------------------------
+            flash(_("Only companies can browse consultant profiles."))
+            # Dit is de reden voor de redirect: een consultant mag dit niet zien.
+            return redirect(url_for("main.dashboard")) 
 
-        # --- Filters ophalen uit query params ---
+        # 2. Parameters Ophalen
+        sort_by = request.args.get("sort_by", "relevance") 
         
-        # --- AANGEPASTE SKILL FILTER ---
-        # Gebruik .getlist() om alle 'skills' parameters te krijgen (bv: ['1', '3'])
+        # Handmatige filters ophalen
         query_skills = request.args.getlist("skills")
         if query_skills:
-            # Converteer de lijst van strings naar een lijst van integers
             query_skills = list(map(int, query_skills))
-        # --- EINDE AANPASSING ---
-            
+
         city = request.args.get("city")
         country = request.args.get("country")
         text_query = request.args.get("q", None)
-
-        # --- Basisquery ---
-        query = db.query(ConsultantProfile)
-
-        # Filter op locatie
-        if city:
-            query = query.filter(ConsultantProfile.location_city.ilike(f"%{city}%"))
-        if country:
-            query = query.filter(ConsultantProfile.country.ilike(f"%{country}%"))
-
-        # Filter op skills
-        if query_skills:
-            # Deze join-logica was al correct
-            query = query.join(ConsultantProfile.skills).filter(Skill.id.in_(query_skills))
-
-        profiles = query.all()
-
-        # --- Bereken relevance score ---
-        now = datetime.now(timezone.utc)
-
-        def compute_score(profile):
-            score = 0.0
-            # skills
-            if query_skills:
-                matched = len(set(s.id for s in profile.skills) & set(query_skills))
-                score += (matched / max(len(query_skills), 1)) * 0.5
-            # text match
-            if text_query:
-                text_fields = " ".join(filter(None, [profile.display_name_masked, profile.headline, profile.location_city, profile.country]))
-                if text_query.lower() in text_fields.lower():
-                    score += 0.3
-            # recency
-            days_old = (now - profile.created_at).days
-            score += max(0, 0.2 - days_old * 0.01)
-            return score
-
-        profiles = sorted(profiles, key=compute_score, reverse=True)
         
-        # Zorg dat je all_skills meegeeft aan de template (net als bij jobs)
+        # 3. Company Behoeften Ophalen (voor Relevantieberekening)
+        company_profile = db.query(Company).filter_by(user_id=user.id).first()
+        
+        required_job = None
+        required_skill_ids = set()
+        
+        if company_profile:
+            # Zoek de meest recente JobPost gelinkt aan dit Company ID
+            required_job = db.query(JobPost).filter(
+                JobPost.company_id == company_profile.id
+            ).order_by(JobPost.created_at.desc()).first()
+            
+            if required_job:
+                required_skill_ids = set(s.id for s in required_job.skills)
+        
+        if not required_job and sort_by == "relevance":
+            flash(_("Maak eerst een Job Post aan om het IConsult relevantiefilter op basis van uw behoeften in te schakelen."))
+
+
+        # 4. Basisquery en Filters Toepassen
+        query = db.query(ConsultantProfile)
+        
+        # Filters gelden ALLEEN in de 'Handmatige Filter' modus
+        if sort_by != "relevance":
+            if city:
+                query = query.filter(ConsultantProfile.location_city.ilike(f"%{city}%"))
+            if country:
+                query = query.filter(ConsultantProfile.country.ilike(f"%{country}%"))
+            
+            # Handmatige skill-filter (AND logica)
+            if query_skills:
+                for skill_id in query_skills:
+                    query = query.filter(ConsultantProfile.skills.any(Skill.id == skill_id))
+
+        consultants = query.all()
+
+        # 5. Sortering & Relevantie Berekening
+        if sort_by == "relevance":
+            now = datetime.now(timezone.utc)
+            
+            def compute_score(profile):
+                # Zorgt ervoor dat de score-berekening niet crasht als er geen job is.
+                if not required_job:
+                    return {'total': 0.0, 'skill': 0.0, 'text': 0.0, 'recency': 0.0, 'skill_factor': 0.0, 'text_factor': 0.0, 'recency_factor': 0.0}
+
+                # A. Skill Similarity (Gewicht 0.5)
+                consultant_skill_ids = set(s.id for s in profile.skills)
+                matched = len(consultant_skill_ids & required_skill_ids)
+                max_skills = max(len(required_skill_ids), 1)
+                skill_similarity = (matched / max_skills) # 0 tot 1
+                skill_weighted_score = skill_similarity * 0.5 
+                
+                # B. Text Match (Gewicht 0.3)
+                text_match = 0
+                if text_query:
+                    # Gebruikt display_name_masked en andere velden voor tekstmatch
+                    text_fields = " ".join(filter(None, [profile.display_name_masked, profile.short_bio, profile.specialization]))
+                    if text_query.lower() in text_fields.lower():
+                        text_match = 1
+                text_weighted_score = text_match * 0.3
+                
+                # C. Recency of Profile Update (Gewicht 0.2)
+                days_old = (now - profile.created_at).days
+                recency_factor = max(0, 1 - days_old / 30) # 1 voor < 30 dagen, daalt naar 0
+                recency_weighted_score = recency_factor * 0.2
+                
+                final_score = skill_weighted_score + text_weighted_score + recency_weighted_score
+                
+                return {
+                    'total': final_score,
+                    'skill': skill_weighted_score, 
+                    'text': text_weighted_score, 
+                    'recency': recency_weighted_score,
+                    'skill_factor': skill_similarity,
+                    'text_factor': text_match,
+                    'recency_factor': recency_factor
+                }
+
+            scored_consultants = [] 
+            for consultant in consultants:
+                score_data = compute_score(consultant)
+                consultant.score = score_data['total']
+                consultant.score_breakdown = score_data
+                scored_consultants.append(consultant)
+
+            # Sorteer de consultants op de berekende score
+            consultants = sorted(scored_consultants, key=lambda c: c.score, reverse=True)
+            
+        elif sort_by == "title":
+            # Alfabetische sortering (op display_name)
+            # FIX: Gebruikt 'display_name_masked' in plaats van 'display_name' om de AttributeError te voorkomen
+            consultants = sorted(consultants, 
+                                 key=lambda c: c.display_name_masked if c.display_name_masked else c.user.username)
+
+
+        # 6. Template Renderen
         all_skills = db.query(Skill).order_by(Skill.name).all()
 
         return render_template(
             "consultant_list.html", 
-            profiles=profiles, 
-            skills=all_skills # VOEG DEZE TOE
+            consultants=consultants, 
+            skills=all_skills, 
+            user=user,
+            sort_by=sort_by,
         )
 
 
