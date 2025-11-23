@@ -1,55 +1,52 @@
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/DxqGQVx4)
-🎯 IConsult Matching Platform (MVP)
-🌟 Project Overzicht
-IConsult is een tweezijdige, anonieme marktplaats die de werving van consultants en het vinden van projecten stroomlijnt. Ons platform pakt de traditionele frictie in de consultancy-arbeidsmarkt aan door relevantie en vertrouwen centraal te stellen.
+# 🎯 IConsult Matching Platform (MVP)
 
-Het primaire doel van de MVP is om bedrijven de meest geschikte consultants te tonen op basis van een geavanceerde matchingsscore, terwijl de identiteit van beide partijen beschermd blijft totdat een match wordt "ontgrendeld".
+## 🌟 Project Overzicht
 
-🚀 Kernfunctionaliteiten
-De focus van dit Minimum Viable Product ligt op de essentiële Must-vereisten, gericht op veilige en efficiënte interactie.
+IConsult is een **tweezijdige, anonieme marktplaats** die de werving van consultants en het vinden van projecten stroomlijnt. Ons platform pakt de traditionele frictie in de consultancy-arbeidsmarkt aan door **relevantie** en **vertrouwen** centraal te stellen.
 
-👥 Rolgebaseerde Toegang
-Gebruikers kunnen zich registreren in één van de twee rollen:
+[cite_start]Het primaire doel van de MVP is om bedrijven de meest geschikte consultants te tonen op basis van een geavanceerde matchingsscore, terwijl de identiteit van beide partijen beschermd blijft totdat een match wordt "ontgrendeld"[cite: 37].
 
+---
 
-Consultant: Kan een anoniem profiel aanmaken en door Job Posts bladeren om relevante missies te vinden.
+## 🚀 Kernfunctionaliteiten (MVP Musts)
 
+[cite_start]De focus van dit Minimum Viable Product (MVP) ligt op de essentiële 'Must'-vereisten[cite: 4, 6, 16, 22, 33, 37, 41, 46].
 
-Company (Bedrijf): Kan een anonieme Job Post aanmaken en door Consultant Profielen bladeren om kandidaten op de shortlist te plaatsen.
+### 👥 Rolgebaseerde Toegang
+[cite_start]Gebruikers kunnen zich registreren als een **Consultant** of **Company (Bedrijf)**[cite: 7].
+* [cite_start]**Consultant:** Kan een **anoniem profiel** aanmaken [cite: 17] [cite_start]en door Job Posts bladeren om relevante missies te vinden[cite: 38].
+* [cite_start]**Company:** Kan een **anonieme Job Post** aanmaken [cite: 34] [cite_start]en door Consultant Profielen bladeren[cite: 23].
 
-🛡️ Anonymiteit en Onthulling
-De identiteit van gebruikers is standaard gemaskeerd. Zo toont het consultantprofiel initialen en een placeholder/blur voor de afbeelding, en zijn contactgegevens verborgen voor het publiek.
+### 🛡️ Anonymiteit en Onthulling
+[cite_start]De identiteit van gebruikers is standaard gemaskeerd (e.g., initialen voor de consultant, "Entreprise anonyme" voor het bedrijf)[cite: 19, 36].
 
-Het cruciale Unlock-Mechanisme stelt gebruikers in staat om contactgegevens te onthullen (van het profiel of de job post), waarna de ontgrendelingsstatus persistent blijft over sessies heen om te voorkomen dat er twee keer "betaald" wordt voor dezelfde informatie.
+[cite_start]Het cruciale **Unlock-Mechanisme** stelt gebruikers in staat om contactgegevens te onthullen (van het profiel of de job post)[cite: 27, 42]. [cite_start]De ontgrendelingsstatus is **persistent** over sessies heen om te voorkomen dat er twee keer betaald wordt voor dezelfde informatie[cite: 57].
 
-🧠 Het iConsult Matchingssysteem
-Het platform biedt twee zoekmodi (zie screenshot):
+---
 
+## 🧠 Het iConsult Matchingssysteem
 
-Handmatige Filter & Sortering: Biedt gedetailleerde filtermogelijkheden op locatie, contracttype, en gevraagde skills.
+[cite_start]Het platform biedt twee zoekmodi: Handmatige Filter & Sortering en **iConsult Match (Beste Relevantie)**[cite: 47].
 
-iConsult Match (Beste Relevantie): Het hart van het platform. Resultaten worden geordend op basis van een gewogen relevantiescore, weergegeven als een percentage (Match: **XX.X%**).
+De iConsult Match-modus sorteert resultaten op basis van een **gewogen relevantiescore**. De totale score wordt berekend op basis van de volgende factoren:
 
+* **Skills (50%):** De overlap en diepte van de benodigde en aanwezige vaardigheden tellen het zwaarst mee.
+* **Zoekterm (30%):** De tekstuele gelijkenis tussen de zoekopdracht en de profiel/job beschrijvingen.
+* **Recentheid (20%):** Geeft de voorkeur aan recent bijgewerkte profielen of recent geplaatste vacatures.
 
-De totale matchscore wordt berekend door de volgende factoren te combineren, waarbij de gewichten de prioriteit aangeven:
+[cite_start]*(De formule en gewichten zijn gedocumenteerd in de interne documentatie en/of de README/API-specificatie)*[cite: 50].
 
+---
 
-Skills (50%): De overlap en diepte van de benodigde en aanwezige vaardigheden tellen het zwaarst mee.
+## 💡 Toekomstige Ontwikkeling (Roadmap)
 
+[cite_start]De roadmap volgt de MoSCOW-prioriteiten (Should/Could)[cite: 4].
 
-Zoekterm (30%): De tekstuele gelijkenis tussen de zoekopdracht en de profiel/job beschrijvingen.
+### Should-Prioriteiten
+* [cite_start]**Administratie en Audit:** We zullen een beheerderspagina implementeren voor **moderatie** van profielen/jobs en basis **Unlock analytics** (gebruiksaanalyse)[cite: 75, 60].
+* [cite_start]**Profiel Bewerken:** Gebruikers kunnen hun basisprofielinformatie bewerken, zodat hun listings relevante details tonen[cite: 11].
 
-
-Recentheid (20%): Geeft de voorkeur aan recent bijgewerkte profielen of recent geplaatste vacatures.
-
-💡 Toekomstige Ontwikkeling
-De verdere roadmap richt zich op de Should en Could prioriteiten om de bruikbaarheid en beheerbaarheid te vergroten.
-
-
-Administratie en Audit: We zullen een beheerderspagina toevoegen om de laatst gecreëerde items te moderen en om basis Unlock analytics (gebruiksanalyse) te bekijken.
-
-
-Verfijning Zoeken: Er zal functionaliteit worden toegevoegd voor suggested keywords om gebruikers te helpen hun zoekopdracht te verfijnen, wat de relevantie-zoekmodus verder verbetert.
-
-
-Gebruikersgemak: Toekomstige functies zijn onder meer het opslaan van favorieten en het toevoegen van privénotities aan ontgrendelde items.
+### Could-Prioriteiten
+* [cite_start]**Verfijning Zoeken:** Implementatie van functionaliteit voor **suggested keywords** om gebruikers te helpen hun zoekopdracht te verfijnen[cite: 51].
+* [cite_start]**Gebruikersgemak:** Toevoeging van functionaliteit voor het opslaan van **favorieten** en het toevoegen van **privénotities** aan ontgrendelde items[cite: 66, 70].
