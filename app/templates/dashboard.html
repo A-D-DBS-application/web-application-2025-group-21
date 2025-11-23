@@ -11,6 +11,19 @@
     <p><strong>Rol:</strong> {{ user.role.value }}</p>
 
     {% if user.role == UserRole.consultant %}
+        {% if profile.profile_image %}
+            <img 
+                src="{{ profile.profile_image }}" 
+                alt="Profielfoto" 
+                style="width:140px;height:140px;border-radius:50%;object-fit:cover;margin-bottom:12px;"
+            >
+        {% else %}
+            <img 
+                src="{{ url_for('static', filename='img/default-avatar.png') }}" 
+                alt="Geen profielfoto"
+                style="width:140px;height:140px;border-radius:50%;object-fit:cover;margin-bottom:12px;"
+            >
+        {% endif %}
         <p><strong>Naam:</strong> {{ profile.display_name_masked }}</p>
         <p><strong>Locatie:</strong> {{ profile.location_city }} , {{ profile.country }}</p>
         <p><strong>Opmerking:</strong> {{ profile.headline or "Geen headline" }}</p>
