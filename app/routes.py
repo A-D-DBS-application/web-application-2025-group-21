@@ -102,11 +102,9 @@ def dashboard():
     with get_session() as db:
         user = get_current_user(db)
         
-        # NIEUWE CONTROLE: Als er geen gebruiker is, stuur naar login.
         if not user:
             flash(_("Please log in to view your dashboard."))
             return redirect(url_for("main.login"))
-        # EINDE NIEUWE CONTROLE
         
         profile = None
         company = None
@@ -146,10 +144,8 @@ def edit_consultant_profile():
             profile.location_city = request.form.get("location_city")
             profile.country = request.form.get("country")
             profile.headline = request.form.get("headline")
-            # --- NIEUW: Contactvelden opslaan ---
             profile.contact_email = request.form.get("contact_email")
             profile.phone_number = request.form.get("phone_number")
-            # ------------------------------------
 
             # ----------------------
             #   PROFIELFOTO

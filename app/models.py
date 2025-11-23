@@ -59,10 +59,8 @@ class ConsultantProfile(Base):
 
     profile_image = Column(String(300), nullable=True)   # <--- DIT ONTBREEKT
 
-    # --- NIEUW: Contactvelden ---
     contact_email = Column(String(120), nullable=True)
     phone_number = Column(String(50), nullable=False)
-    # ----------------------------
 
     user = relationship("User", back_populates="consultant_profile")
     skills = relationship("Skill", secondary="profile_skills", back_populates="profiles")
@@ -84,10 +82,8 @@ class Company(Base):
     country = Column(String(120))
     created_at = Column(TIMESTAMP, nullable=False, server_default=func.now())
 
-    # --- NIEUW: Contactvelden ---
     contact_email = Column(String(120), nullable=True)
     phone_number = Column(String(50), nullable=False)
-    # ----------------------------
 
     user = relationship("User", back_populates="company")
     jobs = relationship("JobPost", back_populates="company")
