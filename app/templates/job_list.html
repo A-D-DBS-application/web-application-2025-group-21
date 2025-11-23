@@ -16,12 +16,16 @@
   <input type="text" name="contract_type" placeholder="Contract type" value="{{ request.args.get('contract_type', '') }}">
 
   <div class="skills-filter">
-    <label>Skills:</label><br>
-    {% for skill in skills %}
-      <input type="checkbox" name="skills" value="{{ skill.id }}"
-        {% if request.args.getlist('skills') and skill.id|string in request.args.getlist('skills') %}checked{% endif %}>
-      {{ skill.name }}<br>
-    {% endfor %}
+    <label>Skills:</label>
+    <div class="skills-checkboxes">
+      {% for skill in skills %}
+        <label class="skill-label">
+          <input type="checkbox" name="skills" value="{{ skill.id }}"
+            {% if request.args.getlist('skills') and skill.id|string in request.args.getlist('skills') %}checked{% endif %}>
+          {{ skill.name }}
+        </label>
+      {% endfor %}
+    </div>
   </div>
 
   <button type="submit" class="btn btn-secondary">Filter</button>
@@ -69,6 +73,22 @@
 
   .skills-filter {
     margin: 8px 0;
+  }
+
+  .skills-checkboxes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .skill-label {
+    display: flex;
+    align-items: center;
+    background: #e9f0ff;
+    border: 1px solid #bcd0ff;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.9rem;
   }
 
   .job-grid {
