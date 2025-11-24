@@ -2,10 +2,18 @@
 {% block title %}Vacatures | Job Lijst{% endblock %}
 {% block content %}
 
-<h1 class="page-title">Vacatures</h1>
+<h1 class="page-title">
+    {% if page_title is defined %}
+        {{ page_title }}
+    {% else %}
+        Vacatures
+    {% endif %}
+</h1>
 
 {% set current_sort = sort_by if sort_by is defined else 'relevance' %}
 
+{# Mode-selector alleen tonen als we NIET in 'none' modus zitten (dus niet op /company/jobs) #}
+{% if (show_mode_selector is not defined or show_mode_selector) and current_sort != 'none' %}
 <div class="mode-selector-container">
     <h2 class="h5">Kies uw zoekmodus:</h2>
     
@@ -19,58 +27,79 @@
         🔧 Handmatige Filter & Sortering
     </a>
 </div>
+{% endif %}
 
-<form method="GET" action="{{ url_for('main.jobs_list') }}" class="filter-form">
-    
-    <input type="hidden" name="sort_by" value="{{ current_sort }}">
 
-    {% if current_sort != 'relevance' %}
-        <p class="form-instruction">Gebruik onderstaande velden om handmatig te filteren. Resultaten worden gesorteerd op Titel (A-Z).</p>
+{# FORM: voor 'none' (company eigen jobs) -> enkel simpele zoekbalk.
+   Voor alle andere (consultant /jobs) -> originele uitgebreide filter. #}
+{% if current_sort == 'none' %}
 
-        <div class="input-grid manual-filter-grid">
-            <input type="text" name="q" placeholder="Zoek op Titel/Omschrijving" value="{{ request.args.get('q', '') }}">
-            <input type="text" name="city" placeholder="Stad" value="{{ request.args.get('city', '') }}">
-            <input type="text" name="country" placeholder="Land" value="{{ request.args.get('country', '') }}">
-            
-            {# CONTRACT TYPE DROPDOWN #}
-            <select name="contract_type" id="contract_type" class="form-control-select">
-                <option value="">Contract type (Alle)</option>
-                {% for value, label in possible_contract_types %}
-                    <option value="{{ value }}" 
-                            {% if current_contract_type == value %}selected{% endif %}>
-                        {{ label }}
-                    </option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <div class="skills-filter">
-            <label class="skills-label">Skills (filteren - *vink de vereiste skills aan*):</label>
-            <div class="skills-checkboxes">
-                {% for skill in skills %}
-                    <label class="skill-label">
-                        <input type="checkbox" name="skills" value="{{ skill.id }}"
-                            {% if request.args.getlist('skills') and skill.id|string in request.args.getlist('skills') %}checked{% endif %}>
-                        {{ skill.name }}
-                    </label>
-                {% endfor %}
-            </div>
-        </div>
-        <button type="submit" class="btn btn-primary apply-btn">Filters Toepassen</button>
-        <a href="{{ url_for('main.jobs_list', sort_by='title') }}" class="btn btn-secondary reset-btn">Reset Filters</a>
-
-    {% else %}
-        <p class="alert alert-info">
-            **Voor een gedetailleerde uitleg over de toegepaste filter- en scoringsmethodologie, verwijzen wij u naar de informatie onderaan deze pagina.**
-        </p>
-        
+    <form method="GET" action="{{ url_for('main.company_jobs_list') }}" class="filter-form">
         <div class="input-group">
-             <input type="text" name="q" placeholder="Verfijn zoekopdracht (wordt meegenomen in de score)" value="{{ request.args.get('q', '') }}">
-             <button type="submit" class="btn btn-primary">Zoek & Herbereken Score</button>
+            <input type="text" name="q" 
+                   placeholder="Zoek in mijn vacatures (titel of omschrijving)" 
+                   value="{{ request.args.get('q', '') }}">
+            <button type="submit" class="btn btn-primary">Zoek</button>
         </div>
-    {% endif %}
+    </form>
 
-</form>
+{% else %}
+
+    <form method="GET" action="{{ url_for('main.jobs_list') }}{% if current_sort %}?sort_by={{ current_sort }}{% endif %}" class="filter-form">
+        
+        <input type="hidden" name="sort_by" value="{{ current_sort }}">
+
+        {% if current_sort != 'relevance' %}
+            <p class="form-instruction">Gebruik onderstaande velden om handmatig te filteren. Resultaten worden gesorteerd op Titel (A-Z).</p>
+
+            <div class="input-grid manual-filter-grid">
+                <input type="text" name="q" placeholder="Zoek op Titel/Omschrijving" value="{{ request.args.get('q', '') }}">
+                <input type="text" name="city" placeholder="Stad" value="{{ request.args.get('city', '') }}">
+                <input type="text" name="country" placeholder="Land" value="{{ request.args.get('country', '') }}">
+                
+                {# CONTRACT TYPE DROPDOWN #}
+                <select name="contract_type" id="contract_type" class="form-control-select">
+                    <option value="">Contract type (Alle)</option>
+                    {% if possible_contract_types is defined %}
+                        {% for value, label in possible_contract_types %}
+                            <option value="{{ value }}" 
+                                    {% if current_contract_type == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    {% endif %}
+                </select>
+            </div>
+
+            <div class="skills-filter">
+                <label class="skills-label">Skills (filteren - *vink de vereiste skills aan*):</label>
+                <div class="skills-checkboxes">
+                    {% for skill in skills %}
+                        <label class="skill-label">
+                            <input type="checkbox" name="skills" value="{{ skill.id }}"
+                                {% if request.args.getlist('skills') and skill.id|string in request.args.getlist('skills') %}checked{% endif %}>
+                            {{ skill.name }}
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary apply-btn">Filters Toepassen</button>
+            <a href="{{ url_for('main.jobs_list', sort_by='title') }}" class="btn btn-secondary reset-btn">Reset Filters</a>
+
+        {% else %}
+            <p class="alert alert-info">
+                **Voor een gedetailleerde uitleg over de toegepaste filter- en scoringsmethodologie, verwijzen wij u naar de informatie onderaan deze pagina.**
+            </p>
+            
+            <div class="input-group">
+                 <input type="text" name="q" placeholder="Verfijn zoekopdracht (wordt meegenomen in de score)" value="{{ request.args.get('q', '') }}">
+                 <button type="submit" class="btn btn-primary">Zoek & Herbereken Score</button>
+            </div>
+        {% endif %}
+
+    </form>
+{% endif %}
+
 
 <div class="job-grid" style="margin-top: 20px;">
     {% for job in jobs %}
@@ -256,7 +285,6 @@
 .recency-bar { background-color: #17a2b8 !important; }/* Cyaan/Blauw */
 .popularity-bar { background-color: #e83e8c !important; } /* Roze */
 
-/* waarden rechts */
 .bar-value { 
     font-weight: 700; 
     text-align: right; 
