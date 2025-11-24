@@ -57,6 +57,7 @@ class ConsultantProfile(Base):
     created_at = Column(TIMESTAMP, nullable=False, server_default=func.now())
 
     profile_image = Column(String(300), nullable=True)   # <--- DIT ONTBREEKT
+    cv_document = Column(String(300), nullable=True)
 
     user = relationship("User", back_populates="consultant_profile")
     skills = relationship("Skill", secondary="profile_skills", back_populates="profiles")

@@ -24,6 +24,18 @@
                 style="width:140px;height:140px;border-radius:50%;object-fit:cover;margin-bottom:12px;"
             >
         {% endif %}
+
+        {% if profile.cv_document %}
+            <p>
+                <strong>CV:</strong>
+                <a href="{{ profile.cv_document }}" target="_blank">
+                    Bekijk / download CV
+                </a>
+            </p>
+        {% else %}
+            <p><strong>CV:</strong> nog niet toegevoegd</p>
+        {% endif %}
+
         <p><strong>Naam:</strong> {{ profile.display_name_masked }}</p>
         <p><strong>Locatie:</strong> {{ profile.location_city }} , {{ profile.country }}</p>
         <p><strong>Opmerking:</strong> {{ profile.headline or "Geen headline" }}</p>

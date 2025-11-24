@@ -245,6 +245,36 @@ def edit_consultant_profile():
 
                 # Pad opslaan in database (wat je gebruikt in je template)
                 profile.profile_image = f"/static/uploads/{filename}"
+            
+            # ----------------------
+            #   CV / DOCUMENT
+            # ----------------------
+            cv_file = request.files.get("cv_document")
+
+            if cv_file and cv_file.filename != "":
+                upload_folder = os.path.join(current_app.root_path, "static", "uploads")
+                os.makedirs(upload_folder, exist_ok=True)
+
+                # extensie behouden
+                _, ext = os.path.splitext(cv_file.filename)
+                ext = ext.lower()
+
+                # Enkel toegelaten types
+                allowed_exts = {".pdf", ".doc", ".docx"}
+                if ext not in allowed_exts:
+                    flash("Ongeldig bestandstype. Upload enkel pdf/doc/docx.")
+                    return redirect(url_for("main.edit_consultant_profile"))
+
+                # Unieke bestandsnaam voor CV
+                cv_filename = f"cv_user_{user.id}{ext}"
+                cv_save_path = os.path.join(upload_folder, cv_filename)
+
+                cv_file.save(cv_save_path)
+
+                # Pad opslaan in database
+                profile.cv_document = f"/static/uploads/{cv_filename}"
+            
+
 
             db.commit()
 
