@@ -97,11 +97,9 @@ def index():
     return render_template("index.html")
 
 #taalwissel-route:
-@main.route("/set_language", methods=["POST"])
+@main.route("/set_language", methods=["GET", "POST"])
 def set_language():
-    lang = request.form.get("language", "en")
-    if lang not in ["en", "nl", "fr"]:
-        lang = "en"
+    lang = request.values.get("language", "en")
     session["language"] = lang
     return redirect(request.referrer or url_for("main.index"))
 

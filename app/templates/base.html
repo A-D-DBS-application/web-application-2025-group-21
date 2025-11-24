@@ -123,15 +123,33 @@
 
     <a href="{{ url_for('main.dashboard') }}">{{ _("Dashboard") }}</a>
 
-    <div style="margin-left: auto;">
-        <form action="{{ url_for('main.set_language') }}" method="POST" style="display:inline;">
-            <select name="language" onchange="this.form.submit()" class="btn">
-                <option value="en" {% if session.get('language') == 'en' %}selected{% endif %}>EN</option>
-                <option value="nl" {% if session.get('language') == 'nl' %}selected{% endif %}>NL</option>
-                <option value="fr" {% if session.get('language') == 'fr' %}selected{% endif %}>FR</option>
-            </select>
-        </form>
+    <div class="dropdown" style="margin-left: auto;">
+        <button class="btn btn-light dropdown-toggle" type="button" id="langMenu" data-bs-toggle="dropdown" aria-expanded="false">
+            {{ session.get('language', 'en')|upper }}
+        </button>
+
+         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="langMenu">
+            <li>
+                <form method="post" action="{{ url_for('main.set_language') }}">
+                    <input type="hidden" name="language" value="en">
+                    <button class="dropdown-item" type="submit">EN</button>
+                </form>
+            </li>
+            <li>
+                <form method="post" action="{{ url_for('main.set_language') }}">
+                    <input type="hidden" name="language" value="nl">
+                    <button class="dropdown-item" type="submit">NL</button>
+                </form>
+            </li>
+            <li>
+                <form method="post" action="{{ url_for('main.set_language') }}">
+                    <input type="hidden" name="language" value="fr">
+                    <button class="dropdown-item" type="submit">FR</button>
+                </form>
+            </li>
+        </ul>
     </div>
+
 
     {% if session.get('user_id') %}
         <form action="{{ url_for('main.logout') }}" method="post" style="display:inline;">
