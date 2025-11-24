@@ -5,7 +5,7 @@
     <title>{% block title %}IConsult Match{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
-    {# 🎯 Huidig jaar instellen voor copyright #}
+    {# 🎯 Huidig jaar voor copyright #}
     {% set now = now() %} 
 
     <style>
@@ -23,8 +23,7 @@
             font-family: system-ui, Arial, sans-serif;
             background: var(--bg);
             color: var(--text);
-            /* Zorg ervoor dat de body de hele viewport inneemt voor de sticky footer */
-            min-height: 100vh; 
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
@@ -71,12 +70,11 @@
             background: #e5e7eb;
         }
 
-        /* LAYOUT */
         main {
             max-width: 900px;
             margin: 24px auto;
             padding: 0 16px;
-            flex-grow: 1; /* Laat main de beschikbare ruimte innemen */
+            flex-grow: 1;
         }
 
         .flash {
@@ -87,34 +85,8 @@
             margin-bottom: 16px;
         }
 
-        /* CARDS */
-        .card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 16px;
-            margin: 16px 0;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-
-        form > * {
-            display: block;
-            margin: 10px 0;
-        }
-
-        .row {
-            display: flex;
-            gap: 16px;
-            flex-wrap: wrap;
-        }
-
-        .grow {
-            flex: 1 1 300px;
-        }
-
-        /* AANGEPASTE FOOTER STIJL */
         .footer {
-            background-color: #f8f9fa; /* Lichtgrijze achtergrond */
+            background-color: #f8f9fa;
             border-top: 1px solid #e9ecef;
             text-align: center;
             padding: 20px 16px;
@@ -135,61 +107,61 @@
 
 <body>
 
-    <header>
-    <nav>
-        <a href="{{ url_for('main.index') }}">{{ _("Home") }}</a>
+<header>
+<nav>
+    <a href="{{ url_for('main.index') }}">{{ _("Home") }}</a>
 
-        {% if session.get('role') == 'company' %}
-            <a href="{{ url_for('main.consultants_list') }}">{{ _("Consultants") }}</a>
+    {# 🌟 Alleen companies zien Consultants 🌟 #}
+    {% if session.get('role') == 'company' %}
+        <a href="{{ url_for('main.consultants_list') }}">{{ _("Consultants") }}</a>
+    {% endif %}
+
+    {# 🌟 Alleen consultants zien Jobs 🌟 #}
+    {% if session.get('role') == 'consultant' %}
+        <a href="{{ url_for('main.jobs_list') }}">{{ _("Jobs") }}</a>
+    {% endif %}
+
+    <a href="{{ url_for('main.dashboard') }}">{{ _("Dashboard") }}</a>
+
+    <div style="margin-left: auto;">
+        <form action="{{ url_for('main.set_language') }}" method="POST" style="display:inline;">
+            <select name="language" onchange="this.form.submit()" class="btn">
+                <option value="en" {% if session.get('language') == 'en' %}selected{% endif %}>EN</option>
+                <option value="nl" {% if session.get('language') == 'nl' %}selected{% endif %}>NL</option>
+                <option value="fr" {% if session.get('language') == 'fr' %}selected{% endif %}>FR</option>
+            </select>
+        </form>
+    </div>
+
+    {% if session.get('user_id') %}
+        <form action="{{ url_for('main.logout') }}" method="post" style="display:inline;">
+            <button class="btn" type="submit">{{ _("Logout") }}</button>
+        </form>
+    {% else %}
+        <a class="btn" href="{{ url_for('main.login') }}">{{ _("Login") }}</a>
+    {% endif %}
+</nav>
+</header>
+
+<main>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for m in messages %}
+                <div class="flash">{{ m }}</div>
+            {% endfor %}
         {% endif %}
+    {% endwith %}
 
-        {% if session.get('role') in ['company', 'consultant'] %}
-            <a href="{{ url_for('main.jobs_list') }}">{{ _("Jobs") }}</a>
-        {% endif %}
+    {% block content %}{% endblock %}
+</main>
 
-        <a href="{{ url_for('main.dashboard') }}">{{ _("Dashboard") }}</a>
-
-        <div style="margin-left: auto;">
-            <form action="{{ url_for('main.set_language') }}" method="POST" style="display:inline;">
-                <select name="language" onchange="this.form.submit()" class="btn">
-                    <option value="en" {% if session.get('language') == 'en' %}selected{% endif %}>EN</option>
-                    <option value="nl" {% if session.get('language') == 'nl' %}selected{% endif %}>NL</option>
-                    <option value="fr" {% if session.get('language') == 'fr' %}selected{% endif %}>FR</option>
-                </select>
-            </form>
-        </div>
-
-
-        {% if session.get('user_id') %}
-            <form action="{{ url_for('main.logout') }}" method="post" style="display:inline;">
-                <button class="btn" type="submit">{{ _("Logout") }}</button>
-            </form>
-        {% else %}
-            <a class="btn" href="{{ url_for('main.login') }}">{{ _("Login") }}</a>
-        {% endif %}
-    </nav>
-    </header>
-
-    <main>
-        {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                {% for m in messages %}
-                    <div class="flash">{{ m }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-
-        {% block content %}{% endblock %}
-    </main>
-
-    {# NIEUWE FOOTER ZONDER DE FILTER METHODOLOGIE LINK #}
-    <footer class="footer">
-        <div class="container text-center">
-            <span class="text-muted">
-                &copy; {{ now.year }} IConsult - All rights reserved
-            </span>
-        </div>
-    </footer>
+<footer class="footer">
+    <div class="container text-center">
+        <span class="text-muted">
+            &copy; {{ now.year }} IConsult - All rights reserved
+        </span>
+    </div>
+</footer>
 
 </body>
 </html>
