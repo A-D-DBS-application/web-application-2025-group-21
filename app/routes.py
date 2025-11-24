@@ -10,6 +10,7 @@ from .models import User, ConsultantProfile, Company, JobPost, UserRole, Skill, 
 
 import os
 from werkzeug.utils import secure_filename
+from sqlalchemy import func  # <-- NIEUW: voor count() over Unlocks
 
 
 def allowed_file(filename):
@@ -89,6 +90,7 @@ def company_jobs_list():
             sort_by='none', 
             page_title=_("Mijn Vacatures"),
         )
+
 #dit gebeurt vanzelf dus geen registreer nodig
 @main.route("/", methods=["GET"])
 def index():
@@ -282,6 +284,7 @@ def edit_consultant_profile():
             return redirect(url_for("main.dashboard"))
 
         return render_template("edit_consultant_profile.html", profile=profile)
+
 @main.route("/consultant/skills/edit", methods=["GET", "POST"])
 def edit_consultant_skills():
     with get_session() as db:
@@ -406,11 +409,37 @@ def consultants_list():
         # 5. Sortering & Relevantie Berekening
         if sort_by == "relevance":
             now = datetime.now(timezone.utc)
+
+            # 🔹 Haal in één keer op hoe vaak elke consultant is ge-unlocked
+            consultant_ids = [c.id for c in consultants]
+            unlock_counts = {}
+            if consultant_ids:
+                unlock_rows = (
+                    db.query(Unlock.target_id, func.count(Unlock.id))
+                    .filter(
+                        Unlock.target_type == UnlockTarget.consultant,
+                        Unlock.target_id.in_(consultant_ids),
+                    )
+                    .group_by(Unlock.target_id)
+                    .all()
+                )
+                unlock_counts = {target_id: count for target_id, count in unlock_rows}
             
             def compute_score(profile):
                 # Zorgt ervoor dat de score-berekening niet crasht als er geen job is.
                 if not required_job:
-                    return {'total': 0.0, 'skill': 0.0, 'text': 0.0, 'recency': 0.0, 'skill_factor': 0.0, 'text_factor': 0.0, 'recency_factor': 0.0}
+                    return {
+                        'total': 0.0,
+                        'skill': 0.0,
+                        'text': 0.0,
+                        'recency': 0.0,
+                        'skill_factor': 0.0,
+                        'text_factor': 0.0,
+                        'recency_factor': 0.0,
+                        'popularity': 0.0,
+                        'popularity_factor': 0.0,
+                        'unlock_count': 0,
+                    }
 
                 # A. Skill Similarity (Gewicht 0.5)
                 consultant_skill_ids = set(s.id for s in profile.skills)
@@ -432,8 +461,19 @@ def consultants_list():
                 days_old = (now - profile.created_at).days
                 recency_factor = max(0, 1 - days_old / 30) # 1 voor < 30 dagen, daalt naar 0
                 recency_weighted_score = recency_factor * 0.2
+
+                # D. Populariteit op basis van unlocks (Gewicht 0.15)
+                unlock_count = unlock_counts.get(profile.id, 0)
+                max_unlocks = 50   # vanaf 50 unlocks is popularity_factor = 1
+                popularity_factor = min(unlock_count / max_unlocks, 1.0)
+                popularity_weighted_score = popularity_factor * 0.15
                 
-                final_score = skill_weighted_score + text_weighted_score + recency_weighted_score
+                final_score = (
+                    skill_weighted_score
+                    + text_weighted_score
+                    + recency_weighted_score
+                    + popularity_weighted_score
+                )
                 
                 return {
                     'total': final_score,
@@ -442,7 +482,10 @@ def consultants_list():
                     'recency': recency_weighted_score,
                     'skill_factor': skill_similarity,
                     'text_factor': text_match,
-                    'recency_factor': recency_factor
+                    'recency_factor': recency_factor,
+                    'popularity': popularity_weighted_score,
+                    'popularity_factor': popularity_factor,
+                    'unlock_count': unlock_count,
                 }
 
             scored_consultants = [] 
