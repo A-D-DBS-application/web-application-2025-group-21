@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-11-22 21:38+0100\n"
-"PO-Revision-Date: 2025-11-22 21:20+0100\n"
+"POT-Creation-Date: 2025-11-24 19:50+0100\n"
+"PO-Revision-Date: 2025-11-24 19:50+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: nl\n"
 "Language-Team: nl <LL@li.org>\n"
@@ -18,32 +18,975 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: app/templates/base.html:120
+#: app/routes.py:33
+msgid "Gelieve in te loggen om deze actie uit te voeren."
+msgstr ""
+
+#: app/routes.py:61
+msgid "Only companies can view their own job posts."
+msgstr ""
+
+#: app/routes.py:69
+msgid "Company profile not found."
+msgstr ""
+
+#: app/routes.py:91
+msgid "Mijn Vacatures"
+msgstr ""
+
+#: app/routes.py:120
+msgid "Gebruikersnaam is vereist."
+msgstr ""
+
+#: app/routes.py:138
+msgid ""
+"Deze gebruikersnaam bestaat al en is gekoppeld aan een andere rol. Kies "
+"een andere gebruikersnaam of log in met de juiste rol."
+msgstr ""
+
+#: app/routes.py:188
+msgid "Please log in to view your dashboard."
+msgstr ""
+
+#: app/routes.py:217
+msgid "Only consultants can edit their profile"
+msgstr ""
+
+#: app/routes.py:267
+msgid "Ongeldig bestandstype. Upload enkel pdf/doc/docx."
+msgstr ""
+
+#: app/routes.py:283 app/routes.py:306
+msgid "Profile updated"
+msgstr ""
+
+#: app/routes.py:294
+msgid "Only consultants can update their skills"
+msgstr ""
+
+#: app/routes.py:327
+msgid "Consultant not found"
+msgstr ""
+
+#: app/routes.py:357
+msgid "Only companies can browse consultant profiles."
+msgstr ""
+
+#: app/routes.py:389
+msgid ""
+"Maak eerst een Job Post aan om het IConsult relevantiefilter op basis van"
+" uw behoeften in te schakelen."
+msgstr ""
+
+#: app/routes.py:526
+msgid "Only companies can edit their profile"
+msgstr ""
+
+#: app/routes.py:543
+msgid "Company profile updated"
+msgstr ""
+
+#: app/routes.py:558
+msgid "Alleen bedrijven kunnen contactgegevens van consultants vrijgeven."
+msgstr ""
+
+#: app/routes.py:563
+msgid "Consultant profiel niet gevonden."
+msgstr ""
+
+#: app/routes.py:567 app/routes.py:597
+msgid "Contactgegevens zijn al vrijgegeven."
+msgstr ""
+
+#: app/routes.py:578 app/routes.py:608
+msgid "Contactgegevens succesvol vrijgegeven!"
+msgstr ""
+
+#: app/routes.py:589
+msgid "Alleen consultants kunnen contactgegevens van bedrijven vrijgeven."
+msgstr ""
+
+#: app/routes.py:593
+msgid "Job post niet gevonden."
+msgstr ""
+
+#: app/routes.py:633
+msgid "Only consultants can browse job posts."
+msgstr ""
+
+#: app/routes.py:786 app/templates/job_new.html:34
+msgid "Freelance"
+msgstr ""
+
+#: app/routes.py:787 app/templates/job_new.html:35
+msgid "Full-time"
+msgstr ""
+
+#: app/routes.py:788 app/templates/job_new.html:36
+msgid "Part-time"
+msgstr ""
+
+#: app/routes.py:789 app/templates/job_new.html:37
+msgid "Project-based"
+msgstr ""
+
+#: app/routes.py:812
+msgid "Job not found"
+msgstr ""
+
+#: app/routes.py:840
+msgid "Only companies can create job posts"
+msgstr ""
+
+#: app/routes.py:857
+msgid "Title is required"
+msgstr ""
+
+#: app/routes.py:887
+msgid "Only companies can edit job posts"
+msgstr ""
+
+#: app/routes.py:894 app/routes.py:928
+msgid "Job not found or you are not the owner"
+msgstr ""
+
+#: app/routes.py:910
+msgid "Job updated!"
+msgstr ""
+
+#: app/routes.py:921
+msgid "Only companies can delete job posts"
+msgstr ""
+
+#: app/routes.py:933
+msgid "Job deleted"
+msgstr ""
+
+#: app/templates/base.html:5
+msgid "IConsult Match"
+msgstr ""
+
+#: app/templates/base.html:112
 msgid "Home"
 msgstr ""
 
-#: app/templates/base.html:123
+#: app/templates/base.html:116
 msgid "Consultants"
 msgstr ""
 
-#: app/templates/base.html:127
+#: app/templates/base.html:121
 msgid "Jobs"
 msgstr ""
 
-#: app/templates/base.html:130
+#: app/templates/base.html:124 app/templates/dashboard.html:2
+#: app/templates/dashboard.html:5
 msgid "Dashboard"
 msgstr ""
 
-#: app/templates/base.html:146
+#: app/templates/base.html:138
 msgid "Logout"
 msgstr ""
 
-#: app/templates/base.html:149
+#: app/templates/base.html:141 app/templates/login.html:2
 msgid "Login"
 msgstr ""
 
-#: app/templates/base.html:167
-msgid "MVP prototype"
+#: app/templates/base.html:161
+msgid "All rights reserved"
+msgstr ""
+
+#: app/templates/consultant_detail.html:2
+msgid "Consultant detail"
+msgstr ""
+
+#: app/templates/consultant_detail.html:9 app/templates/dashboard.html:17
+msgid "Profielfoto"
+msgstr ""
+
+#: app/templates/consultant_detail.html:15 app/templates/dashboard.html:23
+msgid "Geen profielfoto"
+msgstr ""
+
+#: app/templates/consultant_detail.html:24
+#: app/templates/consultant_list.html:130 app/templates/index.html:306
+#: app/templates/job_edit.html:26 app/templates/job_list.html:160
+msgid "Skills"
+msgstr ""
+
+#: app/templates/consultant_detail.html:32
+msgid "Geen skills opgegeven."
+msgstr ""
+
+#: app/templates/consultant_detail.html:43
+msgid "Contactgegevens"
+msgstr ""
+
+#: app/templates/consultant_detail.html:50
+msgid "E-mail"
+msgstr ""
+
+#: app/templates/consultant_detail.html:51
+msgid "Telefoon"
+msgstr ""
+
+#: app/templates/consultant_detail.html:57 app/templates/dashboard.html:32
+msgid "Bekijk / download CV"
+msgstr ""
+
+#: app/templates/consultant_detail.html:61 app/templates/dashboard.html:43
+#: app/templates/dashboard.html:44 app/templates/dashboard.html:60
+#: app/templates/dashboard.html:62 app/templates/dashboard.html:63
+#: app/templates/job_detail.html:14 app/templates/job_detail.html:15
+#: app/templates/job_detail.html:31 app/templates/job_detail.html:32
+msgid "Niet ingevuld"
+msgstr ""
+
+#: app/templates/consultant_detail.html:65 app/templates/job_detail.html:18
+msgid "Deze contactgegevens zijn vrijgegeven en permanent zichtbaar."
+msgstr ""
+
+#: app/templates/consultant_detail.html:70
+msgid "De contactgegevens van deze consultant zijn verborgen."
+msgstr ""
+
+#: app/templates/consultant_detail.html:71
+msgid "CV"
+msgstr ""
+
+#: app/templates/consultant_detail.html:71
+msgid "Verborgen"
+msgstr ""
+
+#: app/templates/consultant_detail.html:72 app/templates/job_detail.html:23
+msgid "Weet u zeker dat u de contactgegevens wilt vrijgeven?"
+msgstr ""
+
+#: app/templates/consultant_detail.html:73 app/templates/job_detail.html:24
+msgid "🔒 Ontgrendel contactgegevens (MVP Knop)"
+msgstr ""
+
+#: app/templates/consultant_detail.html:75
+msgid ""
+"Door op deze knop te klikken, worden de contactgegevens permanent "
+"zichtbaar voor uw bedrijf."
+msgstr ""
+
+#: app/templates/consultant_detail.html:80
+#: app/templates/consultant_detail.html:81 app/templates/job_detail.html:31
+#: app/templates/job_detail.html:32
+msgid "Zichtbaar voor u als eigenaar"
+msgstr ""
+
+#: app/templates/consultant_detail.html:95
+msgid ""
+"Log in als **Bedrijf** om de contactgegevens te bekijken en te "
+"ontgrendelen."
+msgstr ""
+
+#: app/templates/consultant_list.html:3 app/templates/consultant_list.html:7
+msgid "Consultant Profielen"
+msgstr ""
+
+#: app/templates/consultant_list.html:12 app/templates/job_list.html:17
+msgid "Kies uw zoekmodus:"
+msgstr ""
+
+#: app/templates/consultant_list.html:16 app/templates/job_list.html:21
+msgid "🧠 IConsult Match (Beste Relevantie)"
+msgstr ""
+
+#: app/templates/consultant_list.html:21 app/templates/job_list.html:26
+msgid "🔧 Handmatige Filter & Sortering"
+msgstr ""
+
+#: app/templates/consultant_list.html:31
+msgid ""
+"Gebruik onderstaande velden om handmatig te filteren. Resultaten worden "
+"gesorteerd op Naam (A-Z)."
+msgstr ""
+
+#: app/templates/consultant_list.html:35
+msgid "Zoek op Naam/Specialisatie/Bio"
+msgstr ""
+
+#: app/templates/consultant_list.html:36 app/templates/job_list.html:54
+msgid "Stad"
+msgstr ""
+
+#: app/templates/consultant_list.html:37 app/templates/job_list.html:55
+msgid "Land"
+msgstr ""
+
+#: app/templates/consultant_list.html:42
+msgid "Skills (filteren - Consultant moet alle aangevinkte skills bezitten)"
+msgstr ""
+
+#: app/templates/consultant_list.html:54 app/templates/job_list.html:83
+msgid "Filters Toepassen"
+msgstr ""
+
+#: app/templates/consultant_list.html:55 app/templates/job_list.html:84
+msgid "Reset Filters"
+msgstr ""
+
+#: app/templates/consultant_list.html:59 app/templates/job_list.html:88
+msgid ""
+"Voor een gedetailleerde uitleg over de toegepaste filter- en "
+"scoringsmethodologie, verwijzen wij u naar de informatie onderaan deze "
+"pagina."
+msgstr ""
+
+#: app/templates/consultant_list.html:63 app/templates/job_list.html:92
+msgid "Verfijn zoekopdracht (wordt meegenomen in de score)"
+msgstr ""
+
+#: app/templates/consultant_list.html:64 app/templates/job_list.html:93
+msgid "Zoek & Herbereken Score"
+msgstr ""
+
+#: app/templates/consultant_list.html:86 app/templates/index.html:257
+msgid "Consultant"
+msgstr ""
+
+#: app/templates/consultant_list.html:101
+msgid "Specialisatie"
+msgstr ""
+
+#: app/templates/consultant_list.html:105
+msgid "Skills Consultant"
+msgstr ""
+
+#: app/templates/consultant_list.html:111 app/templates/job_list.html:142
+msgid "meer"
+msgstr ""
+
+#: app/templates/consultant_list.html:120 app/templates/job_list.html:150
+msgid "Match"
+msgstr ""
+
+#: app/templates/consultant_list.html:124 app/templates/job_list.html:154
+msgid "Score Uitsplitsing"
+msgstr ""
+
+#: app/templates/consultant_list.html:140 app/templates/index.html:307
+#: app/templates/job_list.html:170
+msgid "Zoekterm"
+msgstr ""
+
+#: app/templates/consultant_list.html:150 app/templates/index.html:308
+#: app/templates/job_list.html:180
+msgid "Recentheid"
+msgstr ""
+
+#: app/templates/consultant_list.html:160 app/templates/index.html:309
+#: app/templates/job_list.html:190
+msgid "Populariteit"
+msgstr ""
+
+#: app/templates/consultant_list.html:170 app/templates/job_list.html:200
+msgid "Totaal"
+msgstr ""
+
+#: app/templates/consultant_list.html:173 app/templates/job_list.html:203
+msgid "geunlockt"
+msgstr ""
+
+#: app/templates/consultant_list.html:182
+msgid "Bekijk Profiel"
+msgstr ""
+
+#: app/templates/consultant_list.html:189
+msgid "Geen consultants gevonden die overeenkomen met de criteria."
+msgstr ""
+
+#: app/templates/dashboard.html:8
+msgid "Profiel"
+msgstr ""
+
+#: app/templates/dashboard.html:10
+msgid "Ingelogd als:"
+msgstr ""
+
+#: app/templates/dashboard.html:11
+msgid "Rol:"
+msgstr ""
+
+#: app/templates/dashboard.html:30 app/templates/dashboard.html:36
+msgid "CV:"
+msgstr ""
+
+#: app/templates/dashboard.html:36
+msgid "nog niet toegevoegd"
+msgstr ""
+
+#: app/templates/dashboard.html:39
+msgid "Naam:"
+msgstr ""
+
+#: app/templates/dashboard.html:40
+msgid "Locatie:"
+msgstr ""
+
+#: app/templates/dashboard.html:41
+msgid "Opmerking:"
+msgstr ""
+
+#: app/templates/dashboard.html:41
+msgid "Geen headline"
+msgstr ""
+
+#: app/templates/dashboard.html:43 app/templates/dashboard.html:62
+#: app/templates/job_detail.html:14 app/templates/job_detail.html:31
+msgid "E-mail:"
+msgstr ""
+
+#: app/templates/dashboard.html:44 app/templates/dashboard.html:63
+#: app/templates/job_detail.html:15 app/templates/job_detail.html:32
+msgid "Telefoon:"
+msgstr ""
+
+#: app/templates/dashboard.html:46
+msgid "Skills:"
+msgstr ""
+
+#: app/templates/dashboard.html:50
+msgid "Geen skills geselecteerd"
+msgstr ""
+
+#: app/templates/dashboard.html:54 app/templates/edit_consultant_skills.html:2
+msgid "Skills aanpassen"
+msgstr ""
+
+#: app/templates/dashboard.html:55 app/templates/dashboard.html:68
+#: app/templates/edit_consultant_profile.html:2
+#: app/templates/edit_consultant_profile.html:5
+msgid "Profiel aanpassen"
+msgstr ""
+
+#: app/templates/dashboard.html:59 app/templates/edit_company_profile.html:10
+msgid "Bedrijfsnaam:"
+msgstr ""
+
+#: app/templates/dashboard.html:60
+msgid "Sector:"
+msgstr ""
+
+#: app/templates/dashboard.html:65
+msgid "Nieuwe job posten"
+msgstr ""
+
+#: app/templates/dashboard.html:66
+msgid "Mijn job posts"
+msgstr ""
+
+#: app/templates/edit_company_profile.html:2
+#: app/templates/edit_company_profile.html:5
+msgid "Bedrijfsprofiel aanpassen"
+msgstr ""
+
+#: app/templates/edit_company_profile.html:21
+#: app/templates/edit_consultant_profile.html:21
+msgid "Stad:"
+msgstr ""
+
+#: app/templates/edit_company_profile.html:31
+#: app/templates/edit_consultant_profile.html:31
+msgid "Land:"
+msgstr ""
+
+#: app/templates/edit_company_profile.html:41
+#: app/templates/edit_consultant_profile.html:51
+msgid "Contactinformatie (wordt verborgen getoond)"
+msgstr ""
+
+#: app/templates/edit_company_profile.html:44
+msgid "Contact E-mailadres:"
+msgstr ""
+
+#: app/templates/edit_company_profile.html:54
+msgid "Contact Telefoonnummer:"
+msgstr ""
+
+#: app/templates/edit_company_profile.html:65
+#: app/templates/edit_consultant_profile.html:93
+#: app/templates/edit_consultant_skills.html:20 app/templates/job_edit.html:41
+msgid "Opslaan"
+msgstr ""
+
+#: app/templates/edit_consultant_profile.html:10
+msgid "Naam zichtbaar voor anderen:"
+msgstr ""
+
+#: app/templates/edit_consultant_profile.html:41
+msgid "Headline:"
+msgstr ""
+
+#: app/templates/edit_consultant_profile.html:54
+msgid "E-mailadres:"
+msgstr ""
+
+#: app/templates/edit_consultant_profile.html:64
+msgid "Telefoonnummer:"
+msgstr ""
+
+#: app/templates/edit_consultant_profile.html:76
+msgid "Profielfoto:"
+msgstr ""
+
+#: app/templates/edit_consultant_profile.html:85
+msgid "CV / Document:"
+msgstr ""
+
+#: app/templates/edit_consultant_skills.html:5
+msgid "Kies je skills"
+msgstr ""
+
+#: app/templates/index.html:2
+msgid "Home | IConsult"
+msgstr ""
+
+#: app/templates/index.html:7
+msgid "IConsult"
+msgstr ""
+
+#: app/templates/index.html:9
+msgid "Het platform waar"
+msgstr ""
+
+#: app/templates/index.html:9
+msgid "consultants"
+msgstr ""
+
+#: app/templates/index.html:9
+msgid "en"
+msgstr ""
+
+#: app/templates/index.html:10
+msgid "bedrijven"
+msgstr ""
+
+#: app/templates/index.html:11
+msgid "elkaar vinden via een slimme, transparante matchscore."
+msgstr ""
+
+#: app/templates/index.html:18
+msgid "👉 Zoek consultants"
+msgstr ""
+
+#: app/templates/index.html:21
+msgid "Mijn vacatures"
+msgstr ""
+
+#: app/templates/index.html:25
+msgid "👉 Bekijk vacatures"
+msgstr ""
+
+#: app/templates/index.html:28
+msgid "Mijn profiel"
+msgstr ""
+
+#: app/templates/index.html:32
+msgid "👉 Ga naar je dashboard"
+msgstr ""
+
+#: app/templates/index.html:37
+msgid "👉 Log in om te starten"
+msgstr ""
+
+#: app/templates/index.html:40
+msgid "Nog geen account? Kies je rol op de loginpagina – consultant of bedrijf."
+msgstr ""
+
+#: app/templates/index.html:48
+msgid "Actieve vacatures"
+msgstr ""
+
+#: app/templates/index.html:56
+msgid "Gericht op digitale & zakelijke profielen"
+msgstr ""
+
+#: app/templates/index.html:60
+msgid "Beschikbare consultants"
+msgstr ""
+
+#: app/templates/index.html:68
+msgid "Met duidelijke skill-profielen"
+msgstr ""
+
+#: app/templates/index.html:72
+msgid "Matchmotor"
+msgstr ""
+
+#: app/templates/index.html:74
+msgid "Skills, tekst, recentheid & populariteit"
+msgstr ""
+
+#: app/templates/index.html:81 app/templates/index.html:100
+msgid "Voor bedrijven"
+msgstr ""
+
+#: app/templates/index.html:83 app/templates/index.html:102
+msgid "Maak snel een vacature aan met vereiste skills."
+msgstr ""
+
+#: app/templates/index.html:84 app/templates/index.html:103
+msgid "Ontvang een gesorteerde lijst consultants volgens matchscore."
+msgstr ""
+
+#: app/templates/index.html:85 app/templates/index.html:104
+msgid "Unlock contactgegevens alleen wanneer het relevant is."
+msgstr ""
+
+#: app/templates/index.html:90 app/templates/index.html:113
+msgid "Voor consultants"
+msgstr ""
+
+#: app/templates/index.html:92
+msgid "Vul je profiel en skills in voor betere matches."
+msgstr ""
+
+#: app/templates/index.html:93 app/templates/index.html:116
+msgid "Ontdek vacatures die echt passen bij jouw expertise."
+msgstr ""
+
+#: app/templates/index.html:94
+msgid "Jij kiest wanneer je je gegevens vrijgeeft aan een bedrijf."
+msgstr ""
+
+#: app/templates/index.html:107
+msgid "+ Nieuwe vacature aanmaken"
+msgstr ""
+
+#: app/templates/index.html:115 app/templates/index.html:323
+msgid "Vul je skills en specialisatie zo volledig mogelijk in."
+msgstr ""
+
+#: app/templates/index.html:117
+msgid "Je kiest zelf wanneer je je gegevens vrijgeeft."
+msgstr ""
+
+#: app/templates/index.html:120
+msgid "✏️ Werk mijn profiel bij"
+msgstr ""
+
+#: app/templates/index.html:129 app/templates/index.html:214
+msgid "Recent toegevoegde vacatures"
+msgstr ""
+
+#: app/templates/index.html:157 app/templates/index.html:186
+msgid "Nieuwe consultants"
+msgstr ""
+
+#: app/templates/index.html:243
+msgid "Recent vrijgegeven profielen (geanonimiseerd)"
+msgstr ""
+
+#: app/templates/index.html:245
+msgid ""
+"Onderstaande items tonen enkel type en locatie. De echte contactgegevens "
+"zijn alleen zichtbaar voor de partij die het profiel heeft vrijgegeven."
+msgstr ""
+
+#: app/templates/index.html:252
+msgid "Consultant-profiel"
+msgstr ""
+
+#: app/templates/index.html:265 app/templates/index.html:282
+msgid "Locatie verborgen"
+msgstr ""
+
+#: app/templates/index.html:269
+msgid "Vacature"
+msgstr ""
+
+#: app/templates/index.html:274
+msgid "Job"
+msgstr ""
+
+#: app/templates/index.html:287
+msgid "Vrijgegeven op"
+msgstr ""
+
+#: app/templates/index.html:291
+msgid "🔒 Details enkel zichtbaar voor de koper"
+msgstr ""
+
+#: app/templates/index.html:300
+msgid "Hoe werkt de IConsult-matchscore?"
+msgstr ""
+
+#: app/templates/index.html:304
+msgid "Wat we meenemen in de score"
+msgstr ""
+
+#: app/templates/index.html:306
+msgid ""
+"hoe beter de gevraagde en aangeboden vaardigheden overeenkomen, hoe hoger"
+" de score."
+msgstr ""
+
+#: app/templates/index.html:307
+msgid ""
+"indien u een zoekterm ingeeft, kijken we of die voorkomt in titel, "
+"samenvatting of beschrijving."
+msgstr ""
+
+#: app/templates/index.html:308
+msgid ""
+"recent toegevoegde of geüpdatete profielen en vacatures krijgen een "
+"lichte boost."
+msgstr ""
+
+#: app/templates/index.html:309
+msgid "profielen en vacatures die vaker worden geunlockt, scoren iets hoger."
+msgstr ""
+
+#: app/templates/index.html:315
+msgid "Voor bedrijven:"
+msgstr ""
+
+#: app/templates/index.html:317
+msgid "Voeg duidelijke skills toe aan elke vacature."
+msgstr ""
+
+#: app/templates/index.html:318
+msgid "Gebruik concrete termen in de titel en omschrijving."
+msgstr ""
+
+#: app/templates/index.html:321
+msgid "Voor consultants:"
+msgstr ""
+
+#: app/templates/index.html:324
+msgid "Hou je profiel up-to-date, vooral bij nieuwe opdrachten."
+msgstr ""
+
+#: app/templates/index.html:328
+msgid "Optimaliseer als bedrijf:"
+msgstr ""
+
+#: app/templates/index.html:330
+msgid "Definieer 3–7 kernskills per vacature voor een scherpere match."
+msgstr ""
+
+#: app/templates/index.html:331
+msgid "Gebruik herkenbare functietitels en vermijd interne jargon."
+msgstr ""
+
+#: app/templates/index.html:332
+msgid ""
+"Werk vacatures bij als requirements wijzigen, zodat de recentheidsscore "
+"behouden blijft."
+msgstr ""
+
+#: app/templates/index.html:336
+msgid "Optimaliseer als consultant:"
+msgstr ""
+
+#: app/templates/index.html:338
+msgid "Vul al je relevante skills in en update ze na elke opdracht."
+msgstr ""
+
+#: app/templates/index.html:339
+msgid "Zorg dat je titel en korte bio je kernexpertise helder verwoorden."
+msgstr ""
+
+#: app/templates/index.html:340
+msgid "Blijf actief: recent bijgewerkte profielen worden iets hoger gerankt."
+msgstr ""
+
+#: app/templates/job_detail.html:8
+msgid "Contactgegevens van het Bedrijf"
+msgstr ""
+
+#: app/templates/job_detail.html:13 app/templates/job_detail.html:30
+msgid "Bedrijf:"
+msgstr ""
+
+#: app/templates/job_detail.html:22
+msgid "De contactgegevens van dit bedrijf zijn verborgen."
+msgstr ""
+
+#: app/templates/job_detail.html:26
+msgid ""
+"Door op deze knop te klikken, worden de contactgegevens permanent "
+"zichtbaar voor uw profiel."
+msgstr ""
+
+#: app/templates/job_detail.html:35
+msgid ""
+"Log in als Consultant om de contactgegevens te bekijken en te "
+"ontgrendelen."
+msgstr ""
+
+#: app/templates/job_detail.html:41 app/templates/job_edit.html:14
+msgid "Beschrijving"
+msgstr ""
+
+#: app/templates/job_detail.html:42
+msgid "Geen beschrijving beschikbaar."
+msgstr ""
+
+#: app/templates/job_detail.html:46
+msgid "Locatie"
+msgstr ""
+
+#: app/templates/job_detail.html:55 app/templates/job_edit.html:23
+msgid "Contracttype"
+msgstr ""
+
+#: app/templates/job_detail.html:56
+msgid "Niet opgegeven"
+msgstr ""
+
+#: app/templates/job_detail.html:60
+msgid "Vereiste skills"
+msgstr ""
+
+#: app/templates/job_detail.html:68
+msgid "Geen specifieke skills opgegeven."
+msgstr ""
+
+#: app/templates/job_detail.html:75
+msgid "Bewerken"
+msgstr ""
+
+#: app/templates/job_detail.html:79
+msgid "Zeker verwijderen?"
+msgstr ""
+
+#: app/templates/job_detail.html:80
+msgid "Verwijderen"
+msgstr ""
+
+#: app/templates/job_edit.html:2 app/templates/job_edit.html:6
+msgid "Job Bewerken"
+msgstr ""
+
+#: app/templates/job_edit.html:11
+msgid "Titel"
+msgstr ""
+
+#: app/templates/job_edit.html:17
+msgid "Locatie — Stad"
+msgstr ""
+
+#: app/templates/job_edit.html:20
+msgid "Locatie — Land"
+msgstr ""
+
+#: app/templates/job_edit.html:42
+msgid "Annuleren"
+msgstr ""
+
+#: app/templates/job_list.html:2
+msgid "Vacatures | Job Lijst"
+msgstr ""
+
+#: app/templates/job_list.html:9
+msgid "Vacatures"
+msgstr ""
+
+#: app/templates/job_list.html:37
+msgid "Zoek in mijn vacatures (titel of omschrijving)"
+msgstr ""
+
+#: app/templates/job_list.html:39
+msgid "Zoek"
+msgstr ""
+
+#: app/templates/job_list.html:50
+msgid ""
+"Gebruik onderstaande velden om handmatig te filteren. Resultaten worden "
+"gesorteerd op Titel (A-Z)."
+msgstr ""
+
+#: app/templates/job_list.html:53
+msgid "Zoek op Titel/Omschrijving"
+msgstr ""
+
+#: app/templates/job_list.html:58
+msgid "Contract type (Alle)"
+msgstr ""
+
+#: app/templates/job_list.html:71
+msgid "Skills (filteren - *vink de vereiste skills aan*)"
+msgstr ""
+
+#: app/templates/job_list.html:136
+msgid "Vereiste Skills:"
+msgstr ""
+
+#: app/templates/job_list.html:211
+msgid "Bekijk Vacature"
+msgstr ""
+
+#: app/templates/job_list.html:217
+msgid "Geen vacatures gevonden die overeenkomen met de criteria."
+msgstr ""
+
+#: app/templates/job_new.html:2
+msgid "Create New Job Post"
+msgstr ""
+
+#: app/templates/job_new.html:6
+msgid "Post a New Job"
+msgstr ""
+
+#: app/templates/job_new.html:11
+msgid "Job Title"
+msgstr ""
+
+#: app/templates/job_new.html:16
+msgid "Description"
+msgstr ""
+
+#: app/templates/job_new.html:22
+msgid "City"
+msgstr ""
+
+#: app/templates/job_new.html:26
+msgid "Country"
+msgstr ""
+
+#: app/templates/job_new.html:32
+msgid "Contract Type"
+msgstr ""
+
+#: app/templates/job_new.html:41
+msgid "Required Skills"
+msgstr ""
+
+#: app/templates/job_new.html:42
+msgid "Select all skills required for this job."
+msgstr ""
+
+#: app/templates/job_new.html:65
+msgid "Post Job"
+msgstr ""
+
+#: app/templates/login.html:5
+msgid "Login (MVP)"
+msgstr ""
+
+#: app/templates/login.html:8
+msgid "Username"
+msgstr ""
+
+#: app/templates/login.html:11
+msgid "Rol"
+msgstr ""
+
+#: app/templates/login.html:13
+msgid "consultant"
+msgstr ""
+
+#: app/templates/login.html:14
+msgid "company"
+msgstr ""
+
+#: app/templates/login.html:17
+msgid "Inloggen"
 msgstr ""
 
 #: venv/Lib/site-packages/click/_termui_impl.py:608

@@ -1,13 +1,13 @@
 {% extends "base.html" %}
-{% block title %}Profiel aanpassen{% endblock %}
+{% block title %}{{ _("Profiel aanpassen") }}{% endblock %}
 
 {% block content %}
-  <h1>Profiel aanpassen</h1>
+  <h1>{{ _("Profiel aanpassen") }}</h1>
 
   <form method="post" enctype="multipart/form-data">
 
     <label style="display:block; margin-bottom: 10px;">
-      Naam zichtbaar voor anderen:
+      {{ _("Naam zichtbaar voor anderen:") }}
       <input
         type="text"
         name="display_name"
@@ -18,7 +18,7 @@
     </label>
 
     <label style="display:block; margin-bottom: 10px;">
-      Stad:
+      {{ _("Stad:") }}
       <input
         type="text"
         name="location_city"
@@ -28,7 +28,7 @@
     </label>
 
     <label style="display:block; margin-bottom: 10px;">
-      Land:
+      {{ _("Land:") }}
       <input
         type="text"
         name="country"
@@ -38,7 +38,7 @@
     </label>
 
     <label style="display:block; margin-bottom: 10px;">
-      Headline:
+      {{ _("Headline:") }}
       <input
         type="text"
         name="headline"
@@ -46,31 +46,34 @@
         style="width: 300px;"
       >
     </label>
+
     <hr style="margin: 20px 0;">
-    <h3>Contactinformatie (wordt verborgen getoond)</h3>
+    <h3>{{ _("Contactinformatie (wordt verborgen getoond)") }}</h3>
 
     <label style="display:block; margin-bottom: 10px;">
-      E-mailadres:
-      <input
-        type="email"
-        name="contact_email"
-        value="{{ profile.contact_email or '' }}"
-        style="width: 300px;"
-      >
-    </label>
+      {{ _("E-mailadres:") }}
+      <input
+        type="email"
+        name="contact_email"
+        value="{{ profile.contact_email or '' }}"
+        style="width: 300px;"
+      >
+    </label>
 
     <label style="display:block; margin-bottom: 10px;">
-      Telefoonnummer:
-      <input
-        type="tel"
-        name="phone_number"
-        value="{{ profile.phone_number or '' }}"
-        style="width: 300px;"
-      >
-    </label>
+      {{ _("Telefoonnummer:") }}
+      <input
+        type="tel"
+        name="phone_number"
+        value="{{ profile.phone_number or '' }}"
+        style="width: 300px;"
+      >
+    </label>
+
     <hr style="margin: 20px 0;">
+
     <label style="display:block; margin-bottom: 10px;">
-      Profielfoto:
+      {{ _("Profielfoto:") }}
       <input
         type="file"
         name="profile_image"
@@ -79,7 +82,7 @@
     </label>
 
     <label style="display:block; margin-bottom: 10px;">
-      CV / Document:
+      {{ _("CV / Document:") }}
       <input
         type="file"
         name="cv_document"
@@ -87,6 +90,6 @@
       >
     </label>
 
-    <button class="btn" type="submit">Opslaan</button>
+    <button class="btn" type="submit">{{ _("Opslaan") }}</button>
   </form>
 {% endblock %}

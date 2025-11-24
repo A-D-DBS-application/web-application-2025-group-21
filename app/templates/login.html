@@ -1,18 +1,20 @@
 {% extends "base.html" %}
-{% block title %}Login{% endblock %}
+{% block title %}{{ _("Login") }}{% endblock %}
+
 {% block content %}
-  <h1>Login (MVP)</h1>
+  <h1>{{ _("Login (MVP)") }}</h1>
+
   <form method="post">
-    <label>Username</label>
+    <label>{{ _("Username") }}</label>
     <input name="username" required>
 
-    <label>Rol</label>
+    <label>{{ _("Rol") }}</label>
     <select name="role">
-      <option value="consultant">consultant</option>
-      <option value="company">company</option>
+      <option value="consultant">{{ _("consultant") }}</option>
+      <option value="company">{{ _("company") }}</option>
     </select>
 
-    <button class="btn" type="submit">Inloggen</button>
+    <button class="btn" type="submit">{{ _("Inloggen") }}</button>
   </form>
+
 {% endblock %}
-#loginpagina en doorgestuurd nr dashboard 

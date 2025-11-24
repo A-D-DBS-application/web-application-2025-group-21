@@ -264,7 +264,7 @@ def edit_consultant_profile():
                 # Enkel toegelaten types
                 allowed_exts = {".pdf", ".doc", ".docx"}
                 if ext not in allowed_exts:
-                    flash("Ongeldig bestandstype. Upload enkel pdf/doc/docx.")
+                    flash(_("Ongeldig bestandstype. Upload enkel pdf/doc/docx."))
                     return redirect(url_for("main.edit_consultant_profile"))
 
                 # Unieke bestandsnaam voor CV
@@ -280,7 +280,7 @@ def edit_consultant_profile():
 
             db.commit()
 
-            flash("Profile updated")
+            flash(_("Profile updated"))
             return redirect(url_for("main.dashboard"))
 
         return render_template("edit_consultant_profile.html", profile=profile)

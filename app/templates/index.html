@@ -1,51 +1,51 @@
 {% extends "base.html" %}
-{% block title %}Home | IConsult{% endblock %}
+{% block title %}{{ _("Home | IConsult") }}{% endblock %}
 
 {% block content %}
 
 <div class="home-hero">
-    <h1>IConsult</h1>
+    <h1>{{ _("IConsult") }}</h1>
     <p class="home-subtitle">
-        Het platform waar <strong>consultants</strong> en <strong>bedrijven</strong> elkaar vinden
-        via een slimme, transparante matchscore.
+        {{ _("Het platform waar") }} <strong>{{ _("consultants") }}</strong> {{ _("en") }}
+        <strong>{{ _("bedrijven") }}</strong> 
+        {{ _("elkaar vinden via een slimme, transparante matchscore.") }}
     </p>
 
     <div class="home-cta-row">
         {% if session.get('user_id') %}
             {% if session.get('role') == 'company' %}
                 <a href="{{ url_for('main.consultants_list') }}" class="home-btn primary">
-                    👉 Zoek consultants
+                    {{ _("👉 Zoek consultants") }}
                 </a>
                 <a href="{{ url_for('main.company_jobs_list') }}" class="home-btn secondary">
-                    Mijn vacatures
+                    {{ _("Mijn vacatures") }}
                 </a>
             {% elif session.get('role') == 'consultant' %}
                 <a href="{{ url_for('main.jobs_list') }}" class="home-btn primary">
-                    👉 Bekijk vacatures
+                    {{ _("👉 Bekijk vacatures") }}
                 </a>
                 <a href="{{ url_for('main.dashboard') }}" class="home-btn secondary">
-                    Mijn profiel
+                    {{ _("Mijn profiel") }}
                 </a>
             {% else %}
                 <a href="{{ url_for('main.dashboard') }}" class="home-btn primary">
-                    👉 Ga naar je dashboard
+                    {{ _("👉 Ga naar je dashboard") }}
                 </a>
             {% endif %}
         {% else %}
             <a href="{{ url_for('main.login') }}" class="home-btn primary">
-                👉 Log in om te starten
+                {{ _("👉 Log in om te starten") }}
             </a>
             <p class="home-small">
-                Nog geen account? Kies je rol op de loginpagina – consultant of bedrijf.
+                {{ _("Nog geen account? Kies je rol op de loginpagina – consultant of bedrijf.") }}
             </p>
         {% endif %}
     </div>
 </div>
 
-{# METRICS BLIJVEN ALGEMEEN #}
 <div class="home-metrics">
     <div class="metric-card">
-        <span class="metric-label">Actieve vacatures</span>
+        <span class="metric-label">{{ _("Actieve vacatures") }}</span>
         <span class="metric-value">
             {% if latest_jobs %}
                 {{ latest_jobs|length }}
@@ -53,10 +53,11 @@
                 10+
             {% endif %}
         </span>
-        <span class="metric-hint">Gericht op digitale & zakelijke profielen</span>
+        <span class="metric-hint">{{ _("Gericht op digitale & zakelijke profielen") }}</span>
     </div>
+
     <div class="metric-card">
-        <span class="metric-label">Beschikbare consultants</span>
+        <span class="metric-label">{{ _("Beschikbare consultants") }}</span>
         <span class="metric-value">
             {% if latest_consultants %}
                 {{ latest_consultants|length }}
@@ -64,75 +65,68 @@
                 20+
             {% endif %}
         </span>
-        <span class="metric-hint">Met duidelijke skill-profielen</span>
+        <span class="metric-hint">{{ _("Met duidelijke skill-profielen") }}</span>
     </div>
+
     <div class="metric-card">
-        <span class="metric-label">Matchmotor</span>
+        <span class="metric-label">{{ _("Matchmotor") }}</span>
         <span class="metric-value">IConsult</span>
-        <span class="metric-hint">Skills, tekst, recentheid & populariteit</span>
+        <span class="metric-hint">{{ _("Skills, tekst, recentheid & populariteit") }}</span>
     </div>
 </div>
 
-{# ROLSPECIFIEKE INFO-BLOKKEN #}
 <div class="home-columns">
-
-    {# NIET INGELOGD → BEIDE #}
     {% if not session.get('user_id') %}
         <div class="home-column">
-            <h2>Voor bedrijven</h2>
+            <h2>{{ _("Voor bedrijven") }}</h2>
             <ul>
-                <li>Maak snel een vacature aan met vereiste skills.</li>
-                <li>Ontvang een gesorteerde lijst consultants volgens matchscore.</li>
-                <li>Unlock contactgegevens alleen wanneer het relevant is.</li>
+                <li>{{ _("Maak snel een vacature aan met vereiste skills.") }}</li>
+                <li>{{ _("Ontvang een gesorteerde lijst consultants volgens matchscore.") }}</li>
+                <li>{{ _("Unlock contactgegevens alleen wanneer het relevant is.") }}</li>
             </ul>
         </div>
 
         <div class="home-column">
-            <h2>Voor consultants</h2>
+            <h2>{{ _("Voor consultants") }}</h2>
             <ul>
-                <li>Vul je profiel en skills in voor betere matches.</li>
-                <li>Ontdek vacatures die echt passen bij jouw expertise.</li>
-                <li>Jij kiest wanneer je je gegevens vrijgeeft aan een bedrijf.</li>
+                <li>{{ _("Vul je profiel en skills in voor betere matches.") }}</li>
+                <li>{{ _("Ontdek vacatures die echt passen bij jouw expertise.") }}</li>
+                <li>{{ _("Jij kiest wanneer je je gegevens vrijgeeft aan een bedrijf.") }}</li>
             </ul>
         </div>
 
-    {# COMPANY → ENKEL BEDRIJVEN #}
     {% elif session.get('role') == 'company' %}
         <div class="home-column">
-            <h2>Voor bedrijven</h2>
+            <h2>{{ _("Voor bedrijven") }}</h2>
             <ul>
-                <li>Maak snel een vacature aan met vereiste skills.</li>
-                <li>Ontvang een gesorteerde lijst consultants volgens matchscore.</li>
-                <li>Unlock contactgegevens alleen wanneer het relevant is.</li>
+                <li>{{ _("Maak snel een vacature aan met vereiste skills.") }}</li>
+                <li>{{ _("Ontvang een gesorteerde lijst consultants volgens matchscore.") }}</li>
+                <li>{{ _("Unlock contactgegevens alleen wanneer het relevant is.") }}</li>
             </ul>
             <a href="{{ url_for('main.job_new') }}" class="home-link">
-                + Nieuwe vacature aanmaken
+                {{ _("+ Nieuwe vacature aanmaken") }}
             </a>
         </div>
 
-    {# CONSULTANT → ENKEL CONSULTANTS #}
     {% elif session.get('role') == 'consultant' %}
         <div class="home-column">
-            <h2>Voor consultants</h2>
+            <h2>{{ _("Voor consultants") }}</h2>
             <ul>
-                <li>Vul je skills en specialisatie zo volledig mogelijk in.</li>
-                <li>Ontdek vacatures die echt passen bij jouw expertise.</li>
-                <li>Je kiest zelf wanneer je je gegevens vrijgeeft.</li>
+                <li>{{ _("Vul je skills en specialisatie zo volledig mogelijk in.") }}</li>
+                <li>{{ _("Ontdek vacatures die echt passen bij jouw expertise.") }}</li>
+                <li>{{ _("Je kiest zelf wanneer je je gegevens vrijgeeft.") }}</li>
             </ul>
             <a href="{{ url_for('main.edit_consultant_profile') }}" class="home-link">
-                ✏️ Werk mijn profiel bij
+                {{ _("✏️ Werk mijn profiel bij") }}
             </a>
         </div>
     {% endif %}
 </div>
 
-{# ROLSPECIFIEKE “RECENT” LIJSTEN #}
-
-{# NIET INGELOGD → BEIDE LIJSTEN #}
 {% if not session.get('user_id') %}
     {% if latest_jobs %}
     <section class="home-list-section">
-        <h2>Recent toegevoegde vacatures</h2>
+        <h2>{{ _("Recent toegevoegde vacatures") }}</h2>
         <div class="home-list-grid">
             {% for job in latest_jobs %}
                 <article class="mini-card">
@@ -160,7 +154,7 @@
 
     {% if latest_consultants %}
     <section class="home-list-section">
-        <h2>Nieuwe consultants</h2>
+        <h2>{{ _("Nieuwe consultants") }}</h2>
         <div class="home-list-grid">
             {% for c in latest_consultants %}
                 <article class="mini-card">
@@ -187,10 +181,9 @@
     {% endif %}
 {% else %}
 
-    {# COMPANY → vooral recent CONSULTANTS tonen #}
     {% if session.get('role') == 'company' and latest_consultants %}
     <section class="home-list-section">
-        <h2>Nieuwe consultants</h2>
+        <h2>{{ _("Nieuwe consultants") }}</h2>
         <div class="home-list-grid">
             {% for c in latest_consultants %}
                 <article class="mini-card">
@@ -216,10 +209,9 @@
     </section>
     {% endif %}
 
-    {# CONSULTANT → vooral recent VACATURES tonen #}
     {% if session.get('role') == 'consultant' and latest_jobs %}
     <section class="home-list-section">
-        <h2>Recent toegevoegde vacatures</h2>
+        <h2>{{ _("Recent toegevoegde vacatures") }}</h2>
         <div class="home-list-grid">
             {% for job in latest_jobs %}
                 <article class="mini-card">
@@ -246,25 +238,23 @@
     {% endif %}
 {% endif %}
 
-{# RECENTE UNLOCKS (ALTIJD ZICHTBAAR, MAAR ANONIEM / GEBLURRED) #}
 {% if recent_unlocks %}
 <section class="home-list-section">
-    <h2>Recent vrijgegeven profielen (geanonimiseerd)</h2>
+    <h2>{{ _("Recent vrijgegeven profielen (geanonimiseerd)") }}</h2>
     <p class="home-muted">
-        Onderstaande items tonen enkel type en locatie. De echte contactgegevens zijn alleen zichtbaar
-        voor de partij die het profiel heeft vrijgegeven.
+        {{ _("Onderstaande items tonen enkel type en locatie. De echte contactgegevens zijn alleen zichtbaar voor de partij die het profiel heeft vrijgegeven.") }}
     </p>
     <div class="home-list-grid">
         {% for u in recent_unlocks %}
             <article class="mini-card blurred-card">
                 <div class="blur-inner">
                     {% if u.kind == 'consultant' %}
-                        <h3>Consultant-profiel</h3>
+                        <h3>{{ _("Consultant-profiel") }}</h3>
                         <p class="mini-meta">
                             {% if u.profile.specialisation %}
                                 {{ u.profile.specialisation }}
                             {% else %}
-                                Consultant
+                                {{ _("Consultant") }}
                             {% endif %}
                         </p>
                         <p class="mini-location">
@@ -272,16 +262,16 @@
                                 <i class="fas fa-map-marker-alt"></i>
                                 {{ u.profile.location_city }}{% if u.profile.location_city and u.profile.country %}, {% endif %}{{ u.profile.country }}
                             {% else %}
-                                Locatie verborgen
+                                {{ _("Locatie verborgen") }}
                             {% endif %}
                         </p>
                     {% elif u.kind == 'job' %}
-                        <h3>Vacature</h3>
+                        <h3>{{ _("Vacature") }}</h3>
                         <p class="mini-meta">
                             {% if u.job.contract_type %}
                                 {{ u.job.contract_type }}
                             {% else %}
-                                Job
+                                {{ _("Job") }}
                             {% endif %}
                         </p>
                         <p class="mini-location">
@@ -289,16 +279,16 @@
                                 <i class="fas fa-map-marker-alt"></i>
                                 {{ u.job.location_city }}{% if u.job.location_city and u.job.country %}, {% endif %}{{ u.job.country }}
                             {% else %}
-                                Locatie verborgen
+                                {{ _("Locatie verborgen") }}
                             {% endif %}
                         </p>
                     {% endif %}
                     <p class="mini-date">
-                        {% if u.created_at_str %}Vrijgegeven op {{ u.created_at_str }}{% endif %}
+                        {% if u.created_at_str %}{{ _("Vrijgegeven op") }} {{ u.created_at_str }}{% endif %}
                     </p>
                 </div>
                 <div class="blur-overlay">
-                    🔒 Details enkel zichtbaar voor de koper
+                    {{ _("🔒 Details enkel zichtbaar voor de koper") }}
                 </div>
             </article>
         {% endfor %}
@@ -306,288 +296,53 @@
 </section>
 {% endif %}
 
-{# ONDERSTE UITLEG – ROLSPECIFIEKE TIPS #}
 <section class="home-explainer">
-    <h2>Hoe werkt de IConsult-matchscore?</h2>
+    <h2>{{ _("Hoe werkt de IConsult-matchscore?") }}</h2>
     <div class="home-explainer-grid">
+
         <div>
-            <h3>Wat we meenemen in de score</h3>
+            <h3>{{ _("Wat we meenemen in de score") }}</h3>
             <ul>
-                <li><strong>Skills</strong> – hoe beter de gevraagde en aangeboden vaardigheden overeenkomen, hoe hoger de score.</li>
-                <li><strong>Zoekterm</strong> – indien u een zoekterm ingeeft, kijken we of die voorkomt in titel, samenvatting of beschrijving.</li>
-                <li><strong>Recentheid</strong> – recent toegevoegde of geüpdatete profielen en vacatures krijgen een lichte boost.</li>
-                <li><strong>Populariteit</strong> – profielen en vacatures die vaker worden geunlockt, scoren iets hoger.</li>
+                <li><strong>{{ _("Skills") }}</strong> – {{ _("hoe beter de gevraagde en aangeboden vaardigheden overeenkomen, hoe hoger de score.") }}</li>
+                <li><strong>{{ _("Zoekterm") }}</strong> – {{ _("indien u een zoekterm ingeeft, kijken we of die voorkomt in titel, samenvatting of beschrijving.") }}</li>
+                <li><strong>{{ _("Recentheid") }}</strong> – {{ _("recent toegevoegde of geüpdatete profielen en vacatures krijgen een lichte boost.") }}</li>
+                <li><strong>{{ _("Populariteit") }}</strong> – {{ _("profielen en vacatures die vaker worden geunlockt, scoren iets hoger.") }}</li>
             </ul>
         </div>
 
         <div class="home-tips">
-            {# NIET INGELOGD → BEIDE TIPSETS #}
             {% if not session.get('user_id') %}
-                <p><strong>Voor bedrijven:</strong></p>
+                <p><strong>{{ _("Voor bedrijven:") }}</strong></p>
                 <ul>
-                    <li>Voeg duidelijke skills toe aan elke vacature.</li>
-                    <li>Gebruik concrete termen in de titel en omschrijving.</li>
-                </ul>
-                <p><strong>Voor consultants:</strong></p>
-                <ul>
-                    <li>Vul je skills en specialisatie zo volledig mogelijk in.</li>
-                    <li>Hou je profiel up-to-date, vooral bij nieuwe opdrachten.</li>
+                    <li>{{ _("Voeg duidelijke skills toe aan elke vacature.") }}</li>
+                    <li>{{ _("Gebruik concrete termen in de titel en omschrijving.") }}</li>
                 </ul>
 
-            {# COMPANY → ENKEL BEDRIJFSTIPS #}
+                <p><strong>{{ _("Voor consultants:") }}</strong></p>
+                <ul>
+                    <li>{{ _("Vul je skills en specialisatie zo volledig mogelijk in.") }}</li>
+                    <li>{{ _("Hou je profiel up-to-date, vooral bij nieuwe opdrachten.") }}</li>
+                </ul>
+
             {% elif session.get('role') == 'company' %}
-                <p><strong>Optimaliseer als bedrijf:</strong></p>
+                <p><strong>{{ _("Optimaliseer als bedrijf:") }}</strong></p>
                 <ul>
-                    <li>Definieer 3–7 kernskills per vacature voor een scherpere match.</li>
-                    <li>Gebruik herkenbare functietitels en vermijd interne jargon.</li>
-                    <li>Werk vacatures bij als requirements wijzigen, zodat de recentheidsscore behouden blijft.</li>
+                    <li>{{ _("Definieer 3–7 kernskills per vacature voor een scherpere match.") }}</li>
+                    <li>{{ _("Gebruik herkenbare functietitels en vermijd interne jargon.") }}</li>
+                    <li>{{ _("Werk vacatures bij als requirements wijzigen, zodat de recentheidsscore behouden blijft.") }}</li>
                 </ul>
 
-            {# CONSULTANT → ENKEL CONSULTANTTIPS #}
             {% elif session.get('role') == 'consultant' %}
-                <p><strong>Optimaliseer als consultant:</strong></p>
+                <p><strong>{{ _("Optimaliseer als consultant:") }}</strong></p>
                 <ul>
-                    <li>Vul al je relevante skills in en update ze na elke opdracht.</li>
-                    <li>Zorg dat je titel en korte bio je kernexpertise helder verwoorden.</li>
-                    <li>Blijf actief: recent bijgewerkte profielen worden iets hoger gerankt.</li>
+                    <li>{{ _("Vul al je relevante skills in en update ze na elke opdracht.") }}</li>
+                    <li>{{ _("Zorg dat je titel en korte bio je kernexpertise helder verwoorden.") }}</li>
+                    <li>{{ _("Blijf actief: recent bijgewerkte profielen worden iets hoger gerankt.") }}</li>
                 </ul>
             {% endif %}
         </div>
+
     </div>
 </section>
-
-<style>
-.home-hero {
-    text-align: center;
-    margin-top: 30px;
-    margin-bottom: 30px;
-}
-.home-hero h1 {
-    font-size: 2.4rem;
-    margin-bottom: 10px;
-}
-.home-subtitle {
-    font-size: 1.05rem;
-    color: #4b5563;
-    max-width: 600px;
-    margin: 0 auto 20px auto;
-}
-.home-cta-row {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-}
-.home-btn {
-    display: inline-block;
-    padding: 10px 20px;
-    border-radius: 999px;
-    font-weight: 600;
-    text-decoration: none;
-    border: 1px solid transparent;
-}
-.home-btn.primary {
-    background: #2563eb;
-    color: #fff;
-    border-color: #1d4ed8;
-}
-.home-btn.primary:hover {
-    background: #1d4ed8;
-}
-.home-btn.secondary {
-    background: #e5e7eb;
-    color: #111827;
-    border-color: #d1d5db;
-}
-.home-btn.secondary:hover {
-    background: #d1d5db;
-}
-.home-small {
-    font-size: 0.9rem;
-    color: #6b7280;
-}
-
-/* metrics */
-.home-metrics {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 16px;
-    margin-bottom: 30px;
-}
-.metric-card {
-    background: #ffffff;
-    border-radius: 12px;
-    border: 1px solid #e5e7eb;
-    padding: 14px 16px;
-    box-shadow: 0 3px 8px rgba(15, 23, 42, 0.06);
-}
-.metric-label {
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: #6b7280;
-}
-.metric-value {
-    display: block;
-    margin-top: 4px;
-    font-size: 1.6rem;
-    font-weight: 700;
-    color: #111827;
-}
-.metric-hint {
-    display: block;
-    margin-top: 4px;
-    font-size: 0.9rem;
-    color: #6b7280;
-}
-
-/* columns blok */
-.home-columns {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 20px;
-    margin-top: 10px;
-    margin-bottom: 30px;
-}
-.home-column {
-    background: #ffffff;
-    border-radius: 12px;
-    border: 1px solid #e5e7eb;
-    padding: 18px 18px 16px 18px;
-}
-.home-column h2 {
-    margin-top: 0;
-    margin-bottom: 10px;
-}
-.home-column ul {
-    padding-left: 18px;
-    margin-top: 0;
-    margin-bottom: 10px;
-}
-.home-column li {
-    margin-bottom: 6px;
-    font-size: 0.95rem;
-}
-.home-link {
-    font-size: 0.9rem;
-    text-decoration: none;
-    color: #2563eb;
-    font-weight: 600;
-}
-.home-link:hover {
-    text-decoration: underline;
-}
-
-/* lijsten recent jobs / consultants / unlocks */
-.home-list-section {
-    margin-bottom: 30px;
-}
-.home-list-section h2 {
-    margin-bottom: 8px;
-}
-.home-muted {
-    font-size: 0.9rem;
-    color: #6b7280;
-    margin-bottom: 10px;
-}
-.home-list-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-    gap: 14px;
-}
-.mini-card {
-    background: #ffffff;
-    border-radius: 10px;
-    border: 1px solid #e5e7eb;
-    padding: 12px 14px;
-    position: relative;
-    overflow: hidden;
-}
-.mini-card h3 {
-    margin: 0 0 4px 0;
-    font-size: 1rem;
-}
-.mini-card h3 a {
-    color: #1f2937;
-    text-decoration: none;
-}
-.mini-card h3 a:hover {
-    color: #2563eb;
-}
-.mini-meta {
-    margin: 0 0 4px 0;
-    font-size: 0.9rem;
-    color: #4b5563;
-}
-.mini-location {
-    margin: 0;
-    font-size: 0.85rem;
-    color: #6b7280;
-}
-.mini-location i {
-    margin-right: 4px;
-}
-.mini-date {
-    margin: 6px 0 0 0;
-    font-size: 0.8rem;
-    color: #9ca3af;
-}
-
-/* geblurde unlocks */
-.blurred-card .blur-inner {
-    filter: blur(3px);
-    opacity: 0.8;
-}
-.blur-overlay {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #111827;
-    background: rgba(249, 250, 251, 0.9);
-    padding: 6px;
-}
-
-/* uitleg matchscore */
-.home-explainer {
-    margin: 20px 0 10px 0;
-    padding: 18px 18px 16px 18px;
-    border-radius: 12px;
-    border: 1px solid #e5e7eb;
-    background: #f9fafb;
-}
-.home-explainer h2 {
-    margin-top: 0;
-    margin-bottom: 10px;
-}
-.home-explainer-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 2fr) minmax(0, 1.4fr);
-    gap: 18px;
-}
-.home-explainer-grid ul {
-    padding-left: 18px;
-}
-.home-tips ul {
-    padding-left: 18px;
-    margin-bottom: 8px;
-}
-.home-tips p {
-    margin: 4px 0;
-}
-
-@media (max-width: 768px) {
-    .home-cta-row {
-        flex-direction: column;
-    }
-    .home-explainer-grid {
-        grid-template-columns: 1fr;
-    }
-}
-</style>
 
 {% endblock %}

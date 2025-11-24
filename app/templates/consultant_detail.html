@@ -1,18 +1,18 @@
 {% extends "base.html" %}
-{% block title %}Consultant detail{% endblock %}
+{% block title %}{{ _("Consultant detail") }}{% endblock %}
 {% block content %}
   <h1>{{ profile.display_name_masked }}</h1>
   {# --------- Profielfoto --------- #}
   {% if profile.profile_image %}
     <img 
       src="{{ profile.profile_image }}" 
-      alt="Profielfoto" 
+      alt="{{ _("Profielfoto") }}"
       style="width:140px;height:140px;border-radius:50%;object-fit:cover;margin-bottom:15px;"
     >
   {% else %}
     <img 
       src="{{ url_for('static', filename='img/default-avatar.png') }}" 
-      alt="Geen profielfoto"
+      alt="{{ _("Geen profielfoto") }}"
       style="width:140px;height:140px;border-radius:50%;object-fit:cover;margin-bottom:15px;"
     >
   {% endif %}
@@ -21,7 +21,7 @@
     <p><i>{{ profile.headline }}</i></p>
   {% endif %}
 
-  <h3>Skills</h3>
+  <h3>{{ _("Skills") }}</h3>
   {% if profile.skills and profile.skills|length > 0 %}
     <ul>
       {% for skill in profile.skills %}
@@ -29,7 +29,7 @@
       {% endfor %}
     </ul>
   {% else %}
-    <p><i>Geen skills opgegeven.</i></p>
+    <p><i>{{ _("Geen skills opgegeven.") }}</i></p>
   {% endif %}
 
   <p>
@@ -40,45 +40,45 @@
     </small>
   </p>
 <div class="card">
-    <h2>Contactgegevens</h2>
+    <h2>{{ _("Contactgegevens") }}</h2>
     
     {# 1. Controleert: Is de bezoeker een Bedrijf? #}
     {% if user and user.role == UserRole.company %}
         
         {# Toon contactgegevens indien ONTGRENDELD of de EIGENAAR #}
         {% if is_unlocked or is_owner %}
-            <p><strong>E-mail:</strong> {{ profile.contact_email or "Niet ingevuld" }}</p>
-            <p><strong>Telefoon:</strong> {{ profile.phone_number or "Niet ingevuld" }}</p>
+            <p><strong>{{ _("E-mail") }}:</strong> {{ profile.contact_email or "Niet ingevuld" }}</p>
+            <p><strong>{{ _("Telefoon") }}:</strong> {{ profile.phone_number or "Niet ingevuld" }}</p>
             
             {% if profile.cv_document %}
                 <p>
                     <strong>CV:</strong>
                     <a href="{{ profile.cv_document }}" target="_blank">
-                        Bekijk / download CV
+                        {{ _("Bekijk / download CV") }}
                     </a>
                 </p>
             {% else %}
-                <p><strong>CV:</strong> Niet ingevuld</p>
+                <p><strong>CV:</strong> {{ _("Niet ingevuld") }}</p>
             {% endif %}
 
             {% if is_unlocked %}
-                <p style="color: green;">✅ Deze contactgegevens zijn vrijgegeven en permanent zichtbaar.</p>
+                <p style="color: green;">✅ {{ _("Deze contactgegevens zijn vrijgegeven en permanent zichtbaar.") }}</p>
             {% endif %}
         
         {# Toon UNLOCK-KNOP indien niet ontgrendeld #}
         {% else %}
-            <p>De contactgegevens van deze consultant zijn **verborgen**.</p>
-            <p><strong>CV:</strong> Verborgen</p>
-            <a href="{{ url_for('main.unlock_consultant', profile_id=profile.id) }}" class="btn" onclick="return confirm('Weet u zeker dat u de contactgegevens wilt vrijgeven?')">
-                🔒 Ontgrendel contactgegevens (MVP Knop)
+            <p>{{ _("De contactgegevens van deze consultant zijn verborgen.") }}</p>
+            <p><strong>{{ _("CV") }}:</strong> {{ _("Verborgen") }}</p>
+            <a href="{{ url_for('main.unlock_consultant', profile_id=profile.id) }}" class="btn" onclick="return confirm('{{ _("Weet u zeker dat u de contactgegevens wilt vrijgeven?") }}')">
+                {{ _("🔒 Ontgrendel contactgegevens (MVP Knop)") }}
             </a>
-            <p><small>Door op deze knop te klikken, worden de contactgegevens permanent zichtbaar voor uw bedrijf.</small></p>
+            <p><small>{{ _("Door op deze knop te klikken, worden de contactgegevens permanent zichtbaar voor uw bedrijf.") }}</small></p>
         {% endif %}
         
     {# 2. Toon consultant's eigen contactinfo (als ze ingelogd zijn op hun eigen profiel)-> is dit niet overbodig? #}
     {% elif is_owner %} 
-        <p><strong>E-mail:</strong> {{ profile.contact_email or "Niet ingevuld" }} (Zichtbaar voor u als eigenaar)</p>
-        <p><strong>Telefoon:</strong> {{ profile.phone_number or "Niet ingevuld" }} (Zichtbaar voor u als eigenaar)</p>
+        <p><strong>E-mail:</strong> {{ profile.contact_email or "Niet ingevuld" }} ({{ _("Zichtbaar voor u als eigenaar") }})</p>
+        <p><strong>Telefoon:</strong> {{ profile.phone_number or "Niet ingevuld" }} ({{ _("Zichtbaar voor u als eigenaar") }})</p>
         {% if profile.cv_document %}
             <p>
                 <strong>CV:</strong>
@@ -92,7 +92,7 @@
         
     {# 3. Fallback: Toon de login/rol-vereiste #}
     {% else %}
-        <p>Log in als **Bedrijf** om de contactgegevens te bekijken en te ontgrendelen.</p>
+        <p>{{ _("Log in als **Bedrijf** om de contactgegevens te bekijken en te ontgrendelen.") }}</p>
     {% endif %}
 </div>
 {% endblock %}

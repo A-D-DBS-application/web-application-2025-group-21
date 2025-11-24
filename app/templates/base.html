@@ -2,7 +2,7 @@
 <html lang="{{ session.get('language', 'en') }}">
 <head>
     <meta charset="utf-8">
-    <title>{% block title %}IConsult Match{% endblock %}</title>
+    <title>{% block title %}{{ _("IConsult Match") }}{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
     {# 🎯 Huidig jaar voor copyright #}
@@ -158,7 +158,7 @@
 <footer class="footer">
     <div class="container text-center">
         <span class="text-muted">
-            &copy; {{ now.year }} IConsult - All rights reserved
+            &copy; {{ now.year }} IConsult - {{ _("All rights reserved") }}
         </span>
     </div>
 </footer>
