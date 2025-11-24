@@ -49,6 +49,18 @@
         {% if is_unlocked or is_owner %}
             <p><strong>E-mail:</strong> {{ profile.contact_email or "Niet ingevuld" }}</p>
             <p><strong>Telefoon:</strong> {{ profile.phone_number or "Niet ingevuld" }}</p>
+            
+            {% if profile.cv_document %}
+                <p>
+                    <strong>CV:</strong>
+                    <a href="{{ profile.cv_document }}" target="_blank">
+                        Bekijk / download CV
+                    </a>
+                </p>
+            {% else %}
+                <p><strong>CV:</strong> Niet ingevuld</p>
+            {% endif %}
+
             {% if is_unlocked %}
                 <p style="color: green;">✅ Deze contactgegevens zijn vrijgegeven en permanent zichtbaar.</p>
             {% endif %}
@@ -56,16 +68,27 @@
         {# Toon UNLOCK-KNOP indien niet ontgrendeld #}
         {% else %}
             <p>De contactgegevens van deze consultant zijn **verborgen**.</p>
+            <p><strong>CV:</strong> Verborgen</p>
             <a href="{{ url_for('main.unlock_consultant', profile_id=profile.id) }}" class="btn" onclick="return confirm('Weet u zeker dat u de contactgegevens wilt vrijgeven?')">
                 🔒 Ontgrendel contactgegevens (MVP Knop)
             </a>
             <p><small>Door op deze knop te klikken, worden de contactgegevens permanent zichtbaar voor uw bedrijf.</small></p>
         {% endif %}
         
-    {# 2. Toon consultant's eigen contactinfo (als ze ingelogd zijn op hun eigen profiel) #}
+    {# 2. Toon consultant's eigen contactinfo (als ze ingelogd zijn op hun eigen profiel)-> is dit niet overbodig? #}
     {% elif is_owner %} 
         <p><strong>E-mail:</strong> {{ profile.contact_email or "Niet ingevuld" }} (Zichtbaar voor u als eigenaar)</p>
         <p><strong>Telefoon:</strong> {{ profile.phone_number or "Niet ingevuld" }} (Zichtbaar voor u als eigenaar)</p>
+        {% if profile.cv_document %}
+            <p>
+                <strong>CV:</strong>
+                <a href="{{ profile.cv_document }}" target="_blank">
+                    Bekijk / download CV
+                </a>
+            </p>
+        {% else %}
+            <p><strong>CV:</strong> Niet ingevuld</p>
+        {% endif %}
         
     {# 3. Fallback: Toon de login/rol-vereiste #}
     {% else %}
