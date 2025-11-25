@@ -1,71 +1,71 @@
 {% extends "base.html" %}
-{% block title %}{{ _("Dashboard") }}{% endblock %}
+{% block title %}Dashboard{% endblock %}
 
 {% block content %}
-<h1>{{ _("Dashboard") }}</h1>
+<h1>Dashboard</h1>
 
 <div class="card">
-    <h2>{{ _("Profiel") }}</h2>
+    <h2>Profiel</h2>
 
-    <p><strong>{{ _("Ingelogd als:") }}</strong> {{ user.username }}</p>
-    <p><strong>{{ _("Rol:") }}</strong> {{ user.role.value }}</p>
+    <p><strong>Ingelogd als:</strong> {{ user.username }}</p>
+    <p><strong>Rol:</strong> {{ user.role.value }}</p>
 
     {% if user.role == UserRole.consultant %}
         {% if profile.profile_image %}
-            <img 
-                src="{{ profile.profile_image }}" 
-                alt="{{ _('Profielfoto') }}" 
+            <img
+                src="{{ profile.profile_image }}"
+                alt="Profielfoto"
                 style="width:140px;height:140px;border-radius:50%;object-fit:cover;margin-bottom:12px;"
             >
         {% else %}
-            <img 
-                src="{{ url_for('static', filename='img/default-avatar.png') }}" 
-                alt="{{ _('Geen profielfoto') }}"
+            <img
+                src="{{ url_for('static', filename='img/default-avatar.png') }}"
+                alt="Geen profielfoto"
                 style="width:140px;height:140px;border-radius:50%;object-fit:cover;margin-bottom:12px;"
             >
         {% endif %}
 
         {% if profile.cv_document %}
             <p>
-                <strong>{{ _("CV:") }}</strong>
+                <strong>CV:</strong>
                 <a href="{{ profile.cv_document }}" target="_blank">
-                    {{ _("Bekijk / download CV") }}
+                    Bekijk / download CV
                 </a>
             </p>
         {% else %}
-            <p><strong>{{ _("CV:") }}</strong> {{ _("nog niet toegevoegd") }}</p>
+            <p><strong>CV:</strong> nog niet toegevoegd</p>
         {% endif %}
 
-        <p><strong>{{ _("Naam:") }}</strong> {{ profile.display_name_masked }}</p>
-        <p><strong>{{ _("Locatie:") }}</strong> {{ profile.location_city }} , {{ profile.country }}</p>
-        <p><strong>{{ _("Opmerking:") }}</strong> {{ profile.headline or _("Geen headline") }}</p>
+        <p><strong>Naam:</strong> {{ profile.display_name_masked }}</p>
+        <p><strong>Locatie:</strong> {{ profile.location_city }} , {{ profile.country }}</p>
+        <p><strong>Opmerking:</strong> {{ profile.headline or "Geen headline" }}</p>
 
-        <p><strong>{{ _("E-mail:") }}</strong> {{ profile.contact_email or _("Niet ingevuld") }}</p>
-        <p><strong>{{ _("Telefoon:") }}</strong> {{ profile.phone_number or _("Niet ingevuld") }}</p>
+        <p><strong>E-mail:</strong> {{ profile.contact_email or "Niet ingevuld" }}</p>
+        <p><strong>Telefoon:</strong> {{ profile.phone_number or "Niet ingevuld" }}</p>
 
-        <p><strong>{{ _("Skills:") }}</strong>
+        <p><strong>Skills:</strong>
             {% if profile.skills %}
                 {{ profile.skills | map(attribute='name') | join(', ') }}
             {% else %}
-                {{ _("Geen skills geselecteerd") }}
+                Geen skills geselecteerd
             {% endif %}
         </p>
 
-        <a class="btn" href="{{ url_for('main.edit_consultant_skills') }}">{{ _("Skills aanpassen") }}</a>
-        <a class="btn" href="{{ url_for('main.edit_consultant_profile') }}">{{ _("Profiel aanpassen") }}</a>
+        <a class="btn" href="{{ url_for('main.edit_consultant_skills') }}">Skills aanpassen</a>
+        <a class="btn" href="{{ url_for('main.edit_consultant_profile') }}">Profiel aanpassen</a>
     {% endif %}
 
     {% if user.role == UserRole.company %}
-        <p><strong>{{ _("Bedrijfsnaam:") }}</strong> {{ company.company_name_masked }}</p>
-        <p><strong>{{ _("Sector:") }}</strong> {{ company.industry or _("Niet ingevuld") }}</p>
+        <p><strong>Bedrijfsnaam:</strong> {{ company.company_name_masked }}</p>
+        <p><strong>Sector:</strong> {{ company.industry or "Niet ingevuld" }}</p>
 
-        <p><strong>{{ _("E-mail:") }}</strong> {{ company.contact_email or _("Niet ingevuld") }}</p>
-        <p><strong>{{ _("Telefoon:") }}</strong> {{ company.phone_number or _("Niet ingevuld") }}</p>
+        <p><strong>E-mail:</strong> {{ company.contact_email or "Niet ingevuld" }}</p>
+        <p><strong>Telefoon:</strong> {{ company.phone_number or "Niet ingevuld" }}</p>
 
-        <a class="btn" href="{{ url_for('main.job_new') }}">{{ _("Nieuwe job posten") }}</a>
-        <a href="{{ url_for('main.company_jobs_list') }}">{{ _("Mijn job posts") }}</a>
+        <a class="btn" href="{{ url_for('main.job_new') }}">Nieuwe job posten</a>
+        <a href="{{ url_for('main.company_jobs_list') }}">Mijn job posts</a>
 
-        <a class="btn" href="{{ url_for('main.edit_company_profile') }}">{{ _("Profiel aanpassen") }}</a>
+        <a class="btn" href="{{ url_for('main.edit_company_profile') }}">Profiel aanpassen</a>
     {% endif %}
 </div>
 {% endblock %}

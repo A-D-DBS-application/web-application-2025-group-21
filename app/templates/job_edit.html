@@ -1,29 +1,29 @@
 {% extends "base.html" %}
-{% block title %}{{ _("Job Bewerken") }}{% endblock %}
+{% block title %}Job Bewerken{% endblock %}
 
 {% block content %}
 
-<h1 class="page-title">{{ _("Job Bewerken") }}</h1>
+<h1 class="page-title">Job Bewerken</h1>
 
 <div class="form-card">
     <form method="POST">
-        
-        <label>{{ _("Titel") }}</label>
+       
+        <label>Titel</label>
         <input type="text" name="title" value="{{ job.title }}" required>
 
-        <label>{{ _("Beschrijving") }}</label>
+        <label>Beschrijving</label>
         <textarea name="description" rows="5">{{ job.description }}</textarea>
 
-        <label>{{ _("Locatie — Stad") }}</label>
+        <label>Locatie — Stad</label>
         <input type="text" name="location_city" value="{{ job.location_city }}">
 
-        <label>{{ _("Locatie — Land") }}</label>
+        <label>Locatie — Land</label>
         <input type="text" name="country" value="{{ job.country }}">
 
-        <label>{{ _("Contracttype") }}</label>
+        <label>Contracttype</label>
         <input type="text" name="contract_type" value="{{ job.contract_type }}">
 
-        <label>{{ _("Skills") }}</label>
+        <label>Skills</label>
         <div class="skills-box">
             {% for s in skills %}
                 <label class="skill-checkbox">
@@ -38,8 +38,8 @@
             {% endfor %}
         </div>
 
-        <button class="btn-primary" type="submit">{{ _("Opslaan") }}</button>
-        <a href="{{ url_for('main.job_detail', job_id=job.id) }}" class="btn-secondary">{{ _("Annuleren") }}</a>
+        <button class="btn-primary" type="submit">Opslaan</button>
+        <a href="{{ url_for('main.job_detail', job_id=job.id) }}" class="btn-secondary">Annuleren</a>
     </form>
 </div>
 

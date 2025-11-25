@@ -5,45 +5,49 @@
 <h1 class="page-title">{{ job.title }}</h1>
 
 <div class="card">
-    <h2>{{ _("Contactgegevens van het Bedrijf") }}</h2>
-    
+    <h2>Contactgegevens van het Bedrijf</h2>
+   
+    {# 1. Controleert: Is de bezoeker een Consultant? #}
     {% if user and user.role == UserRole.consultant %}
-        
+       
+        {# Toon contactgegevens indien ONTGRENDELD of de EIGENAAR #}
         {% if is_unlocked or is_owner %}
-            <p><strong>{{ _("Bedrijf:") }}</strong> {{ job.company.company_name_masked }}</p>
-            <p><strong>{{ _("E-mail:") }}</strong> {{ job.company.contact_email or _("Niet ingevuld") }}</p>
-            <p><strong>{{ _("Telefoon:") }}</strong> {{ job.company.phone_number or _("Niet ingevuld") }}</p>
-
+            <p><strong>Bedrijf:</strong> {{ job.company.company_name_masked }}</p>
+            <p><strong>E-mail:</strong> {{ job.company.contact_email or "Niet ingevuld" }}</p>
+            <p><strong>Telefoon:</strong> {{ job.company.phone_number or "Niet ingevuld" }}</p>
             {% if is_unlocked %}
-                <p style="color: green;">✅ {{ _("Deze contactgegevens zijn vrijgegeven en permanent zichtbaar.") }}</p>
+                <p style="color: green;">✅ Deze contactgegevens zijn vrijgegeven en permanent zichtbaar.</p>
             {% endif %}
-            
+           
+        {# Toon UNLOCK-KNOP indien niet ontgrendeld #}
         {% else %}
-            <p>{{ _("De contactgegevens van dit bedrijf zijn verborgen.") }}</p>
-            <a href="{{ url_for('main.unlock_job', job_id=job.id) }}" class="btn" onclick="return confirm('{{ _('Weet u zeker dat u de contactgegevens wilt vrijgeven?') }}')">
-                {{ _("🔒 Ontgrendel contactgegevens (MVP Knop)") }}
+            <p>De contactgegevens van dit bedrijf zijn **verborgen**.</p>
+            <a href="{{ url_for('main.unlock_job', job_id=job.id) }}" class="btn" onclick="return confirm('Weet u zeker dat u de contactgegevens wilt vrijgeven?')">
+                🔒 Ontgrendel contactgegevens (MVP Knop)
             </a>
-            <p><small>{{ _("Door op deze knop te klikken, worden de contactgegevens permanent zichtbaar voor uw profiel.") }}</small></p>
+            <p><small>Door op deze knop te klikken, worden de contactgegevens permanent zichtbaar voor uw profiel.</small></p>
         {% endif %}
-        
+       
+    {# 2. Toon bedrijf's eigen contactinfo (als ze de job gepost hebben) #}
     {% elif is_owner %}
-        <p><strong>{{ _("Bedrijf:") }}</strong> {{ job.company.company_name_masked }}</p>
-        <p><strong>{{ _("E-mail:") }}</strong> {{ job.company.contact_email or _("Niet ingevuld") }} ({{ _("Zichtbaar voor u als eigenaar") }})</p>
-        <p><strong>{{ _("Telefoon:") }}</strong> {{ job.company.phone_number or _("Niet ingevuld") }} ({{ _("Zichtbaar voor u als eigenaar") }})</p>
-    
+        <p><strong>Bedrijf:</strong> {{ job.company.company_name_masked }}</p>
+        <p><strong>E-mail:</strong> {{ job.company.contact_email or "Niet ingevuld" }} (Zichtbaar voor u als eigenaar)</p>
+        <p><strong>Telefoon:</strong> {{ job.company.phone_number or "Niet ingevuld" }} (Zichtbaar voor u als eigenaar)</p>
+       
+    {# 3. Fallback: Toon de login/rol-vereiste #}
     {% else %}
-        <p>{{ _("Log in als Consultant om de contactgegevens te bekijken en te ontgrendelen.") }}</p>
+        <p>Log in als **Consultant** om de contactgegevens te bekijken en te ontgrendelen.</p>
     {% endif %}
 </div>
 
 <div class="job-detail-card">
     <div class="job-section">
-        <h3>{{ _("Beschrijving") }}</h3>
-        <p>{{ job.description or _("Geen beschrijving beschikbaar.") }}</p>
+        <h3>Beschrijving</h3>
+        <p>{{ job.description or "Geen beschrijving beschikbaar." }}</p>
     </div>
 
     <div class="job-section">
-        <h3>{{ _("Locatie") }}</h3>
+        <h3>Locatie</h3>
         <p>
             {{ job.location_city }}
             {% if job.location_city and job.country %}, {% endif %}
@@ -52,12 +56,12 @@
     </div>
 
     <div class="job-section">
-        <h3>{{ _("Contracttype") }}</h3>
-        <p>{{ job.contract_type or _("Niet opgegeven") }}</p>
+        <h3>Contracttype</h3>
+        <p>{{ job.contract_type or "Niet opgegeven" }}</p>
     </div>
 
     <div class="job-section">
-        <h3>{{ _("Vereiste skills") }}</h3>
+        <h3>Vereiste skills</h3>
         {% if job.skills %}
             <div class="skill-list">
                 {% for s in job.skills %}
@@ -65,19 +69,19 @@
                 {% endfor %}
             </div>
         {% else %}
-            <p>{{ _("Geen specifieke skills opgegeven.") }}</p>
+            <p>Geen specifieke skills opgegeven.</p>
         {% endif %}
     </div>
 
     {% if user and user.role == UserRole.company and company and job.company_id == company.id %}
         <div class="job-actions">
             <a class="btn btn-primary" href="{{ url_for('main.job_edit', job_id=job.id) }}">
-                {{ _("Bewerken") }}
+                Bewerken
             </a>
 
             <form action="{{ url_for('main.job_delete', job_id=job.id) }}" method="post" style="display:inline;">
-                <button class="btn btn-danger" onclick="return confirm('{{ _('Zeker verwijderen?') }}')">
-                    {{ _("Verwijderen") }}
+                <button class="btn btn-danger" onclick="return confirm('Zeker verwijderen?')">
+                    Verwijderen
                 </button>
             </form>
         </div>

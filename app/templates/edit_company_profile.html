@@ -1,13 +1,13 @@
 {% extends "base.html" %}
-{% block title %}{{ _("Bedrijfsprofiel aanpassen") }}{% endblock %}
+{% block title %}Bedrijfsprofiel aanpassen{% endblock %}
 
 {% block content %}
-  <h1>{{ _("Bedrijfsprofiel aanpassen") }}</h1>
+  <h1>Bedrijfsprofiel aanpassen</h1>
 
   <form method="post">
-        
+       
     <label style="display:block; margin-bottom: 10px;">
-      {{ _("Bedrijfsnaam:") }}
+      Bedrijfsnaam:
       <input
         type="text"
         name="company_name"
@@ -18,7 +18,7 @@
     </label>
 
     <label style="display:block; margin-bottom: 10px;">
-      {{ _("Stad:") }}
+      Stad:
       <input
         type="text"
         name="location_city"
@@ -28,7 +28,7 @@
     </label>
 
     <label style="display:block; margin-bottom: 10px;">
-      {{ _("Land:") }}
+      Land:
       <input
         type="text"
         name="country"
@@ -36,12 +36,12 @@
         style="width: 300px;"
       >
     </label>
-    
+   
     <hr style="margin: 20px 0;">
-    <h3>{{ _("Contactinformatie (wordt verborgen getoond)") }}</h3>
+    <h3>Contactinformatie (wordt verborgen getoond)</h3>
 
     <label style="display:block; margin-bottom: 10px;">
-      {{ _("Contact E-mailadres:") }}
+      Contact E-mailadres:
       <input
         type="email"
         name="contact_email"
@@ -51,7 +51,7 @@
     </label>
 
     <label style="display:block; margin-bottom: 10px;">
-      {{ _("Contact Telefoonnummer:") }}
+      Contact Telefoonnummer:
       <input
         type="tel"
         name="phone_number"
@@ -59,9 +59,9 @@
         style="width: 300px;"
       >
     </label>
-
     <hr style="margin: 20px 0;">
 
-    <button class="btn" type="submit">{{ _("Opslaan") }}</button>
+
+    <button class="btn" type="submit">Opslaan</button>
   </form>
 {% endblock %}

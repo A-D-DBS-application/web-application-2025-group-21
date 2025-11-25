@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{# Opmerking: Ik verwijderde {% from 'macros.html' import render_field %} omdat deze hier niet gebruikt wordt in jouw code. #}
 {% block title %}{{ _("Create New Job Post") }}{% endblock %}
 
 {% block content %}
@@ -6,7 +7,7 @@
     <h1 class="mb-4">{{ _("Post a New Job") }}</h1>
 
     <form method="POST" action="{{ url_for('main.job_new') }}" class="card p-4 shadow-sm">
-        
+       
         <div class="mb-3">
             <label for="title" class="form-label"><strong>{{ _("Job Title") }}</strong></label>
             <input type="text" id="title" name="title" class="form-control" required value="{{ request.form.get('title', '') }}">
@@ -27,7 +28,7 @@
                 <input type="text" id="country" name="country" class="form-control" value="{{ request.form.get('country', '') }}">
             </div>
         </div>
-        
+       
         <div class="mb-4">
             <label for="contract_type" class="form-label"><strong>{{ _("Contract Type") }}</strong></label>
             <select id="contract_type" name="contract_type" class="form-select">
@@ -37,20 +38,20 @@
                 <option value="Project-based" {% if request.form.get('contract_type') == 'Project-based' %}selected{% endif %}>{{ _("Project-based") }}</option>
             </select>
         </div>
-        
+       
         <h3 class="mt-4 mb-3">{{ _("Required Skills") }}</h3>
         <p class="text-muted">{{ _("Select all skills required for this job.") }}</p>
-        
+       
         <div class="row row-cols-md-3 g-3 mb-4">
             {% set selected_skills = request.form.getlist('skills') | map('int') | list %}
             {% for skill in skills %}
             <div class="col">
                 <div class="form-check">
-                    <input 
-                        class="form-check-input" 
-                        type="checkbox" 
-                        name="skills" 
-                        value="{{ skill.id }}" 
+                    <input
+                        class="form-check-input"
+                        type="checkbox"
+                        name="skills"
+                        value="{{ skill.id }}"
                         id="skill_{{ skill.id }}"
                         {% if skill.id in selected_skills %}checked{% endif %}
                     >

@@ -1,13 +1,13 @@
 {% extends "base.html" %}
-{% block title %}{{ _("Profiel aanpassen") }}{% endblock %}
+{% block title %}Profiel aanpassen{% endblock %}
 
 {% block content %}
-  <h1>{{ _("Profiel aanpassen") }}</h1>
+  <h1>Profiel aanpassen</h1>
 
   <form method="post" enctype="multipart/form-data">
 
     <label style="display:block; margin-bottom: 10px;">
-      {{ _("Naam zichtbaar voor anderen:") }}
+      Naam zichtbaar voor anderen:
       <input
         type="text"
         name="display_name"
@@ -18,7 +18,7 @@
     </label>
 
     <label style="display:block; margin-bottom: 10px;">
-      {{ _("Stad:") }}
+      Stad:
       <input
         type="text"
         name="location_city"
@@ -28,7 +28,7 @@
     </label>
 
     <label style="display:block; margin-bottom: 10px;">
-      {{ _("Land:") }}
+      Land:
       <input
         type="text"
         name="country"
@@ -38,7 +38,7 @@
     </label>
 
     <label style="display:block; margin-bottom: 10px;">
-      {{ _("Headline:") }}
+      Headline:
       <input
         type="text"
         name="headline"
@@ -46,12 +46,11 @@
         style="width: 300px;"
       >
     </label>
-
     <hr style="margin: 20px 0;">
-    <h3>{{ _("Contactinformatie (wordt verborgen getoond)") }}</h3>
+    <h3>Contactinformatie (wordt verborgen getoond)</h3>
 
     <label style="display:block; margin-bottom: 10px;">
-      {{ _("E-mailadres:") }}
+      E-mailadres:
       <input
         type="email"
         name="contact_email"
@@ -61,7 +60,7 @@
     </label>
 
     <label style="display:block; margin-bottom: 10px;">
-      {{ _("Telefoonnummer:") }}
+      Telefoonnummer:
       <input
         type="tel"
         name="phone_number"
@@ -69,11 +68,9 @@
         style="width: 300px;"
       >
     </label>
-
     <hr style="margin: 20px 0;">
-
     <label style="display:block; margin-bottom: 10px;">
-      {{ _("Profielfoto:") }}
+      Profielfoto:
       <input
         type="file"
         name="profile_image"
@@ -82,7 +79,7 @@
     </label>
 
     <label style="display:block; margin-bottom: 10px;">
-      {{ _("CV / Document:") }}
+      CV / Document:
       <input
         type="file"
         name="cv_document"
@@ -90,6 +87,6 @@
       >
     </label>
 
-    <button class="btn" type="submit">{{ _("Opslaan") }}</button>
+    <button class="btn" type="submit">Opslaan</button>
   </form>
 {% endblock %}

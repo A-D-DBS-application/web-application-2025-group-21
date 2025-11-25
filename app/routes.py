@@ -2,6 +2,8 @@ from flask import Blueprint, render_template, request, redirect, url_for, sessio
 from datetime import datetime
 from flask import current_app
 from functools import wraps
+from sqlalchemy import or_
+
 
 from flask_babel import gettext as _
 
@@ -49,17 +51,12 @@ def is_unlocked(db, unlocking_user_id, target_type, target_id):
 # NIEUW: Toont alle Job Posts die door het ingelogde bedrijf zijn aangemaakt
 @main.route("/company/jobs", methods=["GET"])
 def company_jobs_list():
-    # Zorg ervoor dat de imports bovenaan de file staan:
-    # from datetime import datetime, timezone
-    # from flask_babel import gettext as _ 
-    
     with get_session() as db:
         user = get_current_user(db)
 
         # 1. Beveiligingscontrole
         if not user or user.role != UserRole.company:
             flash(_("Only companies can view their own job posts."))
-            # Stuur naar het algemene job overzicht (indien consultant) of dashboard
             return redirect(url_for("main.dashboard")) 
         
         # Zoek het Company profiel
@@ -69,27 +66,42 @@ def company_jobs_list():
             flash(_("Company profile not found."))
             return redirect(url_for("main.dashboard"))
 
-        # 2. Haal alle Job Posts van DIT bedrijf op
+        # Simpele zoekterm (optioneel)
+        q = request.args.get("q", "").strip()
+
+        query = db.query(JobPost).filter(JobPost.company_id == company.id)
+
+        if q:
+            query = query.filter(
+                or_(
+                    JobPost.title.ilike(f"%{q}%"),
+                    JobPost.description.ilike(f"%{q}%")
+                )
+            )
+
         # Sorteer op meest recent aangemaakt
-        jobs = db.query(JobPost).filter(
-            JobPost.company_id == company.id
-        ).order_by(JobPost.created_at.desc()).all()
+        jobs = query.order_by(JobPost.created_at.desc()).all()
         
-        # 3. Template Renderen
-        # We gebruiken de bestaande job_list.html template.
-        # We geven alle skills mee, zodat de filterbalk correct wordt weergegeven
-        all_skills = db.query(Skill).order_by(Skill.name).all()
+        # skills wordt niet echt gebruikt hier, maar template verwacht 'skills'
+        all_skills = []
 
         return render_template(
             "job_list.html", 
             jobs=jobs, 
             user=user,
             skills=all_skills,
-            # Belangrijk: De 'sort_by' instellen op een waarde die GEEN relevance is (bijv. 'none')
-            # Dit zorgt ervoor dat de relevance-scorelogica in de template wordt omzeild.
-            sort_by='none', 
+
+            # Belangrijk: sort_by is GEEN 'relevance' hier
+            sort_by='none',
+
+            # Titel speciaal voor deze pagina
             page_title=_("Mijn Vacatures"),
+
+            # Nieuwe flags voor template:
+            show_mode_selector=False,  # geen IConsult/Handmatige modus-balk
+            simple_search=True         # toon enkel simpele zoekbalk
         )
+
 
 #dit gebeurt vanzelf dus geen registreer nodig
 @main.route("/", methods=["GET"])
@@ -97,9 +109,11 @@ def index():
     return render_template("index.html")
 
 #taalwissel-route:
-@main.route("/set_language", methods=["GET", "POST"])
+@main.route("/set_language", methods=["POST"])
 def set_language():
-    lang = request.values.get("language", "en")
+    lang = request.form.get("language", "en")
+    if lang not in ["en", "nl", "fr"]:
+        lang = "en"
     session["language"] = lang
     return redirect(request.referrer or url_for("main.index"))
 
@@ -262,7 +276,7 @@ def edit_consultant_profile():
                 # Enkel toegelaten types
                 allowed_exts = {".pdf", ".doc", ".docx"}
                 if ext not in allowed_exts:
-                    flash(_("Ongeldig bestandstype. Upload enkel pdf/doc/docx."))
+                    flash("Ongeldig bestandstype. Upload enkel pdf/doc/docx.")
                     return redirect(url_for("main.edit_consultant_profile"))
 
                 # Unieke bestandsnaam voor CV
@@ -278,7 +292,7 @@ def edit_consultant_profile():
 
             db.commit()
 
-            flash(_("Profile updated"))
+            flash("Profile updated")
             return redirect(url_for("main.dashboard"))
 
         return render_template("edit_consultant_profile.html", profile=profile)
