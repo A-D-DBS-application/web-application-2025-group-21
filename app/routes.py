@@ -2,6 +2,8 @@ from flask import Blueprint, render_template, request, redirect, url_for, sessio
 from datetime import datetime
 from flask import current_app
 from functools import wraps
+from sqlalchemy import or_
+
 
 from flask_babel import gettext as _
 
@@ -10,6 +12,7 @@ from .models import User, ConsultantProfile, Company, JobPost, UserRole, Skill, 
 
 import os
 from werkzeug.utils import secure_filename
+from sqlalchemy import func  # <-- NIEUW: voor count() over Unlocks
 
 
 def allowed_file(filename):
@@ -48,17 +51,12 @@ def is_unlocked(db, unlocking_user_id, target_type, target_id):
 # NIEUW: Toont alle Job Posts die door het ingelogde bedrijf zijn aangemaakt
 @main.route("/company/jobs", methods=["GET"])
 def company_jobs_list():
-    # Zorg ervoor dat de imports bovenaan de file staan:
-    # from datetime import datetime, timezone
-    # from flask_babel import gettext as _ 
-    
     with get_session() as db:
         user = get_current_user(db)
 
         # 1. Beveiligingscontrole
         if not user or user.role != UserRole.company:
             flash(_("Only companies can view their own job posts."))
-            # Stuur naar het algemene job overzicht (indien consultant) of dashboard
             return redirect(url_for("main.dashboard")) 
         
         # Zoek het Company profiel
@@ -68,27 +66,43 @@ def company_jobs_list():
             flash(_("Company profile not found."))
             return redirect(url_for("main.dashboard"))
 
-        # 2. Haal alle Job Posts van DIT bedrijf op
+        # Simpele zoekterm (optioneel)
+        q = request.args.get("q", "").strip()
+
+        query = db.query(JobPost).filter(JobPost.company_id == company.id)
+
+        if q:
+            query = query.filter(
+                or_(
+                    JobPost.title.ilike(f"%{q}%"),
+                    JobPost.description.ilike(f"%{q}%")
+                )
+            )
+
         # Sorteer op meest recent aangemaakt
-        jobs = db.query(JobPost).filter(
-            JobPost.company_id == company.id
-        ).order_by(JobPost.created_at.desc()).all()
+        jobs = query.order_by(JobPost.created_at.desc()).all()
         
-        # 3. Template Renderen
-        # We gebruiken de bestaande job_list.html template.
-        # We geven alle skills mee, zodat de filterbalk correct wordt weergegeven
-        all_skills = db.query(Skill).order_by(Skill.name).all()
+        # skills wordt niet echt gebruikt hier, maar template verwacht 'skills'
+        all_skills = []
 
         return render_template(
             "job_list.html", 
             jobs=jobs, 
             user=user,
             skills=all_skills,
-            # Belangrijk: De 'sort_by' instellen op een waarde die GEEN relevance is (bijv. 'none')
-            # Dit zorgt ervoor dat de relevance-scorelogica in de template wordt omzeild.
-            sort_by='none', 
+
+            # Belangrijk: sort_by is GEEN 'relevance' hier
+            sort_by='none',
+
+            # Titel speciaal voor deze pagina
             page_title=_("Mijn Vacatures"),
+
+            # Nieuwe flags voor template:
+            show_mode_selector=False,  # geen IConsult/Handmatige modus-balk
+            simple_search=True         # toon enkel simpele zoekbalk
         )
+
+
 #dit gebeurt vanzelf dus geen registreer nodig
 @main.route("/", methods=["GET"])
 def index():
@@ -282,6 +296,7 @@ def edit_consultant_profile():
             return redirect(url_for("main.dashboard"))
 
         return render_template("edit_consultant_profile.html", profile=profile)
+
 @main.route("/consultant/skills/edit", methods=["GET", "POST"])
 def edit_consultant_skills():
     with get_session() as db:
@@ -406,11 +421,37 @@ def consultants_list():
         # 5. Sortering & Relevantie Berekening
         if sort_by == "relevance":
             now = datetime.now(timezone.utc)
+
+            # 🔹 Haal in één keer op hoe vaak elke consultant is ge-unlocked
+            consultant_ids = [c.id for c in consultants]
+            unlock_counts = {}
+            if consultant_ids:
+                unlock_rows = (
+                    db.query(Unlock.target_id, func.count(Unlock.id))
+                    .filter(
+                        Unlock.target_type == UnlockTarget.consultant,
+                        Unlock.target_id.in_(consultant_ids),
+                    )
+                    .group_by(Unlock.target_id)
+                    .all()
+                )
+                unlock_counts = {target_id: count for target_id, count in unlock_rows}
             
             def compute_score(profile):
                 # Zorgt ervoor dat de score-berekening niet crasht als er geen job is.
                 if not required_job:
-                    return {'total': 0.0, 'skill': 0.0, 'text': 0.0, 'recency': 0.0, 'skill_factor': 0.0, 'text_factor': 0.0, 'recency_factor': 0.0}
+                    return {
+                        'total': 0.0,
+                        'skill': 0.0,
+                        'text': 0.0,
+                        'recency': 0.0,
+                        'skill_factor': 0.0,
+                        'text_factor': 0.0,
+                        'recency_factor': 0.0,
+                        'popularity': 0.0,
+                        'popularity_factor': 0.0,
+                        'unlock_count': 0,
+                    }
 
                 # A. Skill Similarity (Gewicht 0.5)
                 consultant_skill_ids = set(s.id for s in profile.skills)
@@ -432,8 +473,19 @@ def consultants_list():
                 days_old = (now - profile.created_at).days
                 recency_factor = max(0, 1 - days_old / 30) # 1 voor < 30 dagen, daalt naar 0
                 recency_weighted_score = recency_factor * 0.2
+
+                # D. Populariteit op basis van unlocks (Gewicht 0.15)
+                unlock_count = unlock_counts.get(profile.id, 0)
+                max_unlocks = 50   # vanaf 50 unlocks is popularity_factor = 1
+                popularity_factor = min(unlock_count / max_unlocks, 1.0)
+                popularity_weighted_score = popularity_factor * 0.15
                 
-                final_score = skill_weighted_score + text_weighted_score + recency_weighted_score
+                final_score = (
+                    skill_weighted_score
+                    + text_weighted_score
+                    + recency_weighted_score
+                    + popularity_weighted_score
+                )
                 
                 return {
                     'total': final_score,
@@ -442,7 +494,10 @@ def consultants_list():
                     'recency': recency_weighted_score,
                     'skill_factor': skill_similarity,
                     'text_factor': text_match,
-                    'recency_factor': recency_factor
+                    'recency_factor': recency_factor,
+                    'popularity': popularity_weighted_score,
+                    'popularity_factor': popularity_factor,
+                    'unlock_count': unlock_count,
                 }
 
             scored_consultants = [] 
@@ -580,68 +635,182 @@ from datetime import datetime, timezone
 @main.route("/jobs", methods=["GET"])
 def jobs_list():
     from datetime import datetime, timezone
+    from sqlalchemy import func  # zorg dat dit bovenaan je file geïmporteerd is
+
     with get_session() as db:
         user = get_current_user(db)
 
         # 1. Beveiligingscontrole (Moet een Consultant zijn)
         if not user or user.role != UserRole.consultant:
             flash(_("Only consultants can browse job posts."))
-            return redirect(url_for("main.dashboard")) 
+            return redirect(url_for("main.dashboard"))
 
         # 2. Parameters Ophalen
-        sort_by = request.args.get("sort_by", "relevance") 
-        
-        # Handmatige filters ophalen
+        sort_by = request.args.get("sort_by", "relevance")
+
         query_skills = request.args.getlist("skills")
         if query_skills:
             query_skills = list(map(int, query_skills))
 
         city = request.args.get("city")
         country = request.args.get("country")
-        # 💡 HAAL DE CONTRACT_TYPE WAARDE OP
         contract_type = request.args.get("contract_type")
         text_query = request.args.get("q", None)
-        
-        # ... (Stap 3 en 4: Haal Consultant Skills op en stel Basisquery in)
 
-        # LET OP: Filters worden ALLEEN toegepast in de 'Handmatige Filter' modus
+        # 3. Consultant profiel & skills ophalen (voor relevantie-berekening)
+        consultant_profile = (
+            db.query(ConsultantProfile)
+            .filter(ConsultantProfile.user_id == user.id)
+            .first()
+        )
+        consultant_skill_ids = set()
+        if consultant_profile:
+            consultant_skill_ids = {s.id for s in consultant_profile.skills}
+
+        # 4. Basisquery en filters (alleen actief bij niet-relevance)
         query = db.query(JobPost)
-        if sort_by != "relevance":
-            # ... (filters voor city, country)
-            if contract_type:
-                # 💡 Gebruik exacte match voor dropdown filtering
-                query = query.filter(JobPost.contract_type == contract_type)
-            
-            # ... (Handmatige skill-filter)
 
-        # Haal alle jobs op die voldoen aan de (eventuele) filters
+        if sort_by != "relevance":
+            if city:
+                query = query.filter(JobPost.location_city.ilike(f"%{city}%"))
+            if country:
+                query = query.filter(JobPost.country.ilike(f"%{country}%"))
+            if contract_type:
+                query = query.filter(JobPost.contract_type == contract_type)
+
+            if query_skills:
+                # AND–logica: job moet alle gekozen skills hebben
+                for skill_id in query_skills:
+                    query = query.filter(JobPost.skills.any(Skill.id == skill_id))
+
         jobs = query.all()
 
-        # ... (Stap 5: Sortering & Relevantie Berekening)
-        
+        # 5. Sortering & Relevantie Berekening (zoals bij consultants, met unlocks)
+        if sort_by == "relevance":
+            now = datetime.now(timezone.utc)
+
+            # 🔹 Haal in één keer op hoe vaak elke job is ge-unlocked
+            job_ids = [j.id for j in jobs]
+            unlock_counts = {}
+            if job_ids:
+                unlock_rows = (
+                    db.query(Unlock.target_id, func.count(Unlock.id))
+                    .filter(
+                        Unlock.target_type == UnlockTarget.job,
+                        Unlock.target_id.in_(job_ids),
+                    )
+                    .group_by(Unlock.target_id)
+                    .all()
+                )
+                unlock_counts = {target_id: count for target_id, count in unlock_rows}
+
+            MAX_UNLOCKS = 50  # vanaf 50 unlocks is populariteit max
+
+            def compute_score(job):
+                # fallback als consultant geen profiel heeft
+                if not consultant_profile:
+                    return {
+                        "total": 0.0,
+                        "skill": 0.0,
+                        "text": 0.0,
+                        "recency": 0.0,
+                        "popularity": 0.0,
+                        "skill_factor": 0.0,
+                        "text_factor": 0.0,
+                        "recency_factor": 0.0,
+                        "popularity_factor": 0.0,
+                        "unlock_count": 0,
+                    }
+
+                # A. Skill Similarity (Gewicht 0.5)
+                job_skill_ids = {s.id for s in job.skills}
+                matched = len(job_skill_ids & consultant_skill_ids)
+                max_skills = max(len(consultant_skill_ids), 1)
+                skill_similarity = matched / max_skills  # 0..1
+                skill_weighted_score = skill_similarity * 0.5
+
+                # B. Text Match (Gewicht 0.3)
+                text_match = 0
+                if text_query:
+                    text_fields = " ".join(
+                        filter(
+                            None,
+                            [
+                                job.title,
+                                job.description,
+                                job.location_city,
+                                job.country,
+                                job.contract_type,
+                            ],
+                        )
+                    )
+                    if text_query.lower() in text_fields.lower():
+                        text_match = 1
+                text_weighted_score = text_match * 0.3
+
+                # C. Recency (Gewicht 0.2)
+                days_old = (now - job.created_at).days
+                recency_factor = max(0, 1 - days_old / 30)  # 0..1
+                recency_weighted_score = recency_factor * 0.2
+
+                # D. Populariteit (Gewicht 0.15) – op basis van unlocks
+                unlock_count = unlock_counts.get(job.id, 0)
+                popularity_factor = min(unlock_count / MAX_UNLOCKS, 1.0)
+                popularity_weighted_score = popularity_factor * 0.15
+
+                total = (
+                    skill_weighted_score
+                    + text_weighted_score
+                    + recency_weighted_score
+                    + popularity_weighted_score
+                )
+
+                return {
+                    "total": total,
+                    "skill": skill_weighted_score,
+                    "text": text_weighted_score,
+                    "recency": recency_weighted_score,
+                    "popularity": popularity_weighted_score,
+                    "skill_factor": skill_similarity,
+                    "text_factor": text_match,
+                    "recency_factor": recency_factor,
+                    "popularity_factor": popularity_factor,
+                    "unlock_count": unlock_count,
+                }
+
+            scored_jobs = []
+            for job in jobs:
+                score_data = compute_score(job)
+                job.score = score_data["total"]
+                job.score_breakdown = score_data
+                scored_jobs.append(job)
+
+            # Sorteer jobs op score (hoog naar laag)
+            jobs = sorted(scored_jobs, key=lambda j: j.score, reverse=True)
+
+        elif sort_by == "title":
+            jobs = sorted(jobs, key=lambda j: j.title or "")
+
         # 6. Template Renderen
         all_skills = db.query(Skill).order_by(Skill.name).all()
 
-        # 🌟 NIEUW: Definieer de mogelijke contracttypes 🌟
-        # De sleutel (value) is wat naar de database wordt gestuurd
         possible_contract_types = [
             ("Freelance", _("Freelance")),
             ("Full-time", _("Full-time")),
             ("Part-time", _("Part-time")),
             ("Project-based", _("Project-based")),
-            # Voeg 'Internship' toe indien nodig, of andere types
         ]
 
         return render_template(
-            "job_list.html", 
-            jobs=jobs, 
-            skills=all_skills, 
+            "job_list.html",
+            jobs=jobs,
+            skills=all_skills,
             user=user,
             sort_by=sort_by,
-            # 🌟 NIEUW: Geef de types en de huidige selectie mee 🌟
             possible_contract_types=possible_contract_types,
-            current_contract_type=contract_type 
+            current_contract_type=contract_type,
         )
+
 
 
 

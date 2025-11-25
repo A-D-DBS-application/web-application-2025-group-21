@@ -1,14 +1,10 @@
 # Dutch translations for PROJECT.
-# Copyright (C) 2025 ORGANIZATION
-# This file is distributed under the same license as the PROJECT project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
-#
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-11-22 21:38+0100\n"
-"PO-Revision-Date: 2025-11-22 21:20+0100\n"
+"POT-Creation-Date: 2025-11-24 19:50+0100\n"
+"PO-Revision-Date: 2025-11-24 19:50+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: nl\n"
 "Language-Team: nl <LL@li.org>\n"
@@ -18,337 +14,474 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: app/templates/base.html:120
+
+#: app/routes.py:33
+msgid "Gelieve in te loggen om deze actie uit te voeren."
+msgstr "Gelieve in te loggen om deze actie uit te voeren."
+
+
+#: app/routes.py:61
+msgid "Only companies can view their own job posts."
+msgstr "Alleen bedrijven kunnen hun eigen vacatures bekijken."
+
+
+#: app/routes.py:70
+msgid "Company profile not found."
+msgstr "Bedrijfsprofiel niet gevonden."
+
+
+#: app/routes.py:88
+msgid "Mijn Vacatures"
+msgstr "Mijn vacatures"
+
+
+#: app/routes.py:108
+msgid "Gebruikersnaam is vereist."
+msgstr "Een gebruikersnaam is vereist."
+
+#: app/routes.py:123
+msgid "Please log in to view your dashboard."
+msgstr "Log in om uw dashboard te bekijken."
+
+
+#: app/routes.py:145
+msgid "Only consultants can edit their profile"
+msgstr "Alleen consultants kunnen hun profiel bewerken."
+
+
+#: app/routes.py:175
+msgid "Ongeldig bestandstype. Upload enkel pdf/doc/docx."
+msgstr "Ongeldig bestandstype. Upload alleen PDF-, DOC- of DOCX-bestanden."
+
+
+#: app/routes.py:194
+msgid "Profile updated"
+msgstr "Profiel succesvol bijgewerkt."
+
+
+#: app/routes.py:214
+msgid "Only consultants can update their skills"
+msgstr "Alleen consultants kunnen hun vaardigheden bijwerken."
+
+
+#: app/routes.py:232
+msgid "Consultant not found"
+msgstr "Consultant niet gevonden."
+
+
+#: app/routes.py:246
+msgid "Only companies can browse consultant profiles."
+msgstr "Alleen bedrijven kunnen consultantprofielen bekijken."
+
+
+#: app/routes.py:262
+msgid "Only companies can edit their profile"
+msgstr "Alleen bedrijven kunnen hun profiel bewerken."
+
+
+#: app/routes.py:270
+msgid "Company profile updated"
+msgstr "Bedrijfsprofiel succesvol bijgewerkt."
+
+
+#: app/routes.py:283
+msgid "Alleen bedrijven kunnen contactgegevens van consultants vrijgeven."
+msgstr "Alleen bedrijven kunnen de contactgegevens van consultants vrijgeven."
+
+
+#: app/routes.py:291
+msgid "Consultant profiel niet gevonden."
+msgstr "Consultantprofiel niet gevonden."
+
+
+#: app/routes.py:299
+msgid "Contactgegevens zijn al vrijgegeven."
+msgstr "De contactgegevens zijn al vrijgegeven."
+
+
+#: app/routes.py:309
+msgid "Contactgegevens succesvol vrijgegeven!"
+msgstr "Contactgegevens succesvol vrijgegeven!"
+
+#: app/routes.py:335
+msgid "Maak eerst een Job Post aan om het IConsult relevantiefilter op basis van uw behoeften in te schakelen."
+msgstr "Maak eerst een vacature aan om de IConsult-relevatiefilters te activeren op basis van uw behoeften."
+
+
+#: app/routes.py:409
+msgid "Only companies can unlock consultant contact details"
+msgstr "Alleen bedrijven kunnen de contactgegevens van consultants ontgrendelen."
+
+
+#: app/routes.py:420
+msgid "Consultant not found"
+msgstr "Consultant niet gevonden."
+
+
+#: app/routes.py:440
+msgid "Contactgegevens succesvol vrijgegeven!"
+msgstr "Contactgegevens succesvol vrijgegeven!"
+
+
+#: app/routes.py:463
+msgid "Only companies can create job posts"
+msgstr "Alleen bedrijven kunnen vacatures aanmaken."
+
+
+#: app/routes.py:478
+msgid "Titel en beschrijving zijn verplicht."
+msgstr "Titel en beschrijving zijn verplicht."
+
+
+#: app/routes.py:500
+msgid "Job succesvol aangemaakt."
+msgstr "Vacature succesvol aangemaakt."
+
+
+#: app/routes.py:541
+msgid "Job not found"
+msgstr "Vacature niet gevonden."
+
+
+#: app/routes.py:592
+msgid "Only consultants can unlock job contact details"
+msgstr "Alleen consultants kunnen de contactgegevens van vacatures ontgrendelen."
+
+
+#: app/routes.py:604
+msgid "Job not found"
+msgstr "Vacature niet gevonden."
+
+
+#: app/routes.py:626
+msgid "Contactgegevens succesvol vrijgegeven!"
+msgstr "Contactgegevens succesvol vrijgegeven!"
+
+#: app/routes.py:651
+msgid "Only companies can edit job posts"
+msgstr "Alleen bedrijven kunnen vacatures bewerken."
+
+
+#: app/routes.py:663
+msgid "Job not found or you are not the owner"
+msgstr "Vacature niet gevonden of u bent niet de eigenaar."
+
+
+#: app/routes.py:689
+msgid "Job updated."
+msgstr "Vacature succesvol bijgewerkt."
+
+
+#: app/routes.py:719
+msgid "Only companies can delete job posts"
+msgstr "Alleen bedrijven kunnen vacatures verwijderen."
+
+
+#: app/routes.py:732
+msgid "Job not found or you are not the owner"
+msgstr "Vacature niet gevonden of u bent niet de eigenaar."
+
+
+#: app/routes.py:744
+msgid "Job deleted"
+msgstr "Vacature verwijderd."
+
+
+#: app/routes.py:775
+msgid "Vacatureoverzicht"
+msgstr "Vacatureoverzicht"
+
+#: app/templates/base.html
+msgid "IConsult Match"
+msgstr "IConsult Match"
+
 msgid "Home"
-msgstr ""
+msgstr "Home"
 
-#: app/templates/base.html:123
 msgid "Consultants"
-msgstr ""
+msgstr "Consultants"
 
-#: app/templates/base.html:127
 msgid "Jobs"
-msgstr ""
+msgstr "Vacatures"
 
-#: app/templates/base.html:130
 msgid "Dashboard"
-msgstr ""
+msgstr "Dashboard"
 
-#: app/templates/base.html:146
-msgid "Logout"
-msgstr ""
-
-#: app/templates/base.html:149
 msgid "Login"
-msgstr ""
-
-#: app/templates/base.html:167
-msgid "MVP prototype"
-msgstr ""
-
-#: venv/Lib/site-packages/click/_termui_impl.py:608
-#, python-brace-format
-msgid "{editor}: Editing failed"
-msgstr ""
-
-#: venv/Lib/site-packages/click/_termui_impl.py:612
-#, python-brace-format
-msgid "{editor}: Editing failed: {e}"
-msgstr ""
-
-#: venv/Lib/site-packages/click/core.py:1104
-#: venv/Lib/site-packages/click/core.py:1141
-#, python-brace-format
-msgid "{text} {deprecated_message}"
-msgstr ""
-
-#: venv/Lib/site-packages/click/core.py:1160
-msgid "Options"
-msgstr ""
-
-#: venv/Lib/site-packages/click/core.py:1222
-#, python-brace-format
-msgid "Got unexpected extra argument ({args})"
-msgid_plural "Got unexpected extra arguments ({args})"
-msgstr[0] ""
-msgstr[1] ""
-
-#: venv/Lib/site-packages/click/core.py:1241
-#, python-brace-format
-msgid "DeprecationWarning: The command {name!r} is deprecated.{extra_message}"
-msgstr ""
-
-#: venv/Lib/site-packages/click/core.py:1425
-msgid "Aborted!"
-msgstr ""
-
-#: venv/Lib/site-packages/click/core.py:1799
-msgid "Commands"
-msgstr ""
-
-#: venv/Lib/site-packages/click/core.py:1830
-msgid "Missing command."
-msgstr ""
-
-#: venv/Lib/site-packages/click/core.py:1908
-#, python-brace-format
-msgid "No such command {name!r}."
-msgstr ""
-
-#: venv/Lib/site-packages/click/core.py:2332
-msgid "Value must be an iterable."
-msgstr ""
-
-#: venv/Lib/site-packages/click/core.py:2355
-#, python-brace-format
-msgid "Takes {nargs} values but 1 was given."
-msgid_plural "Takes {nargs} values but {len} were given."
-msgstr[0] ""
-msgstr[1] ""
-
-#: venv/Lib/site-packages/click/core.py:2505
-#, python-brace-format
-msgid ""
-"DeprecationWarning: The {param_type} {name!r} is "
-"deprecated.{extra_message}"
-msgstr ""
-
-#: venv/Lib/site-packages/click/core.py:2956
-#, python-brace-format
-msgid "env var: {var}"
-msgstr ""
-
-#: venv/Lib/site-packages/click/core.py:2959
-#, python-brace-format
-msgid "default: {default}"
-msgstr ""
-
-#: venv/Lib/site-packages/click/core.py:2963
-msgid "required"
-msgstr ""
-
-#: venv/Lib/site-packages/click/core.py:3023
-msgid "(dynamic)"
-msgstr ""
-
-#: venv/Lib/site-packages/click/decorators.py:465
-#, python-format
-msgid "%(prog)s, version %(version)s"
-msgstr ""
-
-#: venv/Lib/site-packages/click/decorators.py:522
-msgid "Show the version and exit."
-msgstr ""
-
-#: venv/Lib/site-packages/click/decorators.py:548
-msgid "Show this message and exit."
-msgstr ""
-
-#: venv/Lib/site-packages/click/exceptions.py:50
-#: venv/Lib/site-packages/click/exceptions.py:89
-#, python-brace-format
-msgid "Error: {message}"
-msgstr ""
-
-#: venv/Lib/site-packages/click/exceptions.py:81
-#, python-brace-format
-msgid "Try '{command} {option}' for help."
-msgstr ""
-
-#: venv/Lib/site-packages/click/exceptions.py:130
-#, python-brace-format
-msgid "Invalid value: {message}"
-msgstr ""
-
-#: venv/Lib/site-packages/click/exceptions.py:132
-#, python-brace-format
-msgid "Invalid value for {param_hint}: {message}"
-msgstr ""
-
-#: venv/Lib/site-packages/click/exceptions.py:190
-msgid "Missing argument"
-msgstr ""
-
-#: venv/Lib/site-packages/click/exceptions.py:192
-msgid "Missing option"
-msgstr ""
-
-#: venv/Lib/site-packages/click/exceptions.py:194
-msgid "Missing parameter"
-msgstr ""
-
-#: venv/Lib/site-packages/click/exceptions.py:196
-#, python-brace-format
-msgid "Missing {param_type}"
-msgstr ""
-
-#: venv/Lib/site-packages/click/exceptions.py:203
-#, python-brace-format
-msgid "Missing parameter: {param_name}"
-msgstr ""
-
-#: venv/Lib/site-packages/click/exceptions.py:223
-#, python-brace-format
-msgid "No such option: {name}"
-msgstr ""
-
-#: venv/Lib/site-packages/click/exceptions.py:235
-#, python-brace-format
-msgid "Did you mean {possibility}?"
-msgid_plural "(Possible options: {possibilities})"
-msgstr[0] ""
-msgstr[1] ""
-
-#: venv/Lib/site-packages/click/exceptions.py:282
-msgid "unknown error"
-msgstr ""
-
-#: venv/Lib/site-packages/click/exceptions.py:289
-#, python-brace-format
-msgid "Could not open file {filename!r}: {message}"
-msgstr ""
-
-#: venv/Lib/site-packages/click/formatting.py:156
-msgid "Usage:"
-msgstr ""
-
-#: venv/Lib/site-packages/click/parser.py:199
-#, python-brace-format
-msgid "Argument {name!r} takes {nargs} values."
-msgstr ""
-
-#: venv/Lib/site-packages/click/parser.py:381
-#, python-brace-format
-msgid "Option {name!r} does not take a value."
-msgstr ""
-
-#: venv/Lib/site-packages/click/parser.py:444
-#, python-brace-format
-msgid "Option {name!r} requires an argument."
-msgid_plural "Option {name!r} requires {nargs} arguments."
-msgstr[0] ""
-msgstr[1] ""
-
-#: venv/Lib/site-packages/click/shell_completion.py:332
-msgid "Shell completion is not supported for Bash versions older than 4.4."
-msgstr ""
-
-#: venv/Lib/site-packages/click/shell_completion.py:339
-msgid "Couldn't detect Bash version, shell completion is not supported."
-msgstr ""
-
-#: venv/Lib/site-packages/click/termui.py:162
-msgid "Repeat for confirmation"
-msgstr ""
-
-#: venv/Lib/site-packages/click/termui.py:178
-msgid "Error: The value you entered was invalid."
-msgstr ""
-
-#: venv/Lib/site-packages/click/termui.py:180
-#, python-brace-format
-msgid "Error: {e.message}"
-msgstr ""
-
-#: venv/Lib/site-packages/click/termui.py:191
-msgid "Error: The two entered values do not match."
-msgstr ""
-
-#: venv/Lib/site-packages/click/termui.py:247
-msgid "Error: invalid input"
-msgstr ""
-
-#: venv/Lib/site-packages/click/termui.py:866
-msgid "Press any key to continue..."
-msgstr ""
-
-#: venv/Lib/site-packages/click/types.py:332
-#, python-brace-format
-msgid ""
-"Choose from:\n"
-"\t{choices}"
-msgstr ""
-
-#: venv/Lib/site-packages/click/types.py:369
-#, python-brace-format
-msgid "{value!r} is not {choice}."
-msgid_plural "{value!r} is not one of {choices}."
-msgstr[0] ""
-msgstr[1] ""
-
-#: venv/Lib/site-packages/click/types.py:460
-#, python-brace-format
-msgid "{value!r} does not match the format {format}."
-msgid_plural "{value!r} does not match the formats {formats}."
-msgstr[0] ""
-msgstr[1] ""
-
-#: venv/Lib/site-packages/click/types.py:482
-#, python-brace-format
-msgid "{value!r} is not a valid {number_type}."
-msgstr ""
-
-#: venv/Lib/site-packages/click/types.py:538
-#, python-brace-format
-msgid "{value} is not in the range {range}."
-msgstr ""
-
-#: venv/Lib/site-packages/click/types.py:719
-#, python-brace-format
-msgid "{value!r} is not a valid boolean. Recognized values: {states}"
-msgstr ""
-
-#: venv/Lib/site-packages/click/types.py:747
-#, python-brace-format
-msgid "{value!r} is not a valid UUID."
-msgstr ""
-
-#: venv/Lib/site-packages/click/types.py:937
-msgid "file"
-msgstr ""
-
-#: venv/Lib/site-packages/click/types.py:939
-msgid "directory"
-msgstr ""
-
-#: venv/Lib/site-packages/click/types.py:941
-msgid "path"
-msgstr ""
-
-#: venv/Lib/site-packages/click/types.py:988
-#, python-brace-format
-msgid "{name} {filename!r} does not exist."
-msgstr ""
-
-#: venv/Lib/site-packages/click/types.py:997
-#, python-brace-format
-msgid "{name} {filename!r} is a file."
-msgstr ""
-
-#: venv/Lib/site-packages/click/types.py:1005
-#, python-brace-format
-msgid "{name} {filename!r} is a directory."
-msgstr ""
-
-#: venv/Lib/site-packages/click/types.py:1014
-#, python-brace-format
-msgid "{name} {filename!r} is not readable."
-msgstr ""
-
-#: venv/Lib/site-packages/click/types.py:1023
-#, python-brace-format
-msgid "{name} {filename!r} is not writable."
-msgstr ""
-
-#: venv/Lib/site-packages/click/types.py:1032
-#, python-brace-format
-msgid "{name} {filename!r} is not executable."
-msgstr ""
-
-#: venv/Lib/site-packages/click/types.py:1099
-#, python-brace-format
-msgid "{len_type} values are required, but {len_value} was given."
-msgid_plural "{len_type} values are required, but {len_value} were given."
-msgstr[0] ""
-msgstr[1] ""
+msgstr "Inloggen"
 
+msgid "Logout"
+msgstr "Uitloggen"
+
+msgid "All rights reserved"
+msgstr "Alle rechten voorbehouden"
+
+msgid "Geen profielfoto"
+msgstr "Geen profielfoto"
+
+msgid "Profielfoto"
+msgstr "Profielfoto"
+
+
+
+# ---------- Consultant Detail ----------
+
+#: app/templates/consultant_detail.html
+msgid "Consultant detail"
+msgstr "Consultantdetail"
+
+msgid "Skills"
+msgstr "Vaardigheden"
+
+msgid "Geen skills opgegeven."
+msgstr "Geen vaardigheden opgegeven."
+
+msgid "Contactgegevens"
+msgstr "Contactgegevens"
+
+msgid "E-mail"
+msgstr "E-mail"
+
+msgid "Telefoon"
+msgstr "Telefoon"
+
+msgid "Niet ingevuld"
+msgstr "Niet ingevuld"
+
+msgid "Bekijk / download CV"
+msgstr "Bekijk / download het CV"
+
+msgid "Deze contactgegevens zijn vrijgegeven en permanent zichtbaar."
+msgstr "Deze contactgegevens zijn vrijgegeven en permanent zichtbaar."
+
+msgid "De contactgegevens van deze consultant zijn verborgen."
+msgstr "De contactgegevens van deze consultant zijn verborgen."
+
+msgid "Weet u zeker dat u de contactgegevens wilt vrijgeven?"
+msgstr "Weet u zeker dat u de contactgegevens wilt vrijgeven?"
+
+msgid "🔒 Ontgrendel contactgegevens (MVP Knop)"
+msgstr "🔒 Ontgrendel contactgegevens (MVP-knop)"
+
+msgid "Door op deze knop te klikken, worden de contactgegevens permanent zichtbaar voor uw bedrijf."
+msgstr "Door op deze knop te klikken, worden de contactgegevens permanent zichtbaar voor uw bedrijf."
+
+msgid "Zichtbaar voor u als eigenaar"
+msgstr "Zichtbaar voor u als eigenaar"
+
+msgid "Log in als Bedrijf om de contactgegevens te bekijken en te ontgrendelen."
+msgstr "Log in als bedrijf om de contactgegevens te bekijken en te ontgrendelen."
+
+msgid "Specialisatie"
+msgstr "Specialisatie"
+
+msgid "Skills Consultant"
+msgstr "Vaardigheden consultant"
+
+msgid "meer"
+msgstr "meer"
+
+msgid "Match"
+msgstr "Match"
+
+msgid "Score Uitsplitsing"
+msgstr "Score-uitsplitsing"
+
+msgid "Recentheid"
+msgstr "Recentheid"
+
+msgid "Populariteit"
+msgstr "Populariteit"
+
+msgid "Totaal"
+msgstr "Totaal"
+
+msgid "geunlockt"
+msgstr "ontgrendeld"
+
+# ---------- Dashboard ----------
+
+#: app/templates/dashboard.html
+msgid "Dashboard"
+msgstr "Dashboard"
+
+msgid "Profiel"
+msgstr "Profiel"
+
+msgid "Ingelogd als:"
+msgstr "Ingelogd als:"
+
+msgid "Rol:"
+msgstr "Rol:"
+
+msgid "CV:"
+msgstr "CV:"
+
+msgid "nog niet toegevoegd"
+msgstr "nog niet toegevoegd"
+
+msgid "Naam:"
+msgstr "Naam:"
+
+msgid "Locatie:"
+msgstr "Locatie:"
+
+msgid "Opmerking:"
+msgstr "Opmerking:"
+
+msgid "Geen headline"
+msgstr "Geen headline"
+
+msgid "Skills:"
+msgstr "Vaardigheden:"
+
+msgid "Geen skills geselecteerd"
+msgstr "Geen vaardigheden geselecteerd"
+
+msgid "Skills aanpassen"
+msgstr "Vaardigheden aanpassen"
+
+msgid "Profiel aanpassen"
+msgstr "Profiel aanpassen"
+
+msgid "Bedrijfsnaam:"
+msgstr "Bedrijfsnaam:"
+
+msgid "Sector:"
+msgstr "Sector:"
+
+msgid "Nieuwe job posten"
+msgstr "Nieuwe vacature plaatsen"
+
+msgid "Mijn job posts"
+msgstr "Mijn vacatures"
+
+
+
+# ---------- Edit Company Profile ----------
+
+#: app/templates/edit_company_profile.html
+msgid "Bedrijfsprofiel aanpassen"
+msgstr "Bedrijfsprofiel aanpassen"
+
+msgid "Stad:"
+msgstr "Stad:"
+
+msgid "Land:"
+msgstr "Land:"
+
+msgid "Contactinformatie (wordt verborgen getoond)"
+msgstr "Contactinformatie (verborgen weergegeven)"
+
+msgid "Contact E-mailadres:"
+msgstr "Contact-e-mailadres:"
+
+msgid "Contact Telefoonnummer:"
+msgstr "Contacttelefoonnummer:"
+
+msgid "Opslaan"
+msgstr "Opslaan"
+
+
+
+# ---------- Edit Consultant Profile ----------
+
+#: app/templates/edit_consultant_profile.html
+msgid "Naam zichtbaar voor anderen:"
+msgstr "Naam zichtbaar voor anderen:"
+
+msgid "Headline:"
+msgstr "Headline:"
+
+msgid "Profielfoto:"
+msgstr "Profielfoto:"
+
+msgid "CV / Document:"
+msgstr "CV / Document:"
+
+
+
+# ---------- Edit Consultant Skills ----------
+
+#: app/templates/edit_consultant_skills.html
+msgid "Skills aanpassen"
+msgstr "Vaardigheden aanpassen"
+
+msgid "Kies je skills"
+msgstr "Selecteer uw vaardigheden"
+
+
+
+# ---------- Job List ----------
+
+#: app/templates/job_list.html
+msgid "Vacatures | Job Lijst"
+msgstr "Vacatures | Vacaturelijst"
+
+msgid "Vacatures"
+msgstr "Vacatures"
+
+msgid "Kies uw zoekmodus:"
+msgstr "Kies uw zoekmodus:"
+
+msgid "🧠 IConsult Match (Beste Relevantie)"
+msgstr "🧠 IConsult Match (Beste relevantie)"
+
+msgid "🔧 Handmatige Filter & Sortering"
+msgstr "🔧 Handmatig filteren & sorteren"
+
+msgid "Gebruik onderstaande velden om handmatig te filteren. Resultaten worden gesorteerd op Titel (A-Z)."
+msgstr "Gebruik de onderstaande velden om handmatig te filteren. Resultaten worden gesorteerd op titel (A–Z)."
+
+msgid "Zoek op Titel/Omschrijving"
+msgstr "Zoek op titel/beschrijving"
+
+msgid "Contract type (Alle)"
+msgstr "Contracttype (Alle)"
+
+msgid "Filters Toepassen"
+msgstr "Filters toepassen"
+
+msgid "Reset Filters"
+msgstr "Filters resetten"
+
+msgid "Vereiste Skills:"
+msgstr "Vereiste vaardigheden:"
+
+msgid "Bekijk Vacature"
+msgstr "Bekijk vacature"
+
+msgid "Geen vacatures gevonden die overeenkomen met de criteria."
+msgstr "Geen vacatures gevonden die overeenkomen met de criteria."
+
+
+
+# ---------- Job Detail ----------
+
+#: app/templates/job_detail.html
+msgid "Contactgegevens van het Bedrijf"
+msgstr "Contactgegevens van het bedrijf"
+
+msgid "Bedrijf:"
+msgstr "Bedrijf:"
+
+msgid "Locatie"
+msgstr "Locatie"
+
+msgid "Contracttype"
+msgstr "Contracttype"
+
+msgid "Vereiste skills"
+msgstr "Vereiste vaardigheden"
+
+msgid "Geen specifieke skills opgegeven."
+msgstr "Geen specifieke vaardigheden opgegeven."
+
+msgid "Bewerken"
+msgstr "Bewerken"
+
+msgid "Verwijderen"
+msgstr "Verwijderen"
+
+msgid "Zeker verwijderen?"
+msgstr "Weet u zeker dat u dit wilt verwijderen?"

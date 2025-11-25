@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-11-22 21:38+0100\n"
-"PO-Revision-Date: 2025-11-22 21:19+0100\n"
+"POT-Creation-Date: 2025-11-24 19:50+0100\n"
+"PO-Revision-Date: 2025-11-24 19:50+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
 "Language-Team: en <LL@li.org>\n"
@@ -18,337 +18,543 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: app/templates/base.html:120
+
+#: app/routes.py:33
+msgid "Gelieve in te loggen om deze actie uit te voeren."
+msgstr "Please log in to perform this action."
+
+
+#: app/routes.py:61
+msgid "Only companies can view their own job posts."
+msgstr "Only companies can view their own job posts."
+
+
+#: app/routes.py:70
+msgid "Company profile not found."
+msgstr "Company profile not found."
+
+
+#: app/routes.py:88
+msgid "Mijn Vacatures"
+msgstr "My Job Posts"
+
+
+#: app/routes.py:108
+msgid "Gebruikersnaam is vereist."
+msgstr "A username is required."
+
+#: app/routes.py:123
+msgid "Please log in to view your dashboard."
+msgstr "Please log in to access your dashboard."
+
+
+#: app/routes.py:145
+msgid "Only consultants can edit their profile"
+msgstr "Only consultants can edit their profile."
+
+
+#: app/routes.py:175
+msgid "Ongeldig bestandstype. Upload enkel pdf/doc/docx."
+msgstr "Invalid file type. Only PDF, DOC, or DOCX files are allowed."
+
+
+#: app/routes.py:194
+msgid "Profile updated"
+msgstr "Profile updated successfully."
+
+
+#: app/routes.py:214
+msgid "Only consultants can update their skills"
+msgstr "Only consultants can update their skills."
+
+
+#: app/routes.py:232
+msgid "Consultant not found"
+msgstr "Consultant not found."
+
+
+#: app/routes.py:246
+msgid "Only companies can browse consultant profiles."
+msgstr "Only companies are allowed to browse consultant profiles."
+
+
+#: app/routes.py:262
+msgid "Only companies can edit their profile"
+msgstr "Only companies can edit their profile."
+
+
+#: app/routes.py:270
+msgid "Company profile updated"
+msgstr "Company profile updated successfully."
+
+
+#: app/routes.py:283
+msgid "Alleen bedrijven kunnen contactgegevens van consultants vrijgeven."
+msgstr "Only companies can unlock consultant contact details."
+
+
+#: app/routes.py:291
+msgid "Consultant profiel niet gevonden."
+msgstr "Consultant profile not found."
+
+
+#: app/routes.py:299
+msgid "Contactgegevens zijn al vrijgegeven."
+msgstr "The contact details have already been unlocked."
+
+
+#: app/routes.py:309
+msgid "Contactgegevens succesvol vrijgegeven!"
+msgstr "Contact details unlocked successfully!"
+
+#: app/routes.py:335
+msgid "Maak eerst een Job Post aan om het IConsult relevantiefilter op basis van uw behoeften in te schakelen."
+msgstr "Create a job post first to enable the IConsult relevance filter based on your needs."
+
+
+#: app/routes.py:409
+msgid "Only companies can unlock consultant contact details"
+msgstr "Only companies can unlock consultant contact details."
+
+
+#: app/routes.py:420
+msgid "Consultant not found"
+msgstr "Consultant not found."
+
+
+#: app/routes.py:440
+msgid "Contactgegevens succesvol vrijgegeven!"
+msgstr "Contact details successfully unlocked!"
+
+
+#: app/routes.py:463
+msgid "Only companies can create job posts"
+msgstr "Only companies can create job posts."
+
+
+#: app/routes.py:478
+msgid "Titel en beschrijving zijn verplicht."
+msgstr "A title and description are required."
+
+
+#: app/routes.py:500
+msgid "Job succesvol aangemaakt."
+msgstr "Job created successfully."
+
+
+#: app/routes.py:541
+msgid "Job not found"
+msgstr "Job not found."
+
+
+#: app/routes.py:592
+msgid "Only consultants can unlock job contact details"
+msgstr "Only consultants can unlock job contact details."
+
+
+#: app/routes.py:604
+msgid "Job not found"
+msgstr "Job not found."
+
+
+#: app/routes.py:626
+msgid "Contactgegevens succesvol vrijgegeven!"
+msgstr "Contact details successfully unlocked!"
+
+#: app/routes.py:651
+msgid "Only companies can edit job posts"
+msgstr "Only companies can edit job posts."
+
+
+#: app/routes.py:663
+msgid "Job not found or you are not the owner"
+msgstr "Job not found or you are not the owner."
+
+
+#: app/routes.py:689
+msgid "Job updated."
+msgstr "Job updated successfully."
+
+
+#: app/routes.py:719
+msgid "Only companies can delete job posts"
+msgstr "Only companies can delete job posts."
+
+
+#: app/routes.py:732
+msgid "Job not found or you are not the owner"
+msgstr "Job not found or you are not the owner."
+
+
+#: app/routes.py:744
+msgid "Job deleted"
+msgstr "Job deleted successfully."
+
+
+#: app/routes.py:775
+msgid "Vacatureoverzicht"
+msgstr "Job Overview"
+
+#: app/templates/base.html
+msgid "IConsult Match"
+msgstr "IConsult Match"
+
+#: app/templates/base.html
 msgid "Home"
-msgstr ""
+msgstr "Home"
 
-#: app/templates/base.html:123
+#: app/templates/base.html
 msgid "Consultants"
-msgstr ""
+msgstr "Consultants"
 
-#: app/templates/base.html:127
+#: app/templates/base.html
 msgid "Jobs"
-msgstr ""
+msgstr "Jobs"
 
-#: app/templates/base.html:130
+#: app/templates/base.html
 msgid "Dashboard"
-msgstr ""
+msgstr "Dashboard"
 
-#: app/templates/base.html:146
-msgid "Logout"
-msgstr ""
-
-#: app/templates/base.html:149
+#: app/templates/base.html
 msgid "Login"
-msgstr ""
+msgstr "Login"
 
-#: app/templates/base.html:167
-msgid "MVP prototype"
-msgstr ""
+#: app/templates/base.html
+msgid "Logout"
+msgstr "Logout"
 
-#: venv/Lib/site-packages/click/_termui_impl.py:608
-#, python-brace-format
-msgid "{editor}: Editing failed"
-msgstr ""
+#: app/templates/base.html
+msgid "All rights reserved"
+msgstr "All rights reserved"
 
-#: venv/Lib/site-packages/click/_termui_impl.py:612
-#, python-brace-format
-msgid "{editor}: Editing failed: {e}"
-msgstr ""
+#: app/templates/base.html
+msgid "Geen profielfoto"
+msgstr "No profile photo"
 
-#: venv/Lib/site-packages/click/core.py:1104
-#: venv/Lib/site-packages/click/core.py:1141
-#, python-brace-format
-msgid "{text} {deprecated_message}"
-msgstr ""
+#: app/templates/base.html
+msgid "Profielfoto"
+msgstr "Profile picture"
 
-#: venv/Lib/site-packages/click/core.py:1160
-msgid "Options"
-msgstr ""
 
-#: venv/Lib/site-packages/click/core.py:1222
-#, python-brace-format
-msgid "Got unexpected extra argument ({args})"
-msgid_plural "Got unexpected extra arguments ({args})"
-msgstr[0] ""
-msgstr[1] ""
+# ---------- Consultant Detail ----------
 
-#: venv/Lib/site-packages/click/core.py:1241
-#, python-brace-format
-msgid "DeprecationWarning: The command {name!r} is deprecated.{extra_message}"
-msgstr ""
+#: app/templates/consultant_detail.html
+msgid "Consultant detail"
+msgstr "Consultant details"
 
-#: venv/Lib/site-packages/click/core.py:1425
-msgid "Aborted!"
-msgstr ""
+#: app/templates/consultant_detail.html
+msgid "Skills"
+msgstr "Skills"
 
-#: venv/Lib/site-packages/click/core.py:1799
-msgid "Commands"
-msgstr ""
+#: app/templates/consultant_detail.html
+msgid "Geen skills opgegeven."
+msgstr "No skills listed."
 
-#: venv/Lib/site-packages/click/core.py:1830
-msgid "Missing command."
-msgstr ""
+#: app/templates/consultant_detail.html
+msgid "Contactgegevens"
+msgstr "Contact details"
 
-#: venv/Lib/site-packages/click/core.py:1908
-#, python-brace-format
-msgid "No such command {name!r}."
-msgstr ""
+#: app/templates/consultant_detail.html
+msgid "E-mail"
+msgstr "Email"
 
-#: venv/Lib/site-packages/click/core.py:2332
-msgid "Value must be an iterable."
-msgstr ""
+#: app/templates/consultant_detail.html
+msgid "Telefoon"
+msgstr "Phone"
 
-#: venv/Lib/site-packages/click/core.py:2355
-#, python-brace-format
-msgid "Takes {nargs} values but 1 was given."
-msgid_plural "Takes {nargs} values but {len} were given."
-msgstr[0] ""
-msgstr[1] ""
+#: app/templates/consultant_detail.html
+msgid "Niet ingevuld"
+msgstr "Not provided"
 
-#: venv/Lib/site-packages/click/core.py:2505
-#, python-brace-format
-msgid ""
-"DeprecationWarning: The {param_type} {name!r} is "
-"deprecated.{extra_message}"
-msgstr ""
+#: app/templates/consultant_detail.html
+msgid "Bekijk / download CV"
+msgstr "View / download CV"
 
-#: venv/Lib/site-packages/click/core.py:2956
-#, python-brace-format
-msgid "env var: {var}"
-msgstr ""
+#: app/templates/consultant_detail.html
+msgid "Deze contactgegevens zijn vrijgegeven en permanent zichtbaar."
+msgstr "These contact details have been unlocked and are permanently visible."
 
-#: venv/Lib/site-packages/click/core.py:2959
-#, python-brace-format
-msgid "default: {default}"
-msgstr ""
+#: app/templates/consultant_detail.html
+msgid "De contactgegevens van deze consultant zijn verborgen."
+msgstr "This consultant’s contact details are hidden."
 
-#: venv/Lib/site-packages/click/core.py:2963
-msgid "required"
-msgstr ""
+#: app/templates/consultant_detail.html
+msgid "Weet u zeker dat u de contactgegevens wilt vrijgeven?"
+msgstr "Are you sure you want to unlock these contact details?"
 
-#: venv/Lib/site-packages/click/core.py:3023
-msgid "(dynamic)"
-msgstr ""
+#: app/templates/consultant_detail.html
+msgid "🔒 Ontgrendel contactgegevens (MVP Knop)"
+msgstr "🔒 Unlock contact details (MVP Button)"
 
-#: venv/Lib/site-packages/click/decorators.py:465
-#, python-format
-msgid "%(prog)s, version %(version)s"
-msgstr ""
+#: app/templates/consultant_detail.html
+msgid "Door op deze knop te klikken, worden de contactgegevens permanent zichtbaar voor uw bedrijf."
+msgstr "By clicking this button, the contact details will become permanently visible to your company."
 
-#: venv/Lib/site-packages/click/decorators.py:522
-msgid "Show the version and exit."
-msgstr ""
+#: app/templates/consultant_detail.html
+msgid "Zichtbaar voor u als eigenaar"
+msgstr "Visible to you as the owner"
 
-#: venv/Lib/site-packages/click/decorators.py:548
-msgid "Show this message and exit."
-msgstr ""
+#: app/templates/consultant_detail.html
+msgid "Log in als Bedrijf om de contactgegevens te bekijken en te ontgrendelen."
+msgstr "Log in as a Company to view and unlock the contact details."
 
-#: venv/Lib/site-packages/click/exceptions.py:50
-#: venv/Lib/site-packages/click/exceptions.py:89
-#, python-brace-format
-msgid "Error: {message}"
-msgstr ""
+#: app/templates/consultant_detail.html
+msgid "Specialisatie"
+msgstr "Specialization"
 
-#: venv/Lib/site-packages/click/exceptions.py:81
-#, python-brace-format
-msgid "Try '{command} {option}' for help."
-msgstr ""
+#: app/templates/consultant_detail.html
+msgid "Skills Consultant"
+msgstr "Consultant Skills"
 
-#: venv/Lib/site-packages/click/exceptions.py:130
-#, python-brace-format
-msgid "Invalid value: {message}"
-msgstr ""
+#: app/templates/consultant_detail.html
+msgid "meer"
+msgstr "more"
 
-#: venv/Lib/site-packages/click/exceptions.py:132
-#, python-brace-format
-msgid "Invalid value for {param_hint}: {message}"
-msgstr ""
+#: app/templates/consultant_detail.html
+msgid "Match"
+msgstr "Match"
 
-#: venv/Lib/site-packages/click/exceptions.py:190
-msgid "Missing argument"
-msgstr ""
+#: app/templates/consultant_detail.html
+msgid "Score Uitsplitsing"
+msgstr "Score Breakdown"
 
-#: venv/Lib/site-packages/click/exceptions.py:192
-msgid "Missing option"
-msgstr ""
+#: app/templates/consultant_detail.html
+msgid "Recentheid"
+msgstr "Recency"
 
-#: venv/Lib/site-packages/click/exceptions.py:194
-msgid "Missing parameter"
-msgstr ""
+#: app/templates/consultant_detail.html
+msgid "Populariteit"
+msgstr "Popularity"
 
-#: venv/Lib/site-packages/click/exceptions.py:196
-#, python-brace-format
-msgid "Missing {param_type}"
-msgstr ""
+#: app/templates/consultant_detail.html
+msgid "Totaal"
+msgstr "Total"
 
-#: venv/Lib/site-packages/click/exceptions.py:203
-#, python-brace-format
-msgid "Missing parameter: {param_name}"
-msgstr ""
+#: app/templates/consultant_detail.html
+msgid "geunlockt"
+msgstr "unlocked"
 
-#: venv/Lib/site-packages/click/exceptions.py:223
-#, python-brace-format
-msgid "No such option: {name}"
-msgstr ""
+# ---------- Dashboard ----------
 
-#: venv/Lib/site-packages/click/exceptions.py:235
-#, python-brace-format
-msgid "Did you mean {possibility}?"
-msgid_plural "(Possible options: {possibilities})"
-msgstr[0] ""
-msgstr[1] ""
+#: app/templates/dashboard.html
+msgid "Dashboard"
+msgstr "Dashboard"
 
-#: venv/Lib/site-packages/click/exceptions.py:282
-msgid "unknown error"
-msgstr ""
+#: app/templates/dashboard.html
+msgid "Profiel"
+msgstr "Profile"
 
-#: venv/Lib/site-packages/click/exceptions.py:289
-#, python-brace-format
-msgid "Could not open file {filename!r}: {message}"
-msgstr ""
+#: app/templates/dashboard.html
+msgid "Ingelogd als:"
+msgstr "Logged in as:"
 
-#: venv/Lib/site-packages/click/formatting.py:156
-msgid "Usage:"
-msgstr ""
+#: app/templates/dashboard.html
+msgid "Rol:"
+msgstr "Role:"
 
-#: venv/Lib/site-packages/click/parser.py:199
-#, python-brace-format
-msgid "Argument {name!r} takes {nargs} values."
-msgstr ""
+#: app/templates/dashboard.html
+msgid "CV:"
+msgstr "CV:"
 
-#: venv/Lib/site-packages/click/parser.py:381
-#, python-brace-format
-msgid "Option {name!r} does not take a value."
-msgstr ""
+#: app/templates/dashboard.html
+msgid "nog niet toegevoegd"
+msgstr "not added yet"
 
-#: venv/Lib/site-packages/click/parser.py:444
-#, python-brace-format
-msgid "Option {name!r} requires an argument."
-msgid_plural "Option {name!r} requires {nargs} arguments."
-msgstr[0] ""
-msgstr[1] ""
+#: app/templates/dashboard.html
+msgid "Naam:"
+msgstr "Name:"
 
-#: venv/Lib/site-packages/click/shell_completion.py:332
-msgid "Shell completion is not supported for Bash versions older than 4.4."
-msgstr ""
+#: app/templates/dashboard.html
+msgid "Locatie:"
+msgstr "Location:"
 
-#: venv/Lib/site-packages/click/shell_completion.py:339
-msgid "Couldn't detect Bash version, shell completion is not supported."
-msgstr ""
+#: app/templates/dashboard.html
+msgid "Opmerking:"
+msgstr "Note:"
 
-#: venv/Lib/site-packages/click/termui.py:162
-msgid "Repeat for confirmation"
-msgstr ""
+#: app/templates/dashboard.html
+msgid "Geen headline"
+msgstr "No headline"
 
-#: venv/Lib/site-packages/click/termui.py:178
-msgid "Error: The value you entered was invalid."
-msgstr ""
+#: app/templates/dashboard.html
+msgid "Skills:"
+msgstr "Skills:"
 
-#: venv/Lib/site-packages/click/termui.py:180
-#, python-brace-format
-msgid "Error: {e.message}"
-msgstr ""
+#: app/templates/dashboard.html
+msgid "Geen skills geselecteerd"
+msgstr "No skills selected"
 
-#: venv/Lib/site-packages/click/termui.py:191
-msgid "Error: The two entered values do not match."
-msgstr ""
+#: app/templates/dashboard.html
+msgid "Skills aanpassen"
+msgstr "Edit skills"
 
-#: venv/Lib/site-packages/click/termui.py:247
-msgid "Error: invalid input"
-msgstr ""
+#: app/templates/dashboard.html
+msgid "Profiel aanpassen"
+msgstr "Edit profile"
 
-#: venv/Lib/site-packages/click/termui.py:866
-msgid "Press any key to continue..."
-msgstr ""
+#: app/templates/dashboard.html
+msgid "Bedrijfsnaam:"
+msgstr "Company name:"
 
-#: venv/Lib/site-packages/click/types.py:332
-#, python-brace-format
-msgid ""
-"Choose from:\n"
-"\t{choices}"
-msgstr ""
+#: app/templates/dashboard.html
+msgid "Sector:"
+msgstr "Industry:"
 
-#: venv/Lib/site-packages/click/types.py:369
-#, python-brace-format
-msgid "{value!r} is not {choice}."
-msgid_plural "{value!r} is not one of {choices}."
-msgstr[0] ""
-msgstr[1] ""
+#: app/templates/dashboard.html
+msgid "Nieuwe job posten"
+msgstr "Post a new job"
 
-#: venv/Lib/site-packages/click/types.py:460
-#, python-brace-format
-msgid "{value!r} does not match the format {format}."
-msgid_plural "{value!r} does not match the formats {formats}."
-msgstr[0] ""
-msgstr[1] ""
+#: app/templates/dashboard.html
+msgid "Mijn job posts"
+msgstr "My job posts"
 
-#: venv/Lib/site-packages/click/types.py:482
-#, python-brace-format
-msgid "{value!r} is not a valid {number_type}."
-msgstr ""
+# ---------- Edit Company Profile ----------
 
-#: venv/Lib/site-packages/click/types.py:538
-#, python-brace-format
-msgid "{value} is not in the range {range}."
-msgstr ""
+#: app/templates/edit_company_profile.html
+msgid "Bedrijfsprofiel aanpassen"
+msgstr "Edit company profile"
 
-#: venv/Lib/site-packages/click/types.py:719
-#, python-brace-format
-msgid "{value!r} is not a valid boolean. Recognized values: {states}"
-msgstr ""
+#: app/templates/edit_company_profile.html
+msgid "Stad:"
+msgstr "City:"
 
-#: venv/Lib/site-packages/click/types.py:747
-#, python-brace-format
-msgid "{value!r} is not a valid UUID."
-msgstr ""
+#: app/templates/edit_company_profile.html
+msgid "Land:"
+msgstr "Country:"
 
-#: venv/Lib/site-packages/click/types.py:937
-msgid "file"
-msgstr ""
+#: app/templates/edit_company_profile.html
+msgid "Contactinformatie (wordt verborgen getoond)"
+msgstr "Contact information (hidden by default)"
 
-#: venv/Lib/site-packages/click/types.py:939
-msgid "directory"
-msgstr ""
+#: app/templates/edit_company_profile.html
+msgid "Contact E-mailadres:"
+msgstr "Contact email address:"
 
-#: venv/Lib/site-packages/click/types.py:941
-msgid "path"
-msgstr ""
+#: app/templates/edit_company_profile.html
+msgid "Contact Telefoonnummer:"
+msgstr "Contact phone number:"
 
-#: venv/Lib/site-packages/click/types.py:988
-#, python-brace-format
-msgid "{name} {filename!r} does not exist."
-msgstr ""
+#: app/templates/edit_company_profile.html
+msgid "Opslaan"
+msgstr "Save"
 
-#: venv/Lib/site-packages/click/types.py:997
-#, python-brace-format
-msgid "{name} {filename!r} is a file."
-msgstr ""
+# ---------- Edit Consultant Profile ----------
 
-#: venv/Lib/site-packages/click/types.py:1005
-#, python-brace-format
-msgid "{name} {filename!r} is a directory."
-msgstr ""
+#: app/templates/edit_consultant_profile.html
+msgid "Naam zichtbaar voor anderen:"
+msgstr "Name visible to others:"
 
-#: venv/Lib/site-packages/click/types.py:1014
-#, python-brace-format
-msgid "{name} {filename!r} is not readable."
-msgstr ""
+#: app/templates/edit_consultant_profile.html
+msgid "Headline:"
+msgstr "Headline:"
 
-#: venv/Lib/site-packages/click/types.py:1023
-#, python-brace-format
-msgid "{name} {filename!r} is not writable."
-msgstr ""
+#: app/templates/edit_consultant_profile.html
+msgid "Profielfoto:"
+msgstr "Profile picture:"
 
-#: venv/Lib/site-packages/click/types.py:1032
-#, python-brace-format
-msgid "{name} {filename!r} is not executable."
-msgstr ""
+#: app/templates/edit_consultant_profile.html
+msgid "CV / Document:"
+msgstr "CV / Document:"
 
-#: venv/Lib/site-packages/click/types.py:1099
-#, python-brace-format
-msgid "{len_type} values are required, but {len_value} was given."
-msgid_plural "{len_type} values are required, but {len_value} were given."
-msgstr[0] ""
-msgstr[1] ""
+# ---------- Edit Consultant Skills ----------
+
+#: app/templates/edit_consultant_skills.html
+msgid "Skills aanpassen"
+msgstr "Edit skills"
+
+#: app/templates/edit_consultant_skills.html
+msgid "Kies je skills"
+msgstr "Select your skills"
+
+# ---------- Job List ----------
+
+#: app/templates/job_list.html
+msgid "Vacatures | Job Lijst"
+msgstr "Vacancies | Job List"
+
+#: app/templates/job_list.html
+msgid "Vacatures"
+msgstr "Jobs"
+
+#: app/templates/job_list.html
+msgid "Kies uw zoekmodus:"
+msgstr "Choose your search mode:"
+
+#: app/templates/job_list.html
+msgid "🧠 IConsult Match (Beste Relevantie)"
+msgstr "🧠 IConsult Match (Best Relevance)"
+
+#: app/templates/job_list.html
+msgid "🔧 Handmatige Filter & Sortering"
+msgstr "🔧 Manual Filtering & Sorting"
+
+#: app/templates/job_list.html
+msgid "Gebruik onderstaande velden om handmatig te filteren. Resultaten worden gesorteerd op Titel (A-Z)."
+msgstr "Use the fields below to filter manually. Results are sorted by Title (A–Z)."
+
+#: app/templates/job_list.html
+msgid "Zoek op Titel/Omschrijving"
+msgstr "Search by Title/Description"
+
+#: app/templates/job_list.html
+msgid "Contract type (Alle)"
+msgstr "Contract type (All)"
+
+#: app/templates/job_list.html
+msgid "Filters Toepassen"
+msgstr "Apply Filters"
+
+#: app/templates/job_list.html
+msgid "Reset Filters"
+msgstr "Reset Filters"
+
+#: app/templates/job_list.html
+msgid "Vereiste Skills:"
+msgstr "Required Skills:"
+
+#: app/templates/job_list.html
+msgid "Bekijk Vacature"
+msgstr "View Job"
+
+#: app/templates/job_list.html
+msgid "Geen vacatures gevonden die overeenkomen met de criteria."
+msgstr "No jobs match the criteria."
+
+# ---------- Job Detail ----------
+
+#: app/templates/job_detail.html
+msgid "Contactgegevens van het Bedrijf"
+msgstr "Company Contact Details"
+
+#: app/templates/job_detail.html
+msgid "Bedrijf:"
+msgstr "Company:"
+
+#: app/templates/job_detail.html
+msgid "Locatie"
+msgstr "Location"
+
+#: app/templates/job_detail.html
+msgid "Contracttype"
+msgstr "Contract type"
+
+#: app/templates/job_detail.html
+msgid "Vereiste skills"
+msgstr "Required skills"
+
+#: app/templates/job_detail.html
+msgid "Geen specifieke skills opgegeven."
+msgstr "No specific skills listed."
+
+#: app/templates/job_detail.html
+msgid "Bewerken"
+msgstr "Edit"
+
+#: app/templates/job_detail.html
+msgid "Verwijderen"
+msgstr "Delete"
+
+#: app/templates/job_detail.html
+msgid "Zeker verwijderen?"
+msgstr "Are you sure you want to delete this?"
 

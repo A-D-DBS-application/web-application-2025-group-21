@@ -6,10 +6,10 @@
 
 <div class="card">
     <h2>Contactgegevens van het Bedrijf</h2>
-    
+   
     {# 1. Controleert: Is de bezoeker een Consultant? #}
     {% if user and user.role == UserRole.consultant %}
-        
+       
         {# Toon contactgegevens indien ONTGRENDELD of de EIGENAAR #}
         {% if is_unlocked or is_owner %}
             <p><strong>Bedrijf:</strong> {{ job.company.company_name_masked }}</p>
@@ -18,7 +18,7 @@
             {% if is_unlocked %}
                 <p style="color: green;">✅ Deze contactgegevens zijn vrijgegeven en permanent zichtbaar.</p>
             {% endif %}
-            
+           
         {# Toon UNLOCK-KNOP indien niet ontgrendeld #}
         {% else %}
             <p>De contactgegevens van dit bedrijf zijn **verborgen**.</p>
@@ -27,13 +27,13 @@
             </a>
             <p><small>Door op deze knop te klikken, worden de contactgegevens permanent zichtbaar voor uw profiel.</small></p>
         {% endif %}
-        
+       
     {# 2. Toon bedrijf's eigen contactinfo (als ze de job gepost hebben) #}
     {% elif is_owner %}
         <p><strong>Bedrijf:</strong> {{ job.company.company_name_masked }}</p>
         <p><strong>E-mail:</strong> {{ job.company.contact_email or "Niet ingevuld" }} (Zichtbaar voor u als eigenaar)</p>
         <p><strong>Telefoon:</strong> {{ job.company.phone_number or "Niet ingevuld" }} (Zichtbaar voor u als eigenaar)</p>
-        
+       
     {# 3. Fallback: Toon de login/rol-vereiste #}
     {% else %}
         <p>Log in als **Consultant** om de contactgegevens te bekijken en te ontgrendelen.</p>

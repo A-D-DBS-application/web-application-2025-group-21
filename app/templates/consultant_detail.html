@@ -4,14 +4,14 @@
   <h1>{{ profile.display_name_masked }}</h1>
   {# --------- Profielfoto --------- #}
   {% if profile.profile_image %}
-    <img 
-      src="{{ profile.profile_image }}" 
-      alt="Profielfoto" 
+    <img
+      src="{{ profile.profile_image }}"
+      alt="Profielfoto"
       style="width:140px;height:140px;border-radius:50%;object-fit:cover;margin-bottom:15px;"
     >
   {% else %}
-    <img 
-      src="{{ url_for('static', filename='img/default-avatar.png') }}" 
+    <img
+      src="{{ url_for('static', filename='img/default-avatar.png') }}"
       alt="Geen profielfoto"
       style="width:140px;height:140px;border-radius:50%;object-fit:cover;margin-bottom:15px;"
     >
@@ -41,15 +41,15 @@
   </p>
 <div class="card">
     <h2>Contactgegevens</h2>
-    
+   
     {# 1. Controleert: Is de bezoeker een Bedrijf? #}
     {% if user and user.role == UserRole.company %}
-        
+       
         {# Toon contactgegevens indien ONTGRENDELD of de EIGENAAR #}
         {% if is_unlocked or is_owner %}
             <p><strong>E-mail:</strong> {{ profile.contact_email or "Niet ingevuld" }}</p>
             <p><strong>Telefoon:</strong> {{ profile.phone_number or "Niet ingevuld" }}</p>
-            
+           
             {% if profile.cv_document %}
                 <p>
                     <strong>CV:</strong>
@@ -64,7 +64,7 @@
             {% if is_unlocked %}
                 <p style="color: green;">✅ Deze contactgegevens zijn vrijgegeven en permanent zichtbaar.</p>
             {% endif %}
-        
+       
         {# Toon UNLOCK-KNOP indien niet ontgrendeld #}
         {% else %}
             <p>De contactgegevens van deze consultant zijn **verborgen**.</p>
@@ -74,9 +74,9 @@
             </a>
             <p><small>Door op deze knop te klikken, worden de contactgegevens permanent zichtbaar voor uw bedrijf.</small></p>
         {% endif %}
-        
+       
     {# 2. Toon consultant's eigen contactinfo (als ze ingelogd zijn op hun eigen profiel)-> is dit niet overbodig? #}
-    {% elif is_owner %} 
+    {% elif is_owner %}
         <p><strong>E-mail:</strong> {{ profile.contact_email or "Niet ingevuld" }} (Zichtbaar voor u als eigenaar)</p>
         <p><strong>Telefoon:</strong> {{ profile.phone_number or "Niet ingevuld" }} (Zichtbaar voor u als eigenaar)</p>
         {% if profile.cv_document %}
@@ -89,7 +89,7 @@
         {% else %}
             <p><strong>CV:</strong> Niet ingevuld</p>
         {% endif %}
-        
+       
     {# 3. Fallback: Toon de login/rol-vereiste #}
     {% else %}
         <p>Log in als **Bedrijf** om de contactgegevens te bekijken en te ontgrendelen.</p>

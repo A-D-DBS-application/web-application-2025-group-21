@@ -12,14 +12,14 @@
 
     {% if user.role == UserRole.consultant %}
         {% if profile.profile_image %}
-            <img 
-                src="{{ profile.profile_image }}" 
-                alt="Profielfoto" 
+            <img
+                src="{{ profile.profile_image }}"
+                alt="Profielfoto"
                 style="width:140px;height:140px;border-radius:50%;object-fit:cover;margin-bottom:12px;"
             >
         {% else %}
-            <img 
-                src="{{ url_for('static', filename='img/default-avatar.png') }}" 
+            <img
+                src="{{ url_for('static', filename='img/default-avatar.png') }}"
                 alt="Geen profielfoto"
                 style="width:140px;height:140px;border-radius:50%;object-fit:cover;margin-bottom:12px;"
             >
