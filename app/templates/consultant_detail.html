@@ -6,13 +6,13 @@
   {% if profile.profile_image %}
     <img
       src="{{ profile.profile_image }}"
-      alt="Profielfoto"
+      alt="Profile picture"
       style="width:140px;height:140px;border-radius:50%;object-fit:cover;margin-bottom:15px;"
     >
   {% else %}
     <img
       src="{{ url_for('static', filename='img/default-avatar.png') }}"
-      alt="Geen profielfoto"
+      alt="No profile picture"
       style="width:140px;height:140px;border-radius:50%;object-fit:cover;margin-bottom:15px;"
     >
   {% endif %}
@@ -29,7 +29,7 @@
       {% endfor %}
     </ul>
   {% else %}
-    <p><i>Geen skills opgegeven.</i></p>
+    <p><i>No skills specified.</i></p>
   {% endif %}
 
   <p>
@@ -40,29 +40,29 @@
     </small>
   </p>
 <div class="card">
-    <h2>Contactgegevens</h2>
+    <h2>Contact details</h2>
    
     {# 1. Controleert: Is de bezoeker een Bedrijf? #}
     {% if user and user.role == UserRole.company %}
        
         {# Toon contactgegevens indien ONTGRENDELD of de EIGENAAR #}
         {% if is_unlocked or is_owner %}
-            <p><strong>E-mail:</strong> {{ profile.contact_email or "Niet ingevuld" }}</p>
-            <p><strong>Telefoon:</strong> {{ profile.phone_number or "Niet ingevuld" }}</p>
+            <p><strong>E-mail:</strong> {{ profile.contact_email or "Not filled in" }}</p>
+            <p><strong>Telefoon:</strong> {{ profile.phone_number or "Not filled in" }}</p>
            
             {% if profile.cv_document %}
                 <p>
                     <strong>CV:</strong>
                     <a href="{{ profile.cv_document }}" target="_blank">
-                        Bekijk / download CV
+                        View / download CV
                     </a>
                 </p>
             {% else %}
-                <p><strong>CV:</strong> Niet ingevuld</p>
+                <p><strong>CV:</strong> Not filled in</p>
             {% endif %}
 
             {% if is_unlocked %}
-                <p style="color: green;">✅ Deze contactgegevens zijn vrijgegeven en permanent zichtbaar.</p>
+                <p style="color: green;">✅ These contact details have been released and are permanently visible.</p>
             {% endif %}
        
         {# Toon UNLOCK-KNOP indien niet ontgrendeld #}
