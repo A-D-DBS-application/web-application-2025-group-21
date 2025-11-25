@@ -108,14 +108,6 @@ def company_jobs_list():
 def index():
     return render_template("index.html")
 
-#taalwissel-route:
-@main.route("/set_language", methods=["POST"])
-def set_language():
-    lang = request.form.get("language", "en")
-    if lang not in ["en", "nl", "fr"]:
-        lang = "en"
-    session["language"] = lang
-    return redirect(request.referrer or url_for("main.index"))
 
 
 # ------------------ LOGIN ------------------
@@ -129,7 +121,7 @@ def login():
         requested_role = UserRole(role_str)
         
         if not username:
-            flash(_("Gebruikersnaam is vereist."))
+            flash(_("Username is required."))
             return redirect(url_for("main.login"))
 
         with get_session() as db:
@@ -142,12 +134,12 @@ def login():
                     # ROL KOMT OVEREEN: Inloggen
                     session["user_id"] = user.id
                     session["role"] = user.role.value
-                    flash(_(f"Welkom terug, {username}."))
+                    flash(_(f"Welcome back, {username}."))
                     return redirect(url_for("main.dashboard"))
                 else:
                     # ROL CONFLICT: Geen login, geef een generieke foutmelding
                     # Dit voorkomt het onthullen van de bestaande rol (veiligheid)
-                    flash(_("Deze gebruikersnaam bestaat al en is gekoppeld aan een andere rol. Kies een andere gebruikersnaam of log in met de juiste rol."))
+                    flash(_("This username already exists and is linked to another role. Please choose a different username or log in with the correct role."))
                     return redirect(url_for("main.login"))
                 
             else:
@@ -173,7 +165,7 @@ def login():
                     db.add(comp)
 
                 db.commit()
-                flash(_(f"Welkom, {username}. U bent geregistreerd en ingelogd als {role_str}."))
+                flash(_(f"Welcome, {username}. You are registered and logged in as {role_str}."))
 
                 # SESSIE SETTEN voor de nieuwe gebruiker
                 session["user_id"] = user.id
@@ -276,7 +268,7 @@ def edit_consultant_profile():
                 # Enkel toegelaten types
                 allowed_exts = {".pdf", ".doc", ".docx"}
                 if ext not in allowed_exts:
-                    flash("Ongeldig bestandstype. Upload enkel pdf/doc/docx.")
+                    flash("Invalid file type. Only upload pdf/doc/docx.")
                     return redirect(url_for("main.edit_consultant_profile"))
 
                 # Unieke bestandsnaam voor CV
@@ -398,7 +390,7 @@ def consultants_list():
                 required_skill_ids = set(s.id for s in required_job.skills)
         
         if not required_job and sort_by == "relevance":
-            flash(_("Maak eerst een Job Post aan om het IConsult relevantiefilter op basis van uw behoeften in te schakelen."))
+            flash(_("First, create a Job Post to enable the IConsult relevance filter based on your needs."))
 
 
         # 4. Basisquery en Filters Toepassen
@@ -567,16 +559,16 @@ def unlock_consultant(profile_id):
         user = get_current_user(db)
         
         if user.role != UserRole.company:
-            flash(_("Alleen bedrijven kunnen contactgegevens van consultants vrijgeven."), "error")
+            flash(_("Only companies can reveal consultants contact details."), "error")
             return redirect(url_for("main.consultant_detail", profile_id=profile_id))
         # Gebruik filter_by voor betere compatibiliteit met Pylance
         consultant_profile = db.query(ConsultantProfile).filter_by(id=profile_id).first()
         if not consultant_profile:
-            flash(_("Consultant profiel niet gevonden."), "error")
+            flash(_("Consultant profile not found."), "error")
             return redirect(url_for("main.dashboard"))
 
         if is_unlocked(db, user.id, UnlockTarget.consultant, profile_id):
-            flash(_("Contactgegevens zijn al vrijgegeven."), "info")
+            flash(_("Contact details have already been released."), "info")
             return redirect(url_for("main.consultant_detail", profile_id=profile_id))
 
         new_unlock = Unlock(
@@ -587,7 +579,7 @@ def unlock_consultant(profile_id):
         db.add(new_unlock)
         db.commit()
         
-        flash(_("Contactgegevens succesvol vrijgegeven!"), "success")
+        flash(_("Contact details successfully released!"), "success")
         return redirect(url_for("main.consultant_detail", profile_id=profile_id))
 
 # Unlock Job/Company (Consultant -> Company)
@@ -598,15 +590,15 @@ def unlock_job(job_id):
         user = get_current_user(db)
         
         if user.role != UserRole.consultant:
-            flash(_("Alleen consultants kunnen contactgegevens van bedrijven vrijgeven."), "error")
+            flash(_("Only consultants can reveal companies' contact details."), "error")
             return redirect(url_for("main.job_detail", job_id=job_id))
         job_post = db.query(JobPost).filter_by(id=job_id).first()
         if not job_post:
-            flash(_("Job post niet gevonden."), "error")
+            flash(_("Job post not found."), "error")
             return redirect(url_for("main.dashboard"))
 
         if is_unlocked(db, user.id, UnlockTarget.job, job_id):
-            flash(_("Contactgegevens zijn al vrijgegeven."), "info")
+            flash(_("Contact details have already been released."), "info")
             return redirect(url_for("main.job_detail", job_id=job_id))
 
         new_unlock = Unlock(
@@ -617,7 +609,7 @@ def unlock_job(job_id):
         db.add(new_unlock)
         db.commit()
 
-        flash(_("Contactgegevens succesvol vrijgegeven!"), "success")
+        flash(_("Contact details successfully released!"), "success")
         return redirect(url_for("main.job_detail", job_id=job_id))
 
 # ------------------ JOB POSTS ------------------

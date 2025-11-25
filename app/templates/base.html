@@ -149,23 +149,13 @@
 
         <a href="{{ url_for('main.dashboard') }}">{{ _("Dashboard") }}</a>
 
-        <div style="margin-left: auto;">
-            <form action="{{ url_for('main.set_language') }}" method="POST" style="display:inline;">
-                <select name="language" onchange="this.form.submit()" class="btn">
-                    <option value="en" {% if session.get('language') == 'en' %}selected{% endif %}>EN</option>
-                    <option value="nl" {% if session.get('language') == 'nl' %}selected{% endif %}>NL</option>
-                    <option value="fr" {% if session.get('language') == 'fr' %}selected{% endif %}>FR</option>
-                </select>
-            </form>
-        </div>
-
 
         {% if session.get('user_id') %}
-            <form action="{{ url_for('main.logout') }}" method="post" style="display:inline;">
+            <form action="{{ url_for('main.logout') }}" method="post" style="margin-left:auto; display:inline;">
                 <button class="btn" type="submit">{{ _("Logout") }}</button>
             </form>
         {% else %}
-            <a class="btn" href="{{ url_for('main.login') }}">{{ _("Login") }}</a>
+            <a class="btn" style="margin-left:auto;" href="{{ url_for('main.login') }}">{{ _("Login") }}</a>
         {% endif %}
     </nav>
     </header>
