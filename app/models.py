@@ -1,6 +1,6 @@
 from sqlalchemy import (
     Column, Integer, String, Text, DECIMAL, Boolean,
-    ForeignKey, Enum, TIMESTAMP, Index, func
+    ForeignKey, Enum, TIMESTAMP, Index, func, Float   # ⬅️ Float toegevoegd
 )
 from sqlalchemy.orm import declarative_base, relationship
 import enum
@@ -21,7 +21,6 @@ class IndustryEnum(enum.Enum):
     Retail = "Retail"
     Manufacturing = "Manufacturing"
     Consulting = "Consulting"
-
 
 
 class UnlockTarget(enum.Enum):
@@ -56,10 +55,14 @@ class ConsultantProfile(Base):
     rate_value = Column(DECIMAL(10, 2))
     created_at = Column(TIMESTAMP, nullable=False, server_default=func.now())
 
-    profile_image = Column(String(300), nullable=True)   # <--- DIT ONTBREEKT
+    profile_image = Column(String(300), nullable=True)
     cv_document = Column(String(300), nullable=True)
     contact_email = Column(String(255), nullable=True)
     phone_number = Column(String(50), nullable=True)
+
+    # 🌍 NIEUW: coördinaten voor locatie-matching
+    latitude = Column(Float, nullable=True)
+    longitude = Column(Float, nullable=True)
 
     user = relationship("User", back_populates="consultant_profile")
     skills = relationship("Skill", secondary="profile_skills", back_populates="profiles")
@@ -70,7 +73,7 @@ class ConsultantProfile(Base):
         if self.display_name_masked:
             names = self.display_name_masked.split()
             initials = "".join(name[0].upper() for name in names if name)
-            return initials if initials else "C" 
+            return initials if initials else "C"
         return "C"
 
 
@@ -92,14 +95,19 @@ class Company(Base):
     contact_email = Column(String(255), nullable=True)
     phone_number = Column(String(50), nullable=True)
 
+    # 🌍 NIEUW: coördinaten voor locatie-matching
+    latitude = Column(Float, nullable=True)
+    longitude = Column(Float, nullable=True)
+
     user = relationship("User", back_populates="company")
     jobs = relationship("JobPost", back_populates="company")
+
     @property
     def initials(self):
         if self.company_name_masked:
             names = self.company_name_masked.split()
             initials = "".join(name[0].upper() for name in names if name)
-            return initials if initials else "B" 
+            return initials if initials else "B"
         return "B"
 
 
@@ -174,6 +182,3 @@ class JobSkill(Base):
 
 Index("idx_job_skills_job_id", JobSkill.job_id)
 Index("idx_job_skills_skill_id", JobSkill.skill_id)
-
-
-
