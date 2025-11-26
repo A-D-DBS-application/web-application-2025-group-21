@@ -2,7 +2,7 @@
 {% block title %}Vacatures | Job Lijst{% endblock %}
 {% block content %}
 
-{# Kleine config-variabelen #}
+{# Config variabelen #}
 {% set page_title = page_title if page_title is defined else "Vacatures" %}
 {% set current_sort = sort_by if sort_by is defined else 'relevance' %}
 {% set show_mode_selector = show_mode_selector if show_mode_selector is defined else True %}
@@ -29,6 +29,51 @@
 <form method="GET" action="{{ url_for(request.endpoint) }}" class="filter-form">
     <input type="hidden" name="sort_by" value="{{ current_sort }}">
 
+    {# 🔹 LOCATIE-FILTER BLOK (altijd zichtbaar, bovenaan) #}
+    {% set current_distance = request.args.get('max_distance_km', '') %}
+    {% if current_distance == '' %}
+        {% set current_distance = 0 %}
+    {% endif %}
+
+    <div class="location-filter-block">
+        <h3 class="location-filter-title">
+            <i class="fas fa-map-marker-alt"></i> Locatie
+        </h3>
+        <div class="location-controls">
+            <div class="location-range-wrapper">
+                <label for="max_distance_km" class="location-label">
+                    Maximale afstand:
+                </label>
+                <input type="range"
+                       id="max_distance_km"
+                       name="max_distance_km"
+                       min="0" max="400" step="10"
+                       value="{{ current_distance }}">
+                <span id="distance-display" class="distance-display">
+                    {% if current_distance|int == 0 %}
+                        Geen afstandsfilter
+                    {% else %}
+                        {{ current_distance }} km
+                    {% endif %}
+                </span>
+            </div>
+
+            <div class="location-checkboxes">
+                <label class="checkbox-inline">
+                    <input type="checkbox" name="ignore_distance" value="1"
+                        {% if request.args.get('ignore_distance') == '1' %}checked{% endif %}>
+                    Afstand is niet van toepassing
+                </label>
+
+                <label class="checkbox-inline">
+                    <input type="checkbox" name="same_country_only" value="1"
+                        {% if request.args.get('same_country_only') == '1' %}checked{% endif %}>
+                    Enkel zelfde land
+                </label>
+            </div>
+        </div>
+    </div>
+
     {# SIMPELE ZOEKMODUS (voor /company/jobs) #}
     {% if simple_search %}
         <div class="input-group">
@@ -37,7 +82,7 @@
             <button type="submit" class="btn btn-primary">Zoek</button>
         </div>
 
-    {# ORIGINELE /jobs LOGICA #}
+    {# VOLLEDIGE /jobs LOGICA #}
     {% else %}
         {% if current_sort != 'relevance' %}
             <p class="form-instruction">
@@ -91,14 +136,19 @@
                 Voor een gedetailleerde uitleg over de toegepaste filter- en
                 scoringsmethodologie, verwijzen wij u naar de informatie onderaan deze pagina.
             </p>
-           
-            <div class="input-group">
-                <input type="text" name="q"
-                       placeholder="Verfijn zoekopdracht (wordt meegenomen in de score)"
-                       value="{{ request.args.get('q', '') }}">
-                <button type="submit" class="btn btn-primary">
-                    Zoek &amp; Herbereken Score
-                </button>
+
+            <div class="relevance-search-block">
+                <label class="relevance-label">
+                    Zoekterm (wordt meegenomen in de score):
+                </label>
+                <div class="input-group relevance-input-group">
+                    <input type="text" name="q"
+                           placeholder="Bijvoorbeeld: Python, .NET, project manager..."
+                           value="{{ request.args.get('q', '') }}">
+                    <button type="submit" class="btn btn-primary relevance-button">
+                        🔍 Zoek &amp; herbereken score
+                    </button>
+                </div>
             </div>
         {% endif %}
     {% endif %}
@@ -178,10 +228,9 @@
                         <div class="score-breakdown">
                             {% set total_score_perc = (job.score * 100) %}
 
-                            {# 1. Skills – factor 0..1 voor balk #}
                             <div class="bar-item">
                                 <span class="bar-label">
-                                    <i class="fas fa-star"></i> Skills (45%):
+                                    <i class="fas fa-star"></i> Skills (50%):
                                 </span>
                                 {% set score_perc = (job.score_breakdown.skill_factor * 100) %}
                                 <div class="progress-bar-container">
@@ -191,7 +240,6 @@
                                 <span class="bar-value">{{ score_perc | round(0) }}%</span>
                             </div>
 
-                            {# 2. Zoekterm #}
                             <div class="bar-item">
                                 <span class="bar-label">
                                     <i class="fas fa-search"></i> Zoekterm (20%):
@@ -204,10 +252,9 @@
                                 <span class="bar-value">{{ score_perc | round(0) }}%</span>
                             </div>
 
-                            {# 3. Recentheid #}
                             <div class="bar-item">
                                 <span class="bar-label">
-                                    <i class="fas fa-clock"></i> Recentheid (15%):
+                                    <i class="fas fa-clock"></i> Recentheid (20%):
                                 </span>
                                 {% set score_perc = (job.score_breakdown.recency_factor * 100) %}
                                 <div class="progress-bar-container">
@@ -217,25 +264,11 @@
                                 <span class="bar-value">{{ score_perc | round(0) }}%</span>
                             </div>
 
-                            {# 4. Locatie #}
-                            <div class="bar-item">
-                                <span class="bar-label">
-                                    <i class="fas fa-map-marker-alt"></i> Locatie (10%):
-                                </span>
-                                {% set score_perc = (job.score_breakdown.get('location_factor', 0) * 100) %}
-                                <div class="progress-bar-container">
-                                    <div class="progress-bar location-bar"
-                                         style="width: {{ score_perc | round(0) }}%;"></div>
-                                </div>
-                                <span class="bar-value">{{ score_perc | round(0) }}%</span>
-                            </div>
-
-                            {# 5. Populariteit (unlocks) #}
                             <div class="bar-item">
                                 <span class="bar-label">
                                     <i class="fas fa-fire"></i> Populariteit (10%):
                                 </span>
-                                {% set score_perc = (job.score_breakdown.get('popularity_factor', 0) * 100) %}
+                                {% set score_perc = (job.score_breakdown.popularity_factor * 100) %}
                                 <div class="progress-bar-container">
                                     <div class="progress-bar popularity-bar"
                                          style="width: {{ score_perc | round(0) }}%;"></div>
@@ -266,22 +299,18 @@
 {% endif %}
 
 <style>
-/* ------------------------------------------- */
-/* --- VERNIEUWDE EN GEOPTIMALISEERDE CSS --- */
-/* ------------------------------------------- */
-
-/* 🎯 STIJLEN VOOR MATCH KLEUREN */
+/* --- MATCH BADGES --- */
 .relevance-badge.match-low {
-    background: #dc3545 !important; /* Rood */
+    background: #dc3545 !important;
     border: 1px solid #c82333;
 }
 .relevance-badge.match-medium {
-    background: #ffc107 !important; /* Oranje */
+    background: #ffc107 !important;
     color: #333 !important;
     border: 1px solid #e0a800;
 }
 .relevance-badge.match-high {
-    background: #28a745 !important; /* Groen */
+    background: #28a745 !important;
     border: 1px solid #1e7e34;
 }
 .relevance-badge {
@@ -297,7 +326,7 @@
     color: white;
 }
 
-/* --- SCORE BREAKDOWN STYLES --- */
+/* SCORE BREAKDOWN */
 .bar-item {
     display: grid;
     grid-template-columns: 140px 1fr 40px;
@@ -319,13 +348,10 @@
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     min-width: 5px;
 }
-
-/* Kleuren voor de progress bars (factoren) */
-.skill-bar      { background-color: #38c172 !important; } /* Groen */
-.text-bar       { background-color: #ffc107 !important; } /* Geel/Oranje */
-.recency-bar    { background-color: #17a2b8 !important; } /* Cyaan/Blauw */
-.location-bar   { background-color: #a855f7 !important; } /* Paars */
-.popularity-bar { background-color: #6b7280 !important; } /* Grijs */
+.skill-bar      { background-color: #38c172 !important; }
+.text-bar       { background-color: #ffc107 !important; }
+.recency-bar    { background-color: #17a2b8 !important; }
+.popularity-bar { background-color: #6b7280 !important; }
 
 .bar-value {
     font-weight: 700;
@@ -333,7 +359,7 @@
     font-size: 1.05rem;
 }
 
-/* --- Job Kaart & Layout --- */
+/* JOB CARDS */
 .job-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -471,7 +497,7 @@
     color: #4a6fa1;
 }
 
-/* Filter & Mode Stijlen */
+/* Filter & Mode */
 .page-title { margin-bottom: 20px; }
 .mode-selector-container {
     margin-bottom: 25px;
@@ -676,10 +702,104 @@
     text-align: right;
     color: #2b63c6;
 }
+
+/* 🔹 Extra styles voor locatieblok & relevance-knop */
+.location-filter-block {
+    margin-bottom: 20px;
+    padding: 15px;
+    border-radius: 10px;
+    background: #eef3ff;
+    border: 1px solid #d4ddff;
+}
+.location-filter-title {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: #1f2937;
+}
+.location-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: center;
+    justify-content: space-between;
+}
+.location-range-wrapper {
+    flex: 1 1 260px;
+}
+.location-label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+#max_distance_km {
+    width: 100%;
+}
+.distance-display {
+    display: inline-block;
+    margin-top: 6px;
+    font-size: 0.9rem;
+    color: #374151;
+    font-weight: 600;
+}
+.location-checkboxes {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 200px;
+}
+.checkbox-inline {
+    font-size: 0.9rem;
+}
+
+/* relevance zoekblok */
+.relevance-search-block {
+    margin-top: 20px;
+}
+.relevance-label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+.relevance-input-group {
+    align-items: stretch;
+}
+.relevance-button {
+    white-space: nowrap;
+}
+
+/* Responsiveness */
+@media (max-width: 640px) {
+    .location-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .relevance-input-group {
+        flex-direction: column;
+    }
+    .relevance-button {
+        width: 100%;
+    }
+}
 </style>
 
+<script>
+(function() {
+    var slider = document.getElementById('max_distance_km');
+    var display = document.getElementById('distance-display');
+    if (slider && display) {
+        var updateText = function() {
+            var v = parseInt(slider.value || '0', 10);
+            if (v === 0) {
+                display.textContent = 'Geen afstandsfilter';
+            } else {
+                display.textContent = v + ' km';
+            }
+        };
+        slider.addEventListener('input', updateText);
+        updateText();
+    }
+})();
+</script>
+
 {% endblock %}
-
-
-
-

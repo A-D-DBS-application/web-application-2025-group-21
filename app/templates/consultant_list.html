@@ -1,14 +1,16 @@
 {% extends "base.html" %}
-{% block title %}Consultants | Profielen{% endblock %}
+{% block title %}Consultants | Lijst{% endblock %}
 {% block content %}
 
 {% set current_sort = sort_by if sort_by is defined else 'relevance' %}
+{% set show_mode_selector = show_mode_selector if show_mode_selector is defined else True %}
 
 <h1 class="page-title">Consultants</h1>
 
+{% if show_mode_selector %}
 <div class="mode-selector-container">
     <h2 class="h5">Kies uw zoekmodus:</h2>
-
+   
     <a href="{{ url_for('main.consultants_list', sort_by='relevance') }}"
        class="mode-btn {% if current_sort == 'relevance' %}active-mode{% else %}inactive-mode{% endif %}">
         🧠 IConsult Match (Beste Relevantie)
@@ -16,12 +18,58 @@
 
     <a href="{{ url_for('main.consultants_list', sort_by='title') }}"
        class="mode-btn {% if current_sort != 'relevance' %}active-mode{% else %}inactive-mode{% endif %}">
-        🔧 Handmatige Filter &amp; Sortering
+        🔧 Handmatige Filter & Sortering
     </a>
 </div>
+{% endif %}
 
 <form method="GET" action="{{ url_for('main.consultants_list') }}" class="filter-form">
     <input type="hidden" name="sort_by" value="{{ current_sort }}">
+
+    {# 🔹 LOCATIE-FILTER BLOK (altijd zichtbaar, bovenaan) #}
+    {% set current_distance = request.args.get('max_distance_km', '') %}
+    {% if current_distance == '' %}
+        {% set current_distance = 0 %}
+    {% endif %}
+
+    <div class="location-filter-block">
+        <h3 class="location-filter-title">
+            <i class="fas fa-map-marker-alt"></i> Locatie
+        </h3>
+        <div class="location-controls">
+            <div class="location-range-wrapper">
+                <label for="max_distance_km" class="location-label">
+                    Maximale afstand van uw bedrijf:
+                </label>
+                <input type="range"
+                       id="max_distance_km"
+                       name="max_distance_km"
+                       min="0" max="400" step="10"
+                       value="{{ current_distance }}">
+                <span id="distance-display" class="distance-display">
+                    {% if current_distance|int == 0 %}
+                        Geen afstandsfilter
+                    {% else %}
+                        {{ current_distance }} km
+                    {% endif %}
+                </span>
+            </div>
+
+            <div class="location-checkboxes">
+                <label class="checkbox-inline">
+                    <input type="checkbox" name="ignore_distance" value="1"
+                        {% if request.args.get('ignore_distance') == '1' %}checked{% endif %}>
+                    Afstand is niet van toepassing
+                </label>
+
+                <label class="checkbox-inline">
+                    <input type="checkbox" name="same_country_only" value="1"
+                        {% if request.args.get('same_country_only') == '1' %}checked{% endif %}>
+                    Enkel zelfde land
+                </label>
+            </div>
+        </div>
+    </div>
 
     {% if current_sort != 'relevance' %}
         <p class="form-instruction">
@@ -30,12 +78,13 @@
         </p>
 
         <div class="input-grid manual-filter-grid">
-            <input type="text" name="q" placeholder="Zoek op naam/headline/locatie"
+            <input type="text" name="q" placeholder="Zoek op naam/headline"
                    value="{{ request.args.get('q', '') }}">
             <input type="text" name="city" placeholder="Stad"
                    value="{{ request.args.get('city', '') }}">
             <input type="text" name="country" placeholder="Land"
                    value="{{ request.args.get('country', '') }}">
+
         </div>
 
         <div class="skills-filter">
@@ -56,23 +105,28 @@
             </div>
         </div>
 
-        <button type="submit" class="btn btn-primary apply-btn">Filters toepassen</button>
+        <button type="submit" class="btn btn-primary apply-btn">Filters Toepassen</button>
         <a href="{{ url_for('main.consultants_list', sort_by='title') }}"
-           class="btn btn-secondary reset-btn">Reset filters</a>
+           class="btn btn-secondary reset-btn">Reset Filters</a>
 
     {% else %}
         <p class="alert alert-info">
-            Voor een gedetailleerde uitleg over de toegepaste filter- en
-            scoringsmethodologie, verwijzen wij u naar de informatie onderaan deze pagina.
+            In IConsult-modus wordt de score berekend op basis van match met uw
+            meest recente vacature (skills, zoekterm, recentheid en populariteit).
         </p>
 
-        <div class="input-group">
-            <input type="text" name="q"
-                   placeholder="Verfijn zoekopdracht (wordt meegenomen in de score)"
-                   value="{{ request.args.get('q', '') }}">
-            <button type="submit" class="btn btn-primary">
-                Zoek &amp; Herbereken Score
-            </button>
+        <div class="relevance-search-block">
+            <label class="relevance-label">
+                Zoekterm (wordt meegenomen in de score):
+            </label>
+            <div class="input-group relevance-input-group">
+                <input type="text" name="q"
+                       placeholder="Bijvoorbeeld: .NET, data engineer, scrum..."
+                       value="{{ request.args.get('q', '') }}">
+                <button type="submit" class="btn btn-primary relevance-button">
+                    🔍 Zoek &amp; herbereken score
+                </button>
+            </div>
         </div>
     {% endif %}
 </form>
@@ -92,12 +146,7 @@
         <div class="job-card">
             <div class="job-meta-top">
                 <span class="contract-type-tag">
-                    <i class="fas fa-user"></i>
-                    {% if c.is_unlocked_for_me %}
-                        {{ c.display_name_masked }}
-                    {% else %}
-                        {{ c.initials }}
-                    {% endif %}
+                    <i class="fas fa-user-tie"></i> Consultant
                 </span>
 
                 {% if c.location_city or c.country %}
@@ -110,25 +159,28 @@
 
             <h3 class="job-title-link">
                 <a href="{{ url_for('main.consultant_detail', profile_id=c.id) }}">
-                    {{ c.headline or "Consultant profiel" }}
+                    {{ c.display_name_masked }}
                 </a>
             </h3>
 
+            {% if c.headline %}
             <p class="company-name">
-                Skills:
+                {{ c.headline }}
             </p>
+            {% endif %}
 
             <div class="required-skills-summary">
                 <label class="skills-label-small">
-                    <i class="fas fa-tools"></i> Belangrijkste skills:
+                    <i class="fas fa-tools"></i> Skills:
                 </label>
                 <div class="skill-tags-wrapper">
-                    {% for s in c.skills[:3] %}
-                        <span class="required-skill-tag">{{ s.name }}</span>
+                    {% for skill in c.skills[:3] %}
+                        <span class="required-skill-tag">{{ skill.name }}</span>
                     {% endfor %}
                     {% if c.skills|length > 3 %}
                         <span class="required-skill-tag more-skills">
-                            <i class="fas fa-plus-circle"></i> {{ c.skills|length - 3 }} meer
+                            <i class="fas fa-plus-circle"></i>
+                            {{ c.skills|length - 3 }} meer
                         </span>
                     {% endif %}
                 </div>
@@ -148,10 +200,9 @@
                         <div class="score-breakdown">
                             {% set total_score_perc = (c.score * 100) %}
 
-                            {# 1. Skills – factor 0..1 #}
                             <div class="bar-item">
                                 <span class="bar-label">
-                                    <i class="fas fa-star"></i> Skills (45%):
+                                    <i class="fas fa-star"></i> Skills (50%):
                                 </span>
                                 {% set score_perc = (c.score_breakdown.skill_factor * 100) %}
                                 <div class="progress-bar-container">
@@ -161,7 +212,6 @@
                                 <span class="bar-value">{{ score_perc | round(0) }}%</span>
                             </div>
 
-                            {# 2. Zoekterm #}
                             <div class="bar-item">
                                 <span class="bar-label">
                                     <i class="fas fa-search"></i> Zoekterm (20%):
@@ -174,10 +224,9 @@
                                 <span class="bar-value">{{ score_perc | round(0) }}%</span>
                             </div>
 
-                            {# 3. Recentheid #}
                             <div class="bar-item">
                                 <span class="bar-label">
-                                    <i class="fas fa-clock"></i> Recentheid (15%):
+                                    <i class="fas fa-clock"></i> Recentheid (20%):
                                 </span>
                                 {% set score_perc = (c.score_breakdown.recency_factor * 100) %}
                                 <div class="progress-bar-container">
@@ -187,20 +236,6 @@
                                 <span class="bar-value">{{ score_perc | round(0) }}%</span>
                             </div>
 
-                            {# 4. Locatie #}
-                            <div class="bar-item">
-                                <span class="bar-label">
-                                    <i class="fas fa-map-marker-alt"></i> Locatie (10%):
-                                </span>
-                                {% set score_perc = (c.score_breakdown.location_factor * 100) %}
-                                <div class="progress-bar-container">
-                                    <div class="progress-bar location-bar"
-                                         style="width: {{ score_perc | round(0) }}%;"></div>
-                                </div>
-                                <span class="bar-value">{{ score_perc | round(0) }}%</span>
-                            </div>
-
-                            {# 5. Populariteit (unlocks) #}
                             <div class="bar-item">
                                 <span class="bar-label">
                                     <i class="fas fa-fire"></i> Populariteit (10%):
@@ -236,9 +271,9 @@
 {% endif %}
 
 <style>
-/* Zelfde styling als job_list.html zodat alles consistent blijft */
+/* Zelfde look & feel als job_list.html */
 
-/* Match kleuren */
+/* --- MATCH BADGES --- */
 .relevance-badge.match-low {
     background: #dc3545 !important;
     border: 1px solid #c82333;
@@ -265,7 +300,7 @@
     color: white;
 }
 
-/* Score breakdown */
+/* SCORE BREAKDOWN */
 .bar-item {
     display: grid;
     grid-template-columns: 140px 1fr 40px;
@@ -287,12 +322,9 @@
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     min-width: 5px;
 }
-
-/* Factor-kleuren */
 .skill-bar      { background-color: #38c172 !important; }
 .text-bar       { background-color: #ffc107 !important; }
 .recency-bar    { background-color: #17a2b8 !important; }
-.location-bar   { background-color: #a855f7 !important; }
 .popularity-bar { background-color: #6b7280 !important; }
 
 .bar-value {
@@ -301,7 +333,7 @@
     font-size: 1.05rem;
 }
 
-/* Kaarten – hergebruik van job_list stijl */
+/* KAARTEN (zelfde grid als jobs) */
 .job-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -399,7 +431,7 @@
 }
 .btn-primary-card:hover { background: #1a4f99; }
 
-/* Skills */
+/* Skills tags */
 .required-skills-summary {
     margin-bottom: 20px;
     border-top: 1px dashed #f0f0f0;
@@ -439,7 +471,7 @@
     color: #4a6fa1;
 }
 
-/* Filter & Mode – zelfde als jobs */
+/* Filter & Mode */
 .page-title { margin-bottom: 20px; }
 .mode-selector-container {
     margin-bottom: 25px;
@@ -578,7 +610,7 @@
 }
 .apply-btn { margin-top: 10px; }
 
-/* Details / summary */
+/* Score Breakdown details */
 .breakdown-details {
     margin-top: 10px;
     margin-bottom: 15px;
@@ -635,6 +667,104 @@
     text-align: right;
     color: #2b63c6;
 }
+
+/* 🔹 Extra styles voor locatieblok & relevance-knop */
+.location-filter-block {
+    margin-bottom: 20px;
+    padding: 15px;
+    border-radius: 10px;
+    background: #eef3ff;
+    border: 1px solid #d4ddff;
+}
+.location-filter-title {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: #1f2937;
+}
+.location-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: center;
+    justify-content: space-between;
+}
+.location-range-wrapper {
+    flex: 1 1 260px;
+}
+.location-label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+#max_distance_km {
+    width: 100%;
+}
+.distance-display {
+    display: inline-block;
+    margin-top: 6px;
+    font-size: 0.9rem;
+    color: #374151;
+    font-weight: 600;
+}
+.location-checkboxes {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 200px;
+}
+.checkbox-inline {
+    font-size: 0.9rem;
+}
+
+/* relevance zoekblok */
+.relevance-search-block {
+    margin-top: 20px;
+}
+.relevance-label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+.relevance-input-group {
+    align-items: stretch;
+}
+.relevance-button {
+    white-space: nowrap;
+}
+
+/* Responsiveness */
+@media (max-width: 640px) {
+    .location-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .relevance-input-group {
+        flex-direction: column;
+    }
+    .relevance-button {
+        width: 100%;
+    }
+}
 </style>
+
+<script>
+(function() {
+    var slider = document.getElementById('max_distance_km');
+    var display = document.getElementById('distance-display');
+    if (slider && display) {
+        var updateText = function() {
+            var v = parseInt(slider.value || '0', 10);
+            if (v === 0) {
+                display.textContent = 'Geen afstandsfilter';
+            } else {
+                display.textContent = v + ' km';
+            }
+        };
+        slider.addEventListener('input', updateText);
+        updateText();
+    }
+})();
+</script>
 
 {% endblock %}
