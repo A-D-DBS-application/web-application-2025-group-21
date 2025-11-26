@@ -157,9 +157,16 @@
                 {% endif %}
             </div>
 
+            {# 🔴 ENIGE AANPASSING: naam vervangen door initialen tenzij eigenaar of unlocked #}
             <h3 class="job-title-link">
                 <a href="{{ url_for('main.consultant_detail', profile_id=c.id) }}">
-                    {{ c.display_name_masked }}
+                    {% if user and user.id == c.user_id %}
+                        {{ c.display_name_masked }}
+                    {% elif c.is_unlocked_for_me %}
+                        {{ c.display_name_masked }}
+                    {% else %}
+                        {{ c.initials }}
+                    {% endif %}
                 </a>
             </h3>
 
