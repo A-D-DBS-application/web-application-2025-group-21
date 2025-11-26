@@ -2,12 +2,12 @@
 {% block title %}Edit Profile{% endblock %}
 
 {% block content %}
-    <h1>Edit Consultant Profile</h1>
+    <h1>Edit consultant profile</h1>
 
     <form method="post" enctype="multipart/form-data">
 
         <label style="display:block; margin-bottom: 10px;">
-            Full Name:
+            Full name:
             <input
                 type="text"
                 name="display_name"
@@ -46,11 +46,35 @@
                 style="width: 300px;"
             >
         </label>
+        
         <hr style="margin: 20px 0;">
-        <h3>Contact Information (Shown only upon unlock)</h3>
+
+        <h3>Documents</h3>
+        
+        <label style="display:block; margin-bottom: 10px;">
+            Profile picture:
+            <input
+                type="file"
+                name="profile_image"
+                accept="image/*"
+            >
+        </label>
 
         <label style="display:block; margin-bottom: 10px;">
-            Contact Email Address:
+            CV document:
+            <input
+                type="file"
+                name="cv_document"
+                accept=".pdf,.doc,.docx"
+            >
+        </label>
+
+        <hr style="margin: 20px 0;">
+
+        <h3>Contact information </h3>
+
+        <label style="display:block; margin-bottom: 10px;">
+            Email address:
             <input
                 type="email"
                 name="contact_email"
@@ -60,7 +84,7 @@
         </label>
 
         <label style="display:block; margin-bottom: 10px;">
-            Phone Number:
+            Phone number:
             <input
                 type="tel"
                 name="phone_number"
@@ -68,24 +92,8 @@
                 style="width: 300px;"
             >
         </label>
+        
         <hr style="margin: 20px 0;">
-        <label style="display:block; margin-bottom: 10px;">
-            Profile Picture:
-            <input
-                type="file"
-                name="profile_image"
-                accept="image/*"
-            >
-        </label>
-
-        <label style="display:block; margin-bottom: 10px;">
-            CV / Document:
-            <input
-                type="file"
-                name="cv_document"
-                accept=".pdf,.doc,.docx"
-            >
-        </label>
 
         <button class="btn" type="submit">Save Changes</button>
     </form>
