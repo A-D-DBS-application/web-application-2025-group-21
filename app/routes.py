@@ -154,7 +154,7 @@ def login():
                 else: # UserRole.company
                     comp = Company(
                         user_id=user.id,
-                        company_name_masked=f"{username} BV",
+                        company_name_masked=username,
                         created_at=datetime.utcnow()
                     )
                     db.add(comp)

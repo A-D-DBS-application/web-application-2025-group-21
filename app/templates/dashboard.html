@@ -5,7 +5,6 @@
 <h1>Dashboard</h1>
 
 {% if user %}
-    {# CORRECTIE: Gebruik <strong> in plaats van Markdown ** #}
     <p>Welcome, <strong>{{ user.username }}</strong>!</p>
 {% endif %}
 
@@ -16,9 +15,6 @@
     <p><strong>Role:</strong> {{ user.role.value }}</p>
 
     {% if user.role == UserRole.consultant %}
-        {# --------------------------------- #}
-        {# CONSULTANT SECTION (Altijd in het Engels) #}
-        {# --------------------------------- #}
         {% if profile.profile_image %}
             <img
                 src="{{ profile.profile_image }}"
@@ -44,13 +40,12 @@
             <p><strong>CV:</strong> Not yet added</p>
         {% endif %}
 
-        {# Label veranderd naar "Name" #}
         <p><strong>Name:</strong> {{ profile.display_name_masked }}</p>
         <p><strong>Location:</strong> {{ profile.location_city }} , {{ profile.country }}</p>
         <p><strong>Headline:</strong> {{ profile.headline or "No headline" }}</p>
 
-        <p><strong>Contact E-mail:</strong> {{ profile.contact_email or "Not filled in" }}</p>
-        <p><strong>Phone:</strong> {{ profile.phone_number or "Not filled in" }}</p>
+        <p><strong>Email address:</strong> {{ profile.contact_email or "Not filled in" }}</p>
+        <p><strong>Phone number:</strong> {{ profile.phone_number or "Not filled in" }}</p>
 
         <p><strong>Skills:</strong>
             {% if profile.skills %}
@@ -66,19 +61,15 @@
     {% endif %}
 
     {% if user.role == UserRole.company %}
-        {# --------------------------------- #}
-        {# COMPANY SECTION (Behoudt meertaligheid via _() of hardcoded) #}
-        {# --------------------------------- #}
-        <p><strong>Bedrijfsnaam:</strong> {{ company.company_name_masked }}</p>
-        <p><strong>Sector:</strong> {{ company.industry or "Niet ingevuld" }}</p>
+        <p><strong>Company name:</strong> {{ company.company_name_masked }}</p>
+        <p><strong>Sector:</strong> {{ company.industry or "Not filled in" }}</p>
 
-        <p><strong>E-mail:</strong> {{ company.contact_email or "Niet ingevuld" }}</p>
-        <p><strong>Telefoon:</strong> {{ company.phone_number or "Niet ingevuld" }}</p>
+        <p><strong>Email address:</strong> {{ company.contact_email or "Not filled in" }}</p>
+        <p><strong>Phone number:</strong> {{ company.phone_number or "Not filled in" }}</p>
+        <a class="btn" href="{{ url_for('main.job_new') }}">New Job Post</a>
+        <a href="{{ url_for('main.company_jobs_list') }}">My Job Posts</a>
 
-        <a class="btn" href="{{ url_for('main.job_new') }}">Nieuwe job posten</a>
-        <a href="{{ url_for('main.company_jobs_list') }}">Mijn job posts</a>
-
-        <a class="btn" href="{{ url_for('main.edit_company_profile') }}">Profiel aanpassen</a>
+        <a class="btn" href="{{ url_for('main.edit_company_profile') }}">Edit Profile</a>
     {% endif %}
 </div>
 {% endblock %}
