@@ -217,8 +217,9 @@ def edit_consultant_profile():
     with get_session() as db:
         user = get_current_user(db)
 
+        # 1. Beveiliging: Vertaal de melding naar het Engels.
         if not user or user.role != UserRole.consultant:
-            flash(_("Only consultants can edit their profile"))
+            flash("Only consultants can edit their profile")
             return redirect(url_for("main.dashboard"))
 
         profile = db.query(ConsultantProfile).filter(
@@ -226,7 +227,10 @@ def edit_consultant_profile():
         ).first()
 
         if request.method == "POST":
-            profile.display_name = request.form.get("display_name")
+            
+            # ** CRUCIALE FIX: Opslaan in display_name_masked **
+            profile.display_name_masked = request.form.get("display_name")
+            
             profile.location_city = request.form.get("location_city")
             profile.country = request.form.get("country")
             profile.headline = request.form.get("headline")
@@ -234,26 +238,21 @@ def edit_consultant_profile():
             profile.phone_number = request.form.get("phone_number")
 
             # ----------------------
-            #   PROFIELFOTO
+            #   PROFIELFOTO LOGICA
             # ----------------------
             file = request.files.get("profile_image")
 
             if file and file.filename != "":
-                # Maak een map /static/uploads als die nog niet bestaat
+                # ... (Logica voor het opslaan van de profielfoto blijft hetzelfde)
                 upload_folder = os.path.join(current_app.root_path, "static", "uploads")
                 os.makedirs(upload_folder, exist_ok=True)
-
-                # Unieke bestandsnaam
                 filename = f"user_{user.id}.jpg"
                 save_path = os.path.join(upload_folder, filename)
-
                 file.save(save_path)
-
-                # Pad opslaan in database (wat je gebruikt in je template)
                 profile.profile_image = f"/static/uploads/{filename}"
             
             # ----------------------
-            #   CV / DOCUMENT
+            #   CV / DOCUMENT LOGICA
             # ----------------------
             cv_file = request.files.get("cv_document")
 
@@ -261,30 +260,24 @@ def edit_consultant_profile():
                 upload_folder = os.path.join(current_app.root_path, "static", "uploads")
                 os.makedirs(upload_folder, exist_ok=True)
 
-                # extensie behouden
                 _, ext = os.path.splitext(cv_file.filename)
                 ext = ext.lower()
 
-                # Enkel toegelaten types
                 allowed_exts = {".pdf", ".doc", ".docx"}
                 if ext not in allowed_exts:
+                    # 2. Vertaal de foutmelding
                     flash("Invalid file type. Only upload pdf/doc/docx.")
                     return redirect(url_for("main.edit_consultant_profile"))
 
-                # Unieke bestandsnaam voor CV
                 cv_filename = f"cv_user_{user.id}{ext}"
                 cv_save_path = os.path.join(upload_folder, cv_filename)
-
                 cv_file.save(cv_save_path)
-
-                # Pad opslaan in database
                 profile.cv_document = f"/static/uploads/{cv_filename}"
             
-
-
             db.commit()
 
-            flash("Profile updated")
+            # 3. Vertaal de succesmelding
+            flash("Profile updated successfully")
             return redirect(url_for("main.dashboard"))
 
         return render_template("edit_consultant_profile.html", profile=profile)

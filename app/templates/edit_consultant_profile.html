@@ -1,92 +1,92 @@
 {% extends "base.html" %}
-{% block title %}Profiel aanpassen{% endblock %}
+{% block title %}Edit Profile{% endblock %}
 
 {% block content %}
-  <h1>Profiel aanpassen</h1>
+    <h1>Edit Consultant Profile</h1>
 
-  <form method="post" enctype="multipart/form-data">
+    <form method="post" enctype="multipart/form-data">
 
-    <label style="display:block; margin-bottom: 10px;">
-      Naam zichtbaar voor anderen:
-      <input
-        type="text"
-        name="display_name"
-        value="{{ profile.display_name }}"
-        style="width: 300px;"
-        required
-      >
-    </label>
+        <label style="display:block; margin-bottom: 10px;">
+            Full Name:
+            <input
+                type="text"
+                name="display_name"
+                value="{{ profile.display_name_masked }}"
+                style="width: 300px;"
+                required
+            >
+        </label>
 
-    <label style="display:block; margin-bottom: 10px;">
-      Stad:
-      <input
-        type="text"
-        name="location_city"
-        value="{{ profile.location_city }}"
-        style="width: 300px;"
-      >
-    </label>
+        <label style="display:block; margin-bottom: 10px;">
+            City:
+            <input
+                type="text"
+                name="location_city"
+                value="{{ profile.location_city }}"
+                style="width: 300px;"
+            >
+        </label>
 
-    <label style="display:block; margin-bottom: 10px;">
-      Land:
-      <input
-        type="text"
-        name="country"
-        value="{{ profile.country }}"
-        style="width: 300px;"
-      >
-    </label>
+        <label style="display:block; margin-bottom: 10px;">
+            Country:
+            <input
+                type="text"
+                name="country"
+                value="{{ profile.country }}"
+                style="width: 300px;"
+            >
+        </label>
 
-    <label style="display:block; margin-bottom: 10px;">
-      Headline:
-      <input
-        type="text"
-        name="headline"
-        value="{{ profile.headline }}"
-        style="width: 300px;"
-      >
-    </label>
-    <hr style="margin: 20px 0;">
-    <h3>Contactinformatie (wordt verborgen getoond)</h3>
+        <label style="display:block; margin-bottom: 10px;">
+            Headline:
+            <input
+                type="text"
+                name="headline"
+                value="{{ profile.headline }}"
+                style="width: 300px;"
+            >
+        </label>
+        <hr style="margin: 20px 0;">
+        <h3>Contact Information (Shown only upon unlock)</h3>
 
-    <label style="display:block; margin-bottom: 10px;">
-      E-mailadres:
-      <input
-        type="email"
-        name="contact_email"
-        value="{{ profile.contact_email or '' }}"
-        style="width: 300px;"
-      >
-    </label>
+        <label style="display:block; margin-bottom: 10px;">
+            Contact Email Address:
+            <input
+                type="email"
+                name="contact_email"
+                value="{{ profile.contact_email or '' }}"
+                style="width: 300px;"
+            >
+        </label>
 
-    <label style="display:block; margin-bottom: 10px;">
-      Telefoonnummer:
-      <input
-        type="tel"
-        name="phone_number"
-        value="{{ profile.phone_number or '' }}"
-        style="width: 300px;"
-      >
-    </label>
-    <hr style="margin: 20px 0;">
-    <label style="display:block; margin-bottom: 10px;">
-      Profielfoto:
-      <input
-        type="file"
-        name="profile_image"
-        accept="image/*"
-      >
-    </label>
+        <label style="display:block; margin-bottom: 10px;">
+            Phone Number:
+            <input
+                type="tel"
+                name="phone_number"
+                value="{{ profile.phone_number or '' }}"
+                style="width: 300px;"
+            >
+        </label>
+        <hr style="margin: 20px 0;">
+        <label style="display:block; margin-bottom: 10px;">
+            Profile Picture:
+            <input
+                type="file"
+                name="profile_image"
+                accept="image/*"
+            >
+        </label>
 
-    <label style="display:block; margin-bottom: 10px;">
-      CV / Document:
-      <input
-        type="file"
-        name="cv_document"
-        accept=".pdf,.doc,.docx"
-      >
-    </label>
+        <label style="display:block; margin-bottom: 10px;">
+            CV / Document:
+            <input
+                type="file"
+                name="cv_document"
+                accept=".pdf,.doc,.docx"
+            >
+        </label>
 
-    <button class="btn" type="submit">Opslaan</button>
-  </form>
+        <button class="btn" type="submit">Save Changes</button>
+    </form>
 {% endblock %}
