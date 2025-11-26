@@ -4,23 +4,31 @@
 {% block content %}
 <h1>Dashboard</h1>
 
-<div class="card">
-    <h2>Profiel</h2>
+{% if user %}
+    {# CORRECTIE: Gebruik <strong> in plaats van Markdown ** #}
+    <p>Welcome, <strong>{{ user.username }}</strong>!</p>
+{% endif %}
 
-    <p><strong>Ingelogd als:</strong> {{ user.username }}</p>
-    <p><strong>Rol:</strong> {{ user.role.value }}</p>
+<div class="card">
+    <h2>Profile Details</h2>
+
+    <p><strong>Username:</strong> {{ user.username }}</p>
+    <p><strong>Role:</strong> {{ user.role.value }}</p>
 
     {% if user.role == UserRole.consultant %}
+        {# --------------------------------- #}
+        {# CONSULTANT SECTION (Altijd in het Engels) #}
+        {# --------------------------------- #}
         {% if profile.profile_image %}
             <img
                 src="{{ profile.profile_image }}"
-                alt="Profielfoto"
+                alt="Profile Picture"
                 style="width:140px;height:140px;border-radius:50%;object-fit:cover;margin-bottom:12px;"
             >
         {% else %}
             <img
                 src="{{ url_for('static', filename='img/default-avatar.png') }}"
-                alt="Geen profielfoto"
+                alt="No profile picture"
                 style="width:140px;height:140px;border-radius:50%;object-fit:cover;margin-bottom:12px;"
             >
         {% endif %}
@@ -29,33 +37,38 @@
             <p>
                 <strong>CV:</strong>
                 <a href="{{ profile.cv_document }}" target="_blank">
-                    Bekijk / download CV
+                    View / download CV
                 </a>
             </p>
         {% else %}
-            <p><strong>CV:</strong> nog niet toegevoegd</p>
+            <p><strong>CV:</strong> Not yet added</p>
         {% endif %}
 
-        <p><strong>Naam:</strong> {{ profile.display_name_masked }}</p>
-        <p><strong>Locatie:</strong> {{ profile.location_city }} , {{ profile.country }}</p>
-        <p><strong>Opmerking:</strong> {{ profile.headline or "Geen headline" }}</p>
+        {# Label veranderd naar "Name" #}
+        <p><strong>Name:</strong> {{ profile.display_name_masked }}</p>
+        <p><strong>Location:</strong> {{ profile.location_city }} , {{ profile.country }}</p>
+        <p><strong>Headline:</strong> {{ profile.headline or "No headline" }}</p>
 
-        <p><strong>E-mail:</strong> {{ profile.contact_email or "Niet ingevuld" }}</p>
-        <p><strong>Telefoon:</strong> {{ profile.phone_number or "Niet ingevuld" }}</p>
+        <p><strong>Contact E-mail:</strong> {{ profile.contact_email or "Not filled in" }}</p>
+        <p><strong>Phone:</strong> {{ profile.phone_number or "Not filled in" }}</p>
 
         <p><strong>Skills:</strong>
             {% if profile.skills %}
                 {{ profile.skills | map(attribute='name') | join(', ') }}
             {% else %}
-                Geen skills geselecteerd
+                No skills selected
             {% endif %}
         </p>
 
-        <a class="btn" href="{{ url_for('main.edit_consultant_skills') }}">Skills aanpassen</a>
-        <a class="btn" href="{{ url_for('main.edit_consultant_profile') }}">Profiel aanpassen</a>
+        <a class="btn" href="{{ url_for('main.edit_consultant_skills') }}">Edit Skills</a>
+        <a class="btn" href="{{ url_for('main.edit_consultant_profile') }}">Edit Profile</a>
+
     {% endif %}
 
     {% if user.role == UserRole.company %}
+        {# --------------------------------- #}
+        {# COMPANY SECTION (Behoudt meertaligheid via _() of hardcoded) #}
+        {# --------------------------------- #}
         <p><strong>Bedrijfsnaam:</strong> {{ company.company_name_masked }}</p>
         <p><strong>Sector:</strong> {{ company.industry or "Niet ingevuld" }}</p>
 
