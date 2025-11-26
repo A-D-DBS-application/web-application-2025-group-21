@@ -185,10 +185,16 @@
 
 
         <h3 class="job-title-link">
-
-            <a href="{{ url_for('main.consultant_detail', profile_id=c.id) }}">{{ c.display_name or c.display_name_masked }}</a>
-
-        </h3>
+        <h3 class="job-title-link">
+            <a href="{{ url_for('main.consultant_detail', profile_id=c.id) }}">
+                {# NIEUWE LOGICA: Toon volledige naam als ontgrendeld, anders initialen #}
+                {% if c.is_unlocked_for_me %}
+                    {{ c.display_name_masked }}
+                {% else %}
+                    {{ c.initials }}
+                {% endif %}
+            </a>
+        </h3>
 
        
 

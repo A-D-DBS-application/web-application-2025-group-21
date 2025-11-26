@@ -107,11 +107,18 @@
 
             <h3 class="job-title-link">
             <a href="{{ url_for('main.job_detail', job_id=job.id) }}">{{ job.title }}</a>
-             </h3>
-       
-            {% if job.company %}
-            <p class="company-name">{{ job.company.company_name_masked }}</p>
-          {% endif %}
+             </h3>
+       
+            {% if job.company %}
+            <p class="company-name">
+                {# NIEUWE LOGICA VOOR INITIALEN / VOLLEDIGE NAAM #}
+                {% if job.is_unlocked_for_me %}
+                    {{ job.company.company_name_masked }}
+                {% else %}
+                    {{ job.company.initials }}
+                {% endif %}
+            </p>
+          {% endif %}
 
             <div class="required-skills-summary">
             <label class="skills-label-small"><i class="fas fa-tools"></i> Vereiste Skills:</label>

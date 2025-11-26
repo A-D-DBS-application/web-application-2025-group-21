@@ -64,6 +64,14 @@ class ConsultantProfile(Base):
     user = relationship("User", back_populates="consultant_profile")
     skills = relationship("Skill", secondary="profile_skills", back_populates="profiles")
 
+    @property
+    def initials(self):
+        """Genereert initialen van de display_name_masked."""
+        if self.display_name_masked:
+            names = self.display_name_masked.split()
+            initials = "".join(name[0].upper() for name in names if name)
+            return initials if initials else "C" 
+        return "C"
 
 
 Index("idx_consultant_profiles_user_id", ConsultantProfile.user_id)
@@ -86,6 +94,13 @@ class Company(Base):
 
     user = relationship("User", back_populates="company")
     jobs = relationship("JobPost", back_populates="company")
+    @property
+    def initials(self):
+        if self.company_name_masked:
+            names = self.company_name_masked.split()
+            initials = "".join(name[0].upper() for name in names if name)
+            return initials if initials else "B" 
+        return "B"
 
 
 Index("idx_companies_user_id", Company.user_id)
