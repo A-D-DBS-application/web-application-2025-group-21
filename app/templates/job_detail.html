@@ -5,45 +5,45 @@
 <h1 class="page-title">{{ job.title }}</h1>
 
 <div class="card">
-    <h2>Contactgegevens van het Bedrijf</h2>
+    <h2>Company contact details</h2>
    
     {# 1. Controleert: Is de bezoeker een Consultant? #}
     {% if user and user.role == UserRole.consultant %}
        
         {# Toon contactgegevens indien ONTGRENDELD of de EIGENAAR #}
         {% if is_unlocked or is_owner %}
-            <p><strong>Bedrijf:</strong> {{ job.company.company_name_masked }}</p>
+            <p><strong>Comppany:</strong> {{ job.company.company_name_masked }}</p>
             <p><strong>E-mail:</strong> {{ job.company.contact_email or "Niet ingevuld" }}</p>
-            <p><strong>Telefoon:</strong> {{ job.company.phone_number or "Niet ingevuld" }}</p>
+            <p><strong>Phone number:</strong> {{ job.company.phone_number or "Niet ingevuld" }}</p>
             {% if is_unlocked %}
-                <p style="color: green;">✅ Deze contactgegevens zijn vrijgegeven en permanent zichtbaar.</p>
+                <p style="color: green;">✅ These contact details have been unlocked and are permanently visible.</p>
             {% endif %}
            
         {# Toon UNLOCK-KNOP indien niet ontgrendeld #}
         {% else %}
-            <p>De contactgegevens van dit bedrijf zijn **verborgen**.</p>
+            <p>The contact details of this company are hidden.</p>
             <a href="{{ url_for('main.unlock_job', job_id=job.id) }}" class="btn" onclick="return confirm('Weet u zeker dat u de contactgegevens wilt vrijgeven?')">
-                🔒 Ontgrendel contactgegevens (MVP Knop)
+                🔒 Unlock contact details (MVP Button)
             </a>
-            <p><small>Door op deze knop te klikken, worden de contactgegevens permanent zichtbaar voor uw profiel.</small></p>
+            <p><small>By clicking this button, the contact details will become permanently visible on your profile.</small></p>
         {% endif %}
        
     {# 2. Toon bedrijf's eigen contactinfo (als ze de job gepost hebben) #}
     {% elif is_owner %}
-        <p><strong>Bedrijf:</strong> {{ job.company.company_name_masked }}</p>
+        <p><strong>Company:</strong> {{ job.company.company_name_masked }}</p>
         <p><strong>E-mail:</strong> {{ job.company.contact_email or "Niet ingevuld" }} (Zichtbaar voor u als eigenaar)</p>
-        <p><strong>Telefoon:</strong> {{ job.company.phone_number or "Niet ingevuld" }} (Zichtbaar voor u als eigenaar)</p>
+        <p><strong>Phone number:</strong> {{ job.company.phone_number or "Niet ingevuld" }} (Zichtbaar voor u als eigenaar)</p>
        
     {# 3. Fallback: Toon de login/rol-vereiste #}
     {% else %}
-        <p>Log in als **Consultant** om de contactgegevens te bekijken en te ontgrendelen.</p>
+        <p>Log in as a Consultant to view and unlock the contact details.</p>
     {% endif %}
 </div>
 
 <div class="job-detail-card">
     <div class="job-section">
-        <h3>Beschrijving</h3>
-        <p>{{ job.description or "Geen beschrijving beschikbaar." }}</p>
+        <h3>Job description</h3>
+        <p>{{ job.description or "No description available." }}</p>
     </div>
 
     <div class="job-section">
@@ -57,11 +57,11 @@
 
     <div class="job-section">
         <h3>Contracttype</h3>
-        <p>{{ job.contract_type or "Niet opgegeven" }}</p>
+        <p>{{ job.contract_type or "Not specified" }}</p>
     </div>
 
     <div class="job-section">
-        <h3>Vereiste skills</h3>
+        <h3>Required skills</h3>
         {% if job.skills %}
             <div class="skill-list">
                 {% for s in job.skills %}
@@ -69,19 +69,19 @@
                 {% endfor %}
             </div>
         {% else %}
-            <p>Geen specifieke skills opgegeven.</p>
+            <p>No specific skills listed.</p>
         {% endif %}
     </div>
 
     {% if user and user.role == UserRole.company and company and job.company_id == company.id %}
         <div class="job-actions">
             <a class="btn btn-primary" href="{{ url_for('main.job_edit', job_id=job.id) }}">
-                Bewerken
+                Edit
             </a>
 
             <form action="{{ url_for('main.job_delete', job_id=job.id) }}" method="post" style="display:inline;">
                 <button class="btn btn-danger" onclick="return confirm('Zeker verwijderen?')">
-                    Verwijderen
+                    Delete
                 </button>
             </form>
         </div>
@@ -93,8 +93,8 @@
     <div class="card collaborate-card">
         <h3>Collaborate?</h3>
         <p>
-            Je hebt de contactgegevens voor deze job ontgrendeld.<br>
-            Wil je met dit bedrijf samenwerken op deze job?
+            You have unlocked the contact details for this job.<br>
+            Would you like to collaborate with this company on this job?
         </p>
         <form method="post" action="{{ url_for('main.collaborate_on_job', job_id=job.id) }}">
             <button type="submit" class="btn btn-success">

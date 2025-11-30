@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Vacatures | Job Lijst{% endblock %}
+{% block title %}Job | Job list{% endblock %}
 {% block content %}
 
 {# Config variabelen #}
@@ -12,16 +12,16 @@
 
 {% if show_mode_selector %}
 <div class="mode-selector-container">
-    <h2 class="h5">Kies uw zoekmodus:</h2>
+    <h2 class="h5">Choose your search mode:</h2>
    
     <a href="{{ url_for('main.jobs_list', sort_by='relevance') }}"
        class="mode-btn {% if current_sort == 'relevance' %}active-mode{% else %}inactive-mode{% endif %}">
-        🧠 IConsult Match (Beste Relevantie)
+        🧠 IConsult Match (Beste Relevance)
     </a>
 
     <a href="{{ url_for('main.jobs_list', sort_by='title') }}"
        class="mode-btn {% if current_sort != 'relevance' %}active-mode{% else %}inactive-mode{% endif %}">
-        🔧 Handmatige Filter & Sortering
+        🔧 Manual Filter & Sorting
     </a>
 </div>
 {% endif %}
@@ -37,12 +37,12 @@
 
     <div class="location-filter-block">
         <h3 class="location-filter-title">
-            <i class="fas fa-map-marker-alt"></i> Locatie
+            <i class="fas fa-map-marker-alt"></i> Location
         </h3>
         <div class="location-controls">
             <div class="location-range-wrapper">
                 <label for="max_distance_km" class="location-label">
-                    Maximale afstand:
+                    Maximum distance:
                 </label>
                 <input type="range"
                        id="max_distance_km"
@@ -51,7 +51,7 @@
                        value="{{ current_distance }}">
                 <span id="distance-display" class="distance-display">
                     {% if current_distance|int == 0 %}
-                        Geen afstandsfilter
+                        No distance filter
                     {% else %}
                         {{ current_distance }} km
                     {% endif %}
@@ -62,13 +62,13 @@
                 <label class="checkbox-inline">
                     <input type="checkbox" name="ignore_distance" value="1"
                         {% if request.args.get('ignore_distance') == '1' %}checked{% endif %}>
-                    Afstand is niet van toepassing
+                    Distance not applicable
                 </label>
 
                 <label class="checkbox-inline">
                     <input type="checkbox" name="same_country_only" value="1"
                         {% if request.args.get('same_country_only') == '1' %}checked{% endif %}>
-                    Enkel zelfde land
+                    Same country only
                 </label>
             </div>
         </div>
@@ -77,17 +77,17 @@
     {# SIMPELE ZOEKMODUS (voor /company/jobs) #}
     {% if simple_search %}
         <div class="input-group">
-            <input type="text" name="q" placeholder="Zoek op Titel/Omschrijving"
+            <input type="text" name="q" placeholder="Search by Title/Description"
                    value="{{ request.args.get('q', '') }}">
-            <button type="submit" class="btn btn-primary">Zoek</button>
+            <button type="submit" class="btn btn-primary">Search</button>
         </div>
 
     {# VOLLEDIGE /jobs LOGICA #}
     {% else %}
         {% if current_sort != 'relevance' %}
             <p class="form-instruction">
-                Gebruik onderstaande velden om handmatig te filteren.
-                Resultaten worden gesorteerd op Titel (A–Z).
+                Use the fields below to filter manually.
+                Results are sorted alphabetically by Title.
             </p>
 
             <div class="input-grid manual-filter-grid">
@@ -99,7 +99,7 @@
                        value="{{ request.args.get('country', '') }}">
 
                 <select name="contract_type" id="contract_type" class="form-control-select">
-                    <option value="">Contract type (Alle)</option>
+                    <option value="">Contract type (All)</option>
                     {% for value, label in possible_contract_types %}
                         <option value="{{ value }}"
                                 {% if current_contract_type == value %}selected{% endif %}>
@@ -111,7 +111,7 @@
 
             <div class="skills-filter">
                 <label class="skills-label">
-                    Skills (filteren – vink de vereiste skills aan):
+                    Skills (filter – check required skills):
                 </label>
                 <div class="skills-checkboxes">
                     {% for skill in skills %}
@@ -127,26 +127,26 @@
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-primary apply-btn">Filters Toepassen</button>
+            <button type="submit" class="btn btn-primary apply-btn">Apply filters</button>
             <a href="{{ url_for('main.jobs_list', sort_by='title') }}"
                class="btn btn-secondary reset-btn">Reset Filters</a>
 
         {% else %}
             <p class="alert alert-info">
-                Voor een gedetailleerde uitleg over de toegepaste filter- en
-                scoringsmethodologie, verwijzen wij u naar de informatie onderaan deze pagina.
+                For a detailed explanation of the applied filtering and
+                scoring methodology, please refer to the information at the bottom of this page.
             </p>
 
             <div class="relevance-search-block">
                 <label class="relevance-label">
-                    Zoekterm (wordt meegenomen in de score):
+                    Search term (included in scoring):
                 </label>
                 <div class="input-group relevance-input-group">
                     <input type="text" name="q"
                            placeholder="Bijvoorbeeld: Python, .NET, project manager..."
                            value="{{ request.args.get('q', '') }}">
                     <button type="submit" class="btn btn-primary relevance-button">
-                        🔍 Zoek &amp; herbereken score
+                        🔍 Search & Recalculate Score
                     </button>
                 </div>
             </div>
@@ -199,7 +199,7 @@
 
             <div class="required-skills-summary">
                 <label class="skills-label-small">
-                    <i class="fas fa-tools"></i> Vereiste Skills:
+                    <i class="fas fa-tools"></i> Required Skills:
                 </label>
                 <div class="skill-tags-wrapper">
                     {% for skill in job.skills[:3] %}
@@ -208,7 +208,7 @@
                     {% if job.skills|length > 3 %}
                         <span class="required-skill-tag more-skills">
                             <i class="fas fa-plus-circle"></i>
-                            {{ job.skills|length - 3 }} meer
+                            {{ job.skills|length - 3 }} more
                         </span>
                     {% endif %}
                 </div>
@@ -223,7 +223,7 @@
                
                     <details class="breakdown-details">
                         <summary>
-                            <i class="fas fa-chart-bar"></i> Score Uitsplitsing
+                            <i class="fas fa-chart-bar"></i> Score breakdwon
                         </summary>
                         <div class="score-breakdown">
                             {% set total_score_perc = (job.score * 100) %}
@@ -242,7 +242,7 @@
 
                             <div class="bar-item">
                                 <span class="bar-label">
-                                    <i class="fas fa-search"></i> Zoekterm (20%):
+                                    <i class="fas fa-search"></i> Search term (20%):
                                 </span>
                                 {% set score_perc = (job.score_breakdown.text_factor * 100) %}
                                 <div class="progress-bar-container">
@@ -254,7 +254,7 @@
 
                             <div class="bar-item">
                                 <span class="bar-label">
-                                    <i class="fas fa-clock"></i> Recentheid (20%):
+                                    <i class="fas fa-clock"></i> Recency (20%):
                                 </span>
                                 {% set score_perc = (job.score_breakdown.recency_factor * 100) %}
                                 <div class="progress-bar-container">
@@ -266,7 +266,7 @@
 
                             <div class="bar-item">
                                 <span class="bar-label">
-                                    <i class="fas fa-fire"></i> Populariteit (10%):
+                                    <i class="fas fa-fire"></i> Popularity (10%):
                                 </span>
                                 {% set score_perc = (job.score_breakdown.popularity_factor * 100) %}
                                 <div class="progress-bar-container">
@@ -294,7 +294,7 @@
 
 {% if not jobs %}
     <p class="alert alert-warning">
-        Geen vacatures gevonden die overeenkomen met de criteria.
+        No jobs found matching your filters.
     </p>
 {% endif %}
 

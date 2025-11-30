@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Skills aanpassen{% endblock %}
 {% block content %}
-  <h1>Kies je skills</h1>
+  <h1>Choose your skills</h1>
 
   <form method="post">
     {% for skill in skills %}
@@ -16,6 +16,6 @@
       </label>
     {% endfor %}
 
-    <button class="btn" type="submit">Opslaan</button>
+    <button class="btn" type="submit">Save</button>
   </form>
 {% endblock %}

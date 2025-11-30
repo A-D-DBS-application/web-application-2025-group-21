@@ -48,7 +48,7 @@
         {# Toon contactgegevens indien ONTGRENDELD of de EIGENAAR #}
         {% if is_unlocked or is_owner %}
             <p><strong>E-mail:</strong> {{ profile.contact_email or "Not filled in" }}</p>
-            <p><strong>Telefoon:</strong> {{ profile.phone_number or "Not filled in" }}</p>
+            <p><strong>Phone:</strong> {{ profile.phone_number or "Not filled in" }}</p>
            
             {% if profile.cv_document %}
                 <p>
@@ -67,32 +67,32 @@
        
         {# Toon UNLOCK-KNOP indien niet ontgrendeld #}
         {% else %}
-            <p>De contactgegevens van deze consultant zijn **verborgen**.</p>
+            <p>The contact details of this consultant are **hidden**.</p>
             <p><strong>CV:</strong> Verborgen</p>
             <a href="{{ url_for('main.unlock_consultant', profile_id=profile.id) }}" class="btn" onclick="return confirm('Weet u zeker dat u de contactgegevens wilt vrijgeven?')">
-                🔒 Ontgrendel contactgegevens (MVP Knop)
+                🔒 Unlock contact details (MVP Button)
             </a>
-            <p><small>Door op deze knop te klikken, worden de contactgegevens permanent zichtbaar voor uw bedrijf.</small></p>
+            <p><small>By clicking this button, the contact details will become permanently visible to your company.</small></p>
         {% endif %}
        
     {# 2. Toon consultant's eigen contactinfo (als ze ingelogd zijn op hun eigen profiel)-> is dit niet overbodig? #}
     {% elif is_owner %}
         <p><strong>E-mail:</strong> {{ profile.contact_email or "Niet ingevuld" }} (Zichtbaar voor u als eigenaar)</p>
-        <p><strong>Telefoon:</strong> {{ profile.phone_number or "Niet ingevuld" }} (Zichtbaar voor u als eigenaar)</p>
+        <p><strong>Phone:</strong> {{ profile.phone_number or "Niet ingevuld" }} (Zichtbaar voor u als eigenaar)</p>
         {% if profile.cv_document %}
             <p>
                 <strong>CV:</strong>
                 <a href="{{ profile.cv_document }}" target="_blank">
-                    Bekijk / download CV
+                    View / download CV
                 </a>
             </p>
         {% else %}
-            <p><strong>CV:</strong> Niet ingevuld</p>
+            <p><strong>CV:</strong> Not filled in</p>
         {% endif %}
        
     {# 3. Fallback: Toon de login/rol-vereiste #}
     {% else %}
-        <p>Log in als **Bedrijf** om de contactgegevens te bekijken en te ontgrendelen.</p>
+        <p>Log in as a **Company** to view and unlock the contact details.</p>
     {% endif %}
 </div>
 

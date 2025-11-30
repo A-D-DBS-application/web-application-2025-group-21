@@ -9,16 +9,16 @@
 
 {% if show_mode_selector %}
 <div class="mode-selector-container">
-    <h2 class="h5">Kies uw zoekmodus:</h2>
+    <h2 class="h5">Choose your search mode:</h2>
    
     <a href="{{ url_for('main.consultants_list', sort_by='relevance') }}"
        class="mode-btn {% if current_sort == 'relevance' %}active-mode{% else %}inactive-mode{% endif %}">
-        🧠 IConsult Match (Beste Relevantie)
+        🧠 IConsult Match (Best Relevance)
     </a>
 
     <a href="{{ url_for('main.consultants_list', sort_by='title') }}"
        class="mode-btn {% if current_sort != 'relevance' %}active-mode{% else %}inactive-mode{% endif %}">
-        🔧 Handmatige Filter & Sortering
+        🔧 Manual Filter & Sorting
     </a>
 </div>
 {% endif %}
@@ -34,12 +34,12 @@
 
     <div class="location-filter-block">
         <h3 class="location-filter-title">
-            <i class="fas fa-map-marker-alt"></i> Locatie
+            <i class="fas fa-map-marker-alt"></i> Location
         </h3>
         <div class="location-controls">
             <div class="location-range-wrapper">
                 <label for="max_distance_km" class="location-label">
-                    Maximale afstand van uw bedrijf:
+                    Maximum distance from your company:
                 </label>
                 <input type="range"
                        id="max_distance_km"
@@ -48,7 +48,7 @@
                        value="{{ current_distance }}">
                 <span id="distance-display" class="distance-display">
                     {% if current_distance|int == 0 %}
-                        Geen afstandsfilter
+                        No distance filter
                     {% else %}
                         {{ current_distance }} km
                     {% endif %}
@@ -59,13 +59,13 @@
                 <label class="checkbox-inline">
                     <input type="checkbox" name="ignore_distance" value="1"
                         {% if request.args.get('ignore_distance') == '1' %}checked{% endif %}>
-                    Afstand is niet van toepassing
+                    Distance not relevant
                 </label>
 
                 <label class="checkbox-inline">
                     <input type="checkbox" name="same_country_only" value="1"
                         {% if request.args.get('same_country_only') == '1' %}checked{% endif %}>
-                    Enkel zelfde land
+                    Same country only
                 </label>
             </div>
         </div>
@@ -73,8 +73,8 @@
 
     {% if current_sort != 'relevance' %}
         <p class="form-instruction">
-            Gebruik onderstaande velden om handmatig te filteren.
-            Resultaten worden gesorteerd op Naam (A–Z).
+            Use the fields below to filter manually.
+            Results are sorted by Name (A–Z).
         </p>
 
         <div class="input-grid manual-filter-grid">
@@ -89,7 +89,7 @@
 
         <div class="skills-filter">
             <label class="skills-label">
-                Skills (filteren – vink de vereiste skills aan):
+                Skills (filter – select the required skills):
             </label>
             <div class="skills-checkboxes">
                 {% for skill in skills %}
@@ -111,20 +111,20 @@
 
     {% else %}
         <p class="alert alert-info">
-            In IConsult-modus wordt de score berekend op basis van match met uw
-            meest recente vacature (skills, zoekterm, recentheid en populariteit).
+            In IConsult mode, the score is calculated based on your latest job posting
+            (skills, search term, recency and popularity).
         </p>
 
         <div class="relevance-search-block">
             <label class="relevance-label">
-                Zoekterm (wordt meegenomen in de score):
+                Search term (included in score calculation):
             </label>
             <div class="input-group relevance-input-group">
                 <input type="text" name="q"
                        placeholder="Bijvoorbeeld: .NET, data engineer, scrum..."
                        value="{{ request.args.get('q', '') }}">
                 <button type="submit" class="btn btn-primary relevance-button">
-                    🔍 Zoek &amp; herbereken score
+                    🔍 Search & Recalculate Score
                 </button>
             </div>
         </div>
@@ -187,7 +187,7 @@
                     {% if c.skills|length > 3 %}
                         <span class="required-skill-tag more-skills">
                             <i class="fas fa-plus-circle"></i>
-                            {{ c.skills|length - 3 }} meer
+                            {{ c.skills|length - 3 }} more
                         </span>
                     {% endif %}
                 </div>
@@ -202,7 +202,7 @@
 
                     <details class="breakdown-details">
                         <summary>
-                            <i class="fas fa-chart-bar"></i> Score Uitsplitsing
+                            <i class="fas fa-chart-bar"></i> Score Breakdown
                         </summary>
                         <div class="score-breakdown">
                             {% set total_score_perc = (c.score * 100) %}
@@ -221,7 +221,7 @@
 
                             <div class="bar-item">
                                 <span class="bar-label">
-                                    <i class="fas fa-search"></i> Zoekterm (20%):
+                                    <i class="fas fa-search"></i> Search Term (20%):
                                 </span>
                                 {% set score_perc = (c.score_breakdown.text_factor * 100) %}
                                 <div class="progress-bar-container">
@@ -233,7 +233,7 @@
 
                             <div class="bar-item">
                                 <span class="bar-label">
-                                    <i class="fas fa-clock"></i> Recentheid (20%):
+                                    <i class="fas fa-clock"></i> Recency (20%):
                                 </span>
                                 {% set score_perc = (c.score_breakdown.recency_factor * 100) %}
                                 <div class="progress-bar-container">
@@ -245,7 +245,7 @@
 
                             <div class="bar-item">
                                 <span class="bar-label">
-                                    <i class="fas fa-fire"></i> Populariteit (10%):
+                                    <i class="fas fa-fire"></i> Popularity (10%):
                                 </span>
                                 {% set score_perc = (c.score_breakdown.popularity_factor * 100) %}
                                 <div class="progress-bar-container">
@@ -265,7 +265,7 @@
 
             <a class="btn btn-primary-card"
                href="{{ url_for('main.consultant_detail', profile_id=c.id) }}">
-                Bekijk Profiel
+                View profile
             </a>
         </div>
     {% endfor %}
@@ -273,7 +273,7 @@
 
 {% if not consultants %}
     <p class="alert alert-warning">
-        Geen consultants gevonden die overeenkomen met de criteria.
+        No consultants found matching your criteria.
     </p>
 {% endif %}
 
