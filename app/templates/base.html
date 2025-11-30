@@ -124,6 +124,73 @@
             text-decoration: underline;
             color: var(--blue);
         }
+        @media (max-width: 600px) {
+
+            nav {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            nav a, .btn {
+                padding: 8px 10px;
+                font-size: 14px;
+            }
+
+            header {
+                padding: 10px 12px;
+            }
+
+            main {
+                padding: 0 12px;
+                max-width: 100%;
+            }
+
+            .row {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .card {
+                padding: 12px;
+            }
+
+            form > * {
+                width: 100%;
+            }
+
+            input, select, textarea {
+                font-size: 16px;
+            }
+            form input,
+            form select,
+            form textarea {
+                width: 100% !important;
+                box-sizing: border-box;
+            }
+
+            form label {
+                width: 100%;
+                display: block;
+            }
+            
+            .btn {
+                width: 100%;
+                display: block;
+                text-align: center;
+            }
+            .mode-selector-container {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .mode-btn {
+                width: 100% !important;
+                text-align: center;
+                display: block;
+            }
+        }
+        
     </style>
 </head>
 

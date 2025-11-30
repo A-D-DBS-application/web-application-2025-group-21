@@ -19,14 +19,16 @@
             <img
                 src="{{ profile.profile_image }}"
                 alt="Profile Picture"
-                style="width:140px;height:140px;border-radius:50%;object-fit:cover;margin-bottom:12px;"
+                style="max-width:140px; width:100%; height:auto; border-radius:50%; object-fit:cover; margin-bottom:12px;"
             >
+
         {% else %}
             <img
                 src="{{ url_for('static', filename='img/default-avatar.png') }}"
                 alt="No profile picture"
-                style="width:140px;height:140px;border-radius:50%;object-fit:cover;margin-bottom:12px;"
+                style="max-width:140px; width:100%; height:auto; border-radius:50%; object-fit:cover; margin-bottom:12px;"
             >
+
         {% endif %}
 
         {% if profile.cv_document %}
