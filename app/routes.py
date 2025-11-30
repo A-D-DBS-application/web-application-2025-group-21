@@ -1245,3 +1245,40 @@ def job_delete(job_id):
         db.commit()
         flash(_("Job deleted"))
         return redirect(url_for("main.jobs_list"))
+
+
+    
+@main.route("/admin")
+@login_required
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if session.get("user_id") is None:
+            return redirect(url_for("main.login"))
+
+        if session.get("role") != UserRole.admin.value:
+            flash(_("You do not have access to this page."))
+            return redirect(url_for("main.dashboard"))
+
+        return f(*args, **kwargs)
+    return decorated_function
+
+@main.route("/admin/collaborations")
+@login_required
+@admin_required
+def admin_collaborations():
+    with get_session() as db:
+        collaborations = (
+            db.query(Collaboration)
+            .order_by(Collaboration.started_at.desc())
+            .all()
+        )
+
+        return render_template(
+            "admin_collaborations.html",
+            collaborations=collaborations
+        )
+
+@admin_required
+def admin_dashboard():
+    return render_template("admin_dashboard.html")
