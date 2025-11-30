@@ -26,6 +26,12 @@ class IndustryEnum(enum.Enum):
 class UnlockTarget(enum.Enum):
     consultant = "consultant"
     job = "job"
+    
+#samenwerking tssn 2
+class CollaborationStatus(enum.Enum):
+    active = "active"
+    ended = "ended"
+
 
 
 # ---- TABLES ----
@@ -59,6 +65,15 @@ class ConsultantProfile(Base):
     cv_document = Column(String(300), nullable=True)
     contact_email = Column(String(255), nullable=True)
     phone_number = Column(String(50), nullable=True)
+
+    #link met company kan Null zijn
+    current_company_id = Column(
+        Integer,
+        ForeignKey("companies.id", ondelete="SET NULL"),
+        nullable=True
+    )
+    # ✅ alle samenwerkingen (archief)
+    collaborations = relationship("Collaboration", back_populates="consultant")
 
     # 🌍 NIEUW: coördinaten voor locatie-matching
     latitude = Column(Float, nullable=True)
@@ -95,6 +110,9 @@ class Company(Base):
     contact_email = Column(String(255), nullable=True)
     phone_number = Column(String(50), nullable=True)
 
+    # ✅ alle samenwerkingen (archief)
+    collaborations = relationship("Collaboration", back_populates="company")
+
     # 🌍 NIEUW: coördinaten voor locatie-matching
     latitude = Column(Float, nullable=True)
     longitude = Column(Float, nullable=True)
@@ -128,9 +146,25 @@ class JobPost(Base):
     anonymize = Column(Boolean, nullable=False, server_default="1")
     created_at = Column(TIMESTAMP, nullable=False, server_default=func.now())
 
+    # ✅ nieuwe kolommen
+    is_active = Column(Boolean, nullable=False, server_default="1")  # TRUE standaard
+    hired_consultant_id = Column(
+        Integer,
+        ForeignKey("consultant_profiles.id", ondelete="SET NULL"),
+        nullable=True
+    )
+
     company = relationship("Company", back_populates="jobs")
     skills = relationship("Skill", secondary="job_skills", back_populates="jobs")
 
+    # ✅ consultant die uiteindelijk is aangenomen
+    hired_consultant = relationship(
+        "ConsultantProfile",
+        foreign_keys=[hired_consultant_id]
+    )
+
+    # ✅ alle samenwerkingen gekoppeld aan deze job
+    collaborations = relationship("Collaboration", back_populates="job_post")
 
 Index("idx_job_posts_company_id", JobPost.company_id)
 
@@ -182,3 +216,24 @@ class JobSkill(Base):
 
 Index("idx_job_skills_job_id", JobSkill.job_id)
 Index("idx_job_skills_skill_id", JobSkill.skill_id)
+
+class Collaboration(Base):
+    __tablename__ = "collaborations"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    company_id = Column(Integer, ForeignKey("companies.id", ondelete="CASCADE"), nullable=False)
+    consultant_id = Column(Integer, ForeignKey("consultant_profiles.id", ondelete="CASCADE"), nullable=False)
+    job_post_id = Column(Integer, ForeignKey("job_posts.id", ondelete="SET NULL"), nullable=True)
+
+    status = Column(
+        Enum(CollaborationStatus, name="collaboration_status"),
+        nullable=False,
+        server_default="active"
+    )
+    started_at = Column(TIMESTAMP, nullable=False, server_default=func.now())
+    ended_at = Column(TIMESTAMP, nullable=True)
+
+    company = relationship("Company", back_populates="collaborations")
+    consultant = relationship("ConsultantProfile", back_populates="collaborations")
+    job_post = relationship("JobPost", back_populates="collaborations")
+

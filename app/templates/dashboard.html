@@ -55,6 +55,15 @@
             {% endif %}
         </p>
 
+        <p>
+            <strong>Availability:</strong>
+            {% if profile.availability %}
+                <span style="color: #28a745;">Available for new jobs</span>
+            {% else %}
+                <span style="color: #e24b4b;">Unavailable</span>
+            {% endif %}
+        </p>
+
         <a class="btn" href="{{ url_for('main.edit_consultant_skills') }}">Edit Skills</a>
         <a class="btn" href="{{ url_for('main.edit_consultant_profile') }}">Edit Profile</a>
 

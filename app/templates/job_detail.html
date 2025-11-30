@@ -88,6 +88,23 @@
     {% endif %}
 </div>
 
+{# 🔹 Collaborate-vraag + groene knop: alleen consultant, unlocked en job actief #}
+{% if user and user.role == UserRole.consultant and is_unlocked and job.is_active %}
+    <div class="card collaborate-card">
+        <h3>Collaborate?</h3>
+        <p>
+            Je hebt de contactgegevens voor deze job ontgrendeld.<br>
+            Wil je met dit bedrijf samenwerken op deze job?
+        </p>
+        <form method="post" action="{{ url_for('main.collaborate_on_job', job_id=job.id) }}">
+            <button type="submit" class="btn btn-success">
+                Yes, collaborate
+            </button>
+        </form>
+    </div>
+{% endif %}
+
+
 <style>
     .job-detail-card {
         background: #ffffff;
@@ -144,6 +161,23 @@
         border: none;
         cursor: pointer;
     }
+    .btn-success {
+        background: #28a745;
+        color: white;
+        padding: 8px 14px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+    }
+
+    .collaborate-card {
+        margin-top: 20px;
+        border: 1px solid #cfe9d5;
+        background: #f3fff5;
+        border-radius: 14px;
+        padding: 18px;
+    }
 </style>
+
 
 {% endblock %}

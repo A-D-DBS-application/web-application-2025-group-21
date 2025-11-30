@@ -5,7 +5,7 @@ from sqlalchemy import or_, func
 from sqlalchemy.orm import joinedload
 from flask_babel import gettext as _
 from .supabase_client import get_session
-from .models import User, ConsultantProfile, Company, JobPost, UserRole, Skill, Unlock, UnlockTarget
+from .models import User, ConsultantProfile, Company, JobPost, UserRole, Skill, Unlock, UnlockTarget, Collaboration, CollaborationStatus
 import os
 from werkzeug.utils import secure_filename
 
@@ -277,6 +277,25 @@ def edit_consultant_profile():
             profile.contact_email = request.form.get("contact_email")
             profile.phone_number = request.form.get("phone_number")
 
+            # 🔽 Availability uit dropdown lezen
+            availability_value = request.form.get("availability_status", "available")
+            was_available_before = profile.availability
+            profile.availability = (availability_value == "available")
+
+            # Als je jezelf weer 'available' maakt, actieve samenwerkingen afsluiten
+            if (not was_available_before) and profile.availability:
+                now = datetime.now(timezone.utc)
+                active_collabs = db.query(Collaboration).filter(
+                    Collaboration.consultant_id == profile.id,
+                    Collaboration.status == CollaborationStatus.active
+                ).all()
+                for c in active_collabs:
+                    c.status = CollaborationStatus.ended
+                    c.ended_at = now
+
+                # consultant loskoppelen van current_company
+                profile.current_company_id = None
+
             # Geocode locatie
             lat, lon = geocode_with_mapbox(profile.location_city, profile.country)
             profile.latitude = lat
@@ -316,6 +335,7 @@ def edit_consultant_profile():
             return redirect(url_for("main.dashboard"))
 
         return render_template("edit_consultant_profile.html", profile=profile)
+
 
 
 @main.route("/consultant/skills/edit", methods=["GET", "POST"])
@@ -438,7 +458,11 @@ def consultants_list():
         )
 
         # 4. Basisquery en Filters Toepassen (zonder afstand)
-        query = db.query(ConsultantProfile).options(joinedload(ConsultantProfile.user))
+        query = (
+            db.query(ConsultantProfile)
+            .options(joinedload(ConsultantProfile.user))
+            .filter(ConsultantProfile.availability == True)
+        )
 
         # Filters gelden ALLEEN in de 'Handmatige Filter' modus
         if sort_by != "relevance":
@@ -677,6 +701,61 @@ def unlock_consultant(profile_id):
         flash(_("Contact details successfully released!"), "success")
         return redirect(url_for("main.consultant_detail", profile_id=profile_id))
 
+@main.route("/consultant/<int:profile_id>/collaborate", methods=["POST"])
+@login_required
+def collaborate_with_consultant(profile_id):
+    """
+    Company klikt op 'Samenwerken' bij een consultant.
+    Voorwaarden:
+    - user is company
+    - consultant bestaat & is beschikbaar
+    - company heeft consultant unlocked
+    """
+    with get_session() as db:
+        user = get_current_user(db)
+
+        if not user or user.role != UserRole.company:
+            flash(_("Only companies can start a collaboration with a consultant."), "error")
+            return redirect(url_for("main.consultant_detail", profile_id=profile_id))
+
+        company = db.query(Company).filter_by(user_id=user.id).first()
+        if not company:
+            flash(_("Company profile not found."), "error")
+            return redirect(url_for("main.dashboard"))
+
+        profile = db.query(ConsultantProfile).filter_by(id=profile_id).first()
+        if not profile:
+            flash(_("Consultant profile not found."), "error")
+            return redirect(url_for("main.consultants_list"))
+
+        if not profile.availability:
+            flash(_("This consultant is currently not available."), "error")
+            return redirect(url_for("main.consultant_detail", profile_id=profile_id))
+
+        # ✅ eerst unlock checken
+        if not is_unlocked(db, user.id, UnlockTarget.consultant, profile_id):
+            flash(_("First unlock this consultant before starting a collaboration."), "error")
+            return redirect(url_for("main.consultant_detail", profile_id=profile_id))
+
+        # ✅ Collaboration aanmaken zonder specifieke job
+        collab = Collaboration(
+            company_id=company.id,
+            consultant_id=profile.id,
+            job_post_id=None,
+            status=CollaborationStatus.active,
+        )
+        db.add(collab)
+
+        # ✅ Consultant unavailable + link naar current company
+        profile.availability = False
+        profile.current_company_id = company.id
+
+        db.commit()
+
+        flash(_("You are now collaborating with this consultant. They have been marked as unavailable."), "success")
+        return redirect(url_for("main.consultant_detail", profile_id=profile_id))
+
+
 
 @main.route("/unlock/job/<int:job_id>")
 @login_required
@@ -708,6 +787,67 @@ def unlock_job(job_id):
         flash(_("Contact details successfully released!"), "success")
         return redirect(url_for("main.job_detail", job_id=job_id))
 
+@main.route("/jobs/<int:job_id>/collaborate", methods=["POST"])
+@login_required
+def collaborate_on_job(job_id):
+    """
+    Consultant klikt op 'Ik wil samenwerken' bij een job.
+    Voorwaarden:
+    - user is consultant
+    - job bestaat & is actief
+    - consultant heeft job unlocked
+    - consultant is beschikbaar
+    """
+    with get_session() as db:
+        user = get_current_user(db)
+
+        if not user or user.role != UserRole.consultant:
+            flash(_("Only consultants can start a collaboration for a job."), "error")
+            return redirect(url_for("main.job_detail", job_id=job_id))
+
+        job = db.query(JobPost).filter_by(id=job_id).first()
+        if not job:
+            flash(_("Job post not found."), "error")
+            return redirect(url_for("main.jobs_list"))
+
+        if not job.is_active:
+            flash(_("This job is no longer available."), "error")
+            return redirect(url_for("main.job_detail", job_id=job_id))
+
+        profile = db.query(ConsultantProfile).filter_by(user_id=user.id).first()
+        if not profile:
+            flash(_("Consultant profile not found."), "error")
+            return redirect(url_for("main.dashboard"))
+
+        if not profile.availability:
+            flash(_("You are currently marked as unavailable."), "error")
+            return redirect(url_for("main.job_detail", job_id=job_id))
+
+        # ✅ check: job moet eerst unlocked zijn
+        if not is_unlocked(db, user.id, UnlockTarget.job, job_id):
+            flash(_("First unlock this job before starting a collaboration."), "error")
+            return redirect(url_for("main.job_detail", job_id=job_id))
+
+        # ✅ Collaboration aanmaken (archief)
+        collab = Collaboration(
+            company_id=job.company_id,
+            consultant_id=profile.id,
+            job_post_id=job.id,
+            status=CollaborationStatus.active,
+        )
+        db.add(collab)
+
+        # ✅ Job sluiten + consultant unavailable maken
+        job.is_active = False
+        job.hired_consultant_id = profile.id
+
+        profile.availability = False
+        profile.current_company_id = job.company_id
+
+        db.commit()
+
+        flash(_("You are now collaborating with this company. The job is closed and you are set to unavailable."), "success")
+        return redirect(url_for("main.dashboard"))
 
 # ------------------ JOB POSTS ------------------
 
@@ -770,7 +910,12 @@ def jobs_list():
         )
 
         # 4. Basisquery en filters (nog zonder afstandsfilter)
-        query = db.query(JobPost).options(joinedload(JobPost.company))
+        query = (
+            db.query(JobPost)
+            .options(joinedload(JobPost.company))
+            .filter(JobPost.is_active == True)
+        )
+
 
         if sort_by != "relevance":
             if city:
@@ -966,6 +1111,12 @@ def job_detail(job_id):
         company_posting = job.company
 
         is_owner = user and company_posting and user.id == company_posting.user_id
+
+        # 🔒 Als job ingevuld/inactief is: alleen eigenaar mag de detailpagina nog zien
+        if not job.is_active and not is_owner:
+            flash(_("This job is no longer available."))
+            return redirect(url_for("main.jobs_list"))
+        
         is_unlocked_status = False
 
         if user:

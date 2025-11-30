@@ -83,7 +83,7 @@
             >
         </label>
 
-        <label style="display:block; margin-bottom: 10px;">
+                <label style="display:block; margin-bottom: 10px;">
             Phone number:
             <input
                 type="tel"
@@ -92,7 +92,22 @@
                 style="width: 300px;"
             >
         </label>
-        
+
+        <hr style="margin: 20px 0;">
+
+        <h3>Availability</h3>
+        <label style="display:block; margin-bottom: 10px;">
+            Status:
+            <select name="availability_status" style="width: 300px;">
+                <option value="available" {% if profile.availability %}selected{% endif %}>
+                    Available for new jobs
+                </option>
+                <option value="unavailable" {% if not profile.availability %}selected{% endif %}>
+                    Unavailable (not searching right now)
+                </option>
+            </select>
+        </label>
+
         <hr style="margin: 20px 0;">
 
         <button class="btn" type="submit">Save Changes</button>

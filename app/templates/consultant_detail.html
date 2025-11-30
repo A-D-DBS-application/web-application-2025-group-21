@@ -95,4 +95,43 @@
         <p>Log in als **Bedrijf** om de contactgegevens te bekijken en te ontgrendelen.</p>
     {% endif %}
 </div>
+
+{# 🔹 Collaborate-vraag + groene knop:
+     - alleen als user company is
+     - consultant is unlocked
+     - consultant is nog beschikbaar #}
+  {% if user and user.role == UserRole.company and is_unlocked and profile.availability %}
+    <div class="card collaborate-card" style="margin-top:20px;">
+        <h3>Collaborate?</h3>
+        <p>
+            You have unlocked this consultant's contact details.<br>
+            Do you want to start a collaboration with this consultant?
+        </p>
+        <form method="post" action="{{ url_for('main.collaborate_with_consultant', profile_id=profile.id) }}">
+            <button type="submit" class="btn btn-success">
+                Yes, collaborate
+            </button>
+        </form>
+    </div>
+  {% endif %}
+
+  <style>
+    .btn-success {
+        background: #28a745;
+        color: white;
+        padding: 8px 14px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .collaborate-card {
+        border: 1px solid #cfe9d5;
+        background: #f3fff5;
+        border-radius: 14px;
+        padding: 18px;
+    }
+  </style>
+
 {% endblock %}
