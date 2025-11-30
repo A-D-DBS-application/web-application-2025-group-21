@@ -2,14 +2,20 @@
 {% block title %}Admin Dashboard{% endblock %}
 
 {% block content %}
-<h1>Admin dashboard</h1>
 
-<p>Welkom admin.</p>
+<h1>Admin Dashboard</h1>
 
-<div style="margin-top:20px;">
-  <a class="btn" href="{{ url_for('main.admin_dashboard') }}">Gebruikers</a>
-  <a class="btn" href="{{ url_for('main.admin_jobs') }}">Jobs</a>
-  <a class="btn" href="{{ url_for('main.admin_collaborations') }}">Samenwerkingen</a>
+<div class="card">
+  <p>Beheer van het platform.</p>
+</div>
+
+<div class="card">
+  <h3>Samenwerkingen</h3>
+  <p>Overzicht van alle actieve en afgelopen samenwerkingen.</p>
+
+  <a class="btn" href="{{ url_for('main.admin_collaborations') }}">
+    Bekijk samenwerkingen
+  </a>
 </div>
 
 {% endblock %}
