@@ -8,6 +8,8 @@ from .supabase_client import get_session
 from .models import User, ConsultantProfile, Company, JobPost, UserRole, Skill, Unlock, UnlockTarget, Collaboration, CollaborationStatus
 import os
 from werkzeug.utils import secure_filename
+from functools import wraps
+
 
 import requests
 from math import radians, sin, cos, sqrt, atan2
@@ -1246,10 +1248,8 @@ def job_delete(job_id):
         flash(_("Job deleted"))
         return redirect(url_for("main.jobs_list"))
 
+# ------------------ ADMIN DECORATOR ------------------
 
-    
-@main.route("/admin")
-@login_required
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -1262,6 +1262,9 @@ def admin_required(f):
 
         return f(*args, **kwargs)
     return decorated_function
+
+
+# ------------------ ADMIN COLLABORATIONS ------------------
 
 @main.route("/admin/collaborations")
 @login_required
@@ -1279,6 +1282,11 @@ def admin_collaborations():
             collaborations=collaborations
         )
 
+
+# ------------------ ADMIN DASHBOARD ------------------
+
+@main.route("/admin")
+@login_required
 @admin_required
 def admin_dashboard():
     return render_template("admin_dashboard.html")

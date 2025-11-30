@@ -154,6 +154,11 @@
         {% else %}
             <a class="btn" style="margin-left:auto;" href="{{ url_for('main.login') }}">{{ _("Login") }}</a>
         {% endif %}
+
+        {% if session.get("role") == "admin" %}
+            <a href="{{ url_for('main.admin_dashboard') }}">Admin</a>
+        {% endif %}
+
     </nav>
     </header>
 
