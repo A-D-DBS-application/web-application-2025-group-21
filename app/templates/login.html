@@ -2,7 +2,9 @@
 {% block title %}Login{% endblock %}
 {% block content %}
   <h1>Login (MVP)</h1>
+
   <form method="post">
+
     <label>Username</label>
     <input name="username" required>
 
@@ -10,7 +12,11 @@
     <select name="role">
       <option value="consultant">consultant</option>
       <option value="company">company</option>
+      <option value="admin">admin</option>
     </select>
+
+    <label>Admin code (alleen voor admin)</label>
+    <input type="password" name="admin_code">
 
     <button class="btn" type="submit">Log in</button>
   </form>

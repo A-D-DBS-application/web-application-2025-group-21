@@ -171,9 +171,17 @@ def login():
         role_str = request.form.get("role", "consultant")
         requested_role = UserRole(role_str)
 
+        admin_code_input = request.form.get("admin_code")
+
         if not username:
             flash(_("Username is required."))
             return redirect(url_for("main.login"))
+
+        # ADMIN BEVEILIGING
+        if requested_role == UserRole.admin:
+            if admin_code_input != os.getenv("ADMIN_CODE"):
+                flash(_("Invalid admin code."))
+                return redirect(url_for("main.login"))
 
         with get_session() as db:
             user = db.query(User).filter(User.username == username).first()
@@ -186,7 +194,7 @@ def login():
                     flash(_(f"Welcome back, {username}."))
                     return redirect(url_for("main.dashboard"))
                 else:
-                    flash(_("This username already exists and is linked to another role. Please choose a different username or log in with the correct role."))
+                    flash(_("This username already exists and is linked to another role."))
                     return redirect(url_for("main.login"))
             else:
                 # Nieuwe gebruiker
@@ -202,13 +210,16 @@ def login():
                         created_at=datetime.utcnow()
                     )
                     db.add(prof)
-                else:  # company
+
+                elif requested_role == UserRole.company:
                     comp = Company(
                         user_id=user.id,
                         company_name_masked=username,
                         created_at=datetime.utcnow()
                     )
                     db.add(comp)
+
+                # ✅ admin heeft geen extra profiel nodig
 
                 db.commit()
                 flash(_(f"Welcome, {username}. You are registered and logged in as {role_str}."))
@@ -218,6 +229,7 @@ def login():
                 return redirect(url_for("main.dashboard"))
 
     return render_template("login.html")
+
 
 
 @main.route("/logout", methods=["POST"])
