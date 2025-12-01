@@ -27,16 +27,30 @@
             flex-direction: column;
         }
 
+        /* ===== NAVBAR ===== */
         header {
             background: var(--blue);
             color: #fff;
-            padding: 14px 20px;
+            padding: 12px 20px;
         }
 
         nav {
             display: flex;
             align-items: center;
             gap: 16px;
+        }
+
+        /* Logo links vóór alle menu-items */
+        .nav-logo-link {
+            display: flex;
+            align-items: center;
+            margin-right: 10px;
+        }
+
+        .nav-logo {
+            height: 32px;
+            width: auto;
+            display: block;
         }
 
         nav a {
@@ -52,6 +66,7 @@
             background: rgba(255, 255, 255, 0.15);
         }
 
+        /* Buttons */
         .btn {
             background: #fff;
             color: var(--blue);
@@ -68,7 +83,7 @@
             background: #e5e7eb;
         }
 
-        /* right-hand side: logo + login/logout */
+        /* RIGHT SIDE */
         .nav-right {
             margin-left: auto;
             display: flex;
@@ -76,12 +91,7 @@
             gap: 12px;
         }
 
-        .nav-logo {
-            height: 26px;
-            width: auto;
-            display: block;
-        }
-
+        /* MAIN CONTENT */
         main {
             max-width: 900px;
             margin: 24px auto;
@@ -97,113 +107,31 @@
             margin-bottom: 16px;
         }
 
-        .card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 16px;
-            margin: 16px 0;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-
-        form > * {
-            display: block;
-            margin: 10px 0;
-        }
-
-        .row {
-            display: flex;
-            gap: 16px;
-            flex-wrap: wrap;
-        }
-
-        .grow {
-            flex: 1 1 300px;
-        }
-
         .footer {
             background-color: #f8f9fa;
             border-top: 1px solid #e9ecef;
             text-align: center;
             padding: 20px 16px;
             color: #6b7280;
-            width: 100%;
             margin-top: 40px;
         }
+
         .footer a {
             color: #6b7280;
             text-decoration: none;
         }
+
         .footer a:hover {
             text-decoration: underline;
             color: var(--blue);
         }
 
+        /* ===== RESPONSIVE ===== */
         @media (max-width: 600px) {
 
             nav {
                 flex-wrap: wrap;
                 gap: 8px;
-            }
-
-            nav a, .btn {
-                padding: 8px 10px;
-                font-size: 14px;
-            }
-
-            header {
-                padding: 10px 12px;
-            }
-
-            main {
-                padding: 0 12px;
-                max-width: 100%;
-            }
-
-            .row {
-                flex-direction: column;
-                gap: 10px;
-            }
-
-            .card {
-                padding: 12px;
-            }
-
-            form > * {
-                width: 100%;
-            }
-
-            input, select, textarea {
-                font-size: 16px;
-            }
-            form input,
-            form select,
-            form textarea {
-                width: 100% !important;
-                box-sizing: border-box;
-            }
-
-            form label {
-                width: 100%;
-                display: block;
-            }
-            
-            .btn {
-                width: 100%;
-                display: block;
-                text-align: center;
-            }
-
-            .mode-selector-container {
-                display: flex;
-                flex-direction: column;
-                gap: 10px;
-            }
-
-            .mode-btn {
-                width: 100% !important;
-                text-align: center;
-                display: block;
             }
 
             .nav-right {
@@ -213,10 +141,10 @@
             }
 
             .nav-logo {
-                height: 22px;
+                height: 26px;
             }
         }
-        
+
     </style>
 </head>
 
@@ -224,40 +152,42 @@
 
     <header>
         <nav>
-            <a href="{{ url_for('main.index') }}">{{ _("Home") }}</a>
 
-            {# COMPANY: only show Consultants (and optionally own jobs) #}
+            <!-- LOGO (links, klikbaar) -->
+            <a href="{{ url_for('main.index') }}" class="nav-logo-link">
+                <img src="{{ url_for('static', filename='logo.png') }}" class="nav-logo" alt="IConsult">
+            </a>
+
+            <!-- MENU LINKS -->
+            <a href="{{ url_for('main.index') }}">Home</a>
+
             {% if session.get('role') == 'company' %}
-                <a href="{{ url_for('main.consultants_list') }}">{{ _("Consultants") }}</a>
-                {# <a href="{{ url_for('main.company_jobs_list') }}">{{ _("My Jobs") }}</a> #}
+                <a href="{{ url_for('main.consultants_list') }}">Consultants</a>
             {% endif %}
 
-            {# CONSULTANT: only show Jobs #}
             {% if session.get('role') == 'consultant' %}
-                <a href="{{ url_for('main.jobs_list') }}">{{ _("Jobs") }}</a>
+                <a href="{{ url_for('main.jobs_list') }}">Jobs</a>
             {% endif %}
 
-            <a href="{{ url_for('main.dashboard') }}">{{ _("Dashboard") }}</a>
+            <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
 
             {% if session.get("role") == "admin" %}
                 <a href="{{ url_for('main.admin_dashboard') }}">Admin</a>
             {% endif %}
 
+            <!-- RIGHT SIDE: LOGIN / LOGOUT -->
             <div class="nav-right">
-                <img
-                    src="{{ url_for('static', filename='logo.png') }}"
-                    alt="IConsult logo"
-                    class="nav-logo"
-                >
 
                 {% if session.get('user_id') %}
-                    <form action="{{ url_for('main.logout') }}" method="post" style="display:inline;">
-                        <button class="btn" type="submit">{{ _("Logout") }}</button>
+                    <form action="{{ url_for('main.logout') }}" method="post">
+                        <button class="btn" type="submit">Logout</button>
                     </form>
                 {% else %}
-                    <a class="btn" href="{{ url_for('main.login') }}">{{ _("Login") }}</a>
+                    <a class="btn" href="{{ url_for('main.login') }}">Login</a>
                 {% endif %}
+
             </div>
+
         </nav>
     </header>
 
