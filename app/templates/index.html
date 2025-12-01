@@ -11,21 +11,20 @@ main {
     padding: 0 !important;
 }
 
-/* Eigen kleuren voor deze pagina */
+/* IConsult color palette */
 :root {
-    --color-primary: #fbbf24;
-    --color-secondary: #10b981;
+    --color-primary: #60a5fa;     /* light blue accent */
+    --color-secondary: #2563eb;   /* deep blue CTA */
     --color-text: #1f2937;
     --color-muted: #4b5563;
-    --color-bg-light: #f9fafb;
+    --color-bg-light: #f3f4f6;
 }
 
 /* ===== HERO SECTION ===== */
 .hero-section {
     position: relative;
     width: 100%;
-    height: 110vh; 
-    min-height: calc(100vh); /* 70px ≈ hoogte navbar */
+    height: 110vh; /* a bit taller so the “scroll down” text is visible */
     margin: 0;
 }
 
@@ -46,13 +45,14 @@ main {
     color: #ffffff;
 }
 
+/* blue overlay over the image */
 .hero-overlay {
     position: absolute;
     inset: 0;
     background: linear-gradient(
         to bottom right,
-        rgba(31, 41, 55, 0.88),
-        rgba(16, 185, 129, 0.55)
+        rgba(37, 99, 235, 0.75),
+        rgba(96, 165, 250, 0.15)
     );
 }
 
@@ -64,7 +64,7 @@ main {
     margin-bottom: 12vh;
 }
 
-/* ---- LOGO OP DE FOTO ---- */
+/* LOGO */
 .hero-logo {
     height: 90px;
     width: auto;
@@ -72,7 +72,7 @@ main {
     filter: drop-shadow(0 4px 10px rgba(0,0,0,0.7));
 }
 
-/* H1 alleen voor screenreaders / SEO */
+/* H1 only for SEO/screenreaders */
 .hero-title-hidden {
     position: absolute;
     left: -9999px;
@@ -107,25 +107,25 @@ main {
     font-size: 0.98rem;
 }
 
+/* Primary = light blue */
 .hero-cta-btn {
     background: var(--color-primary);
-    color: var(--color-text);
-    box-shadow: 0 10px 25px rgba(251, 191, 36, 0.6);
+    color: #fff;
+    box-shadow: 0 10px 25px rgba(96, 165, 250, 0.4);
 }
-
 .hero-cta-btn:hover {
-    background: #f59e0b;
+    background: #3b82f6;
     transform: translateY(-2px);
 }
 
+/* Secondary = deep blue */
 .hero-secondary-btn {
     background: var(--color-secondary);
     color: #fff;
-    box-shadow: 0 8px 20px rgba(16,185,129,0.4);
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
 }
-
 .hero-secondary-btn:hover {
-    background: #059669;
+    background: #1d4ed8;
     transform: translateY(-2px);
 }
 
@@ -189,11 +189,12 @@ main {
     box-shadow: 0 12px 25px rgba(15,23,42,0.18);
 }
 
+/* Blue highlight box */
 .isc-summary {
-    background: #eff6ff;
+    background: #e0f2fe;
     border-radius: 16px;
     padding: 25px;
-    border: 2px solid var(--color-secondary);
+    border: 2px solid var(--color-primary);
     margin-top: 25px;
 }
 
@@ -210,10 +211,10 @@ main {
 
 @media (max-width: 768px) {
     .hero-section {
-        min-height: calc(100vh - 56px);
+        height: 100vh;
     }
     .hero-hero {
-        background-attachment: scroll; /* betere performance op mobiel */
+        background-attachment: scroll; /* better for mobile performance */
     }
     .hero-inner {
         padding: 40px 18px 70px 18px;
@@ -234,10 +235,10 @@ main {
         <div class="hero-overlay"></div>
 
         <div class="hero-inner">
-            <!-- Logo op foto -->
+            <!-- Logo on top of the hero image -->
             <img src="{{ url_for('static', filename='logo.png') }}" class="hero-logo" alt="IConsult logo">
 
-            <!-- Verborgen titel (SEO) -->
+            <!-- Hidden H1 for SEO -->
             <h1 class="hero-title-hidden">IConsult</h1>
 
             <p class="hero-subtitle">
@@ -246,12 +247,12 @@ main {
             </p>
 
             {% if not session.get("user_id") %}
-                <!-- NIET INGELOGD -->
+                <!-- Not logged in -->
                 <a href="{{ url_for('main.login') }}" class="hero-cta-btn">
                     Start your IConsult journey →
                 </a>
             {% else %}
-                <!-- WEL INGELOGD -->
+                <!-- Logged in -->
                 {% if session.get('role') == 'consultant' %}
                     <a href="{{ url_for('main.jobs_list') }}" class="hero-secondary-btn">
                         Search Jobs →
