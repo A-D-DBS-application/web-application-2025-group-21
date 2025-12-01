@@ -7,17 +7,16 @@
     <img
         src="{{ profile.profile_image }}"
         alt="Profile picture"
+        class="{% if not is_unlocked and not is_owner %}blurred-photo{% endif %}"
         style="max-width:140px; width:100%; height:auto; border-radius:50%; object-fit:cover; margin-bottom:15px;"
     >
-
-    
   {% else %}
     <img
         src="{{ url_for('static', filename='img/default-avatar.png') }}"
         alt="No profile picture"
+        class="{% if not is_unlocked and not is_owner %}blurred-photo{% endif %}"
         style="max-width:140px; width:100%; height:auto; border-radius:50%; object-fit:cover; margin-bottom:12px;"
     >
-    
   {% endif %}
 
   {% if profile.headline %}
