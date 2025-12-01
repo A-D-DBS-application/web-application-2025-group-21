@@ -4,12 +4,14 @@
 {% block content %}
 
 <style>
-
-/* Remove padding inherited from base */
-body {
+/* === OVERRIDE base.html MAIN LAYOUT FOR HOMEPAGE === */
+main {
+    max-width: 100% !important;
+    margin: 0 !important;
     padding: 0 !important;
 }
 
+/* Eigen kleuren voor deze pagina */
 :root {
     --color-primary: #fbbf24;
     --color-secondary: #10b981;
@@ -20,9 +22,10 @@ body {
 
 /* ===== HERO SECTION ===== */
 .hero-section {
-    margin: -20px -20px 0 -20px;
     position: relative;
-    height: 100vh;
+    width: 100%;
+    min-height: calc(100vh - 70px); /* 70px ≈ hoogte navbar */
+    margin: 0;
 }
 
 .hero-hero {
@@ -47,44 +50,43 @@ body {
     inset: 0;
     background: linear-gradient(
         to bottom right,
-        rgba(31, 41, 55, 0.85),
-        rgba(16, 185, 129, 0.5)
+        rgba(31, 41, 55, 0.88),
+        rgba(16, 185, 129, 0.55)
     );
 }
 
 .hero-inner {
     position: relative;
     z-index: 2;
-    padding: 50px 10%;
-    max-width: 700px;
-    margin-top: auto;
-    margin-bottom: 10vh;
+    padding: 60px 10%;
+    max-width: 720px;
+    margin-bottom: 12vh;
 }
 
 /* ---- LOGO OP DE FOTO ---- */
 .hero-logo {
-    height: 90px;                /* Grootte logo */
+    height: 90px;
     width: auto;
-    margin-bottom: 20px;
-    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.7));  
+    margin-bottom: 24px;
+    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.7));
 }
 
-/* SEO-hidden H1 (screenreaders only) */
+/* H1 alleen voor screenreaders / SEO */
 .hero-title-hidden {
-    position:absolute;
-    left:-9999px;
-    top:auto;
-    width:1px;
-    height:1px;
-    overflow:hidden;
+    position: absolute;
+    left: -9999px;
+    top: auto;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
 }
 
 .hero-subtitle {
     font-size: 1.25rem;
-    margin-bottom: 25px;
+    margin-bottom: 28px;
     line-height: 1.6;
-    max-width: 600px;
-    opacity: 0.95;
+    max-width: 620px;
+    opacity: 0.97;
     font-weight: 300;
 }
 
@@ -93,11 +95,15 @@ body {
 .hero-secondary-btn {
     display: inline-flex;
     align-items: center;
-    padding: 14px 30px;
+    justify-content: center;
+    padding: 14px 32px;
     border-radius: 999px;
     font-weight: 700;
     text-decoration: none;
     transition: 0.3s;
+    border: none;
+    cursor: pointer;
+    font-size: 0.98rem;
 }
 
 .hero-cta-btn {
@@ -118,19 +124,20 @@ body {
 }
 
 .hero-secondary-btn:hover {
-    background:#059669;
+    background: #059669;
     transform: translateY(-2px);
 }
 
 .hero-scroll-hint {
     position: absolute;
-    bottom: 20px;
+    bottom: 22px;
     left: 50%;
     transform: translateX(-50%);
     text-align: center;
-    font-size: 1rem;
+    font-size: 0.95rem;
     color: #ffffff;
     z-index: 2;
+    opacity: 0.9;
 }
 
 /* ===== CONTENT SECTIONS ===== */
@@ -152,12 +159,13 @@ body {
     color: var(--color-text);
     border-bottom: 4px solid var(--color-primary);
     display: inline-block;
+    padding-bottom: 4px;
 }
 
 .isc-intro {
     max-width: 800px;
     color: var(--color-muted);
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     margin-bottom: 30px;
 }
 
@@ -172,11 +180,12 @@ body {
     border-radius: 16px;
     padding: 20px;
     border: 1px solid #e5e7eb;
-    transition: 0.3s;
     box-shadow: 0 6px 15px rgba(15,23,42,0.1);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 .isc-card:hover {
     transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(15,23,42,0.18);
 }
 
 .isc-summary {
@@ -184,20 +193,38 @@ body {
     border-radius: 16px;
     padding: 25px;
     border: 2px solid var(--color-secondary);
-    margin-top: 20px;
+    margin-top: 25px;
 }
 
-@media (max-width: 900px) {
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+    .hero-inner {
+        padding: 50px 8%;
+        margin-bottom: 8vh;
+    }
     .isc-grid {
-        grid-template-columns: repeat(2,1fr);
+        grid-template-columns: repeat(2, 1fr);
     }
 }
-@media (max-width: 600px) {
+
+@media (max-width: 768px) {
+    .hero-section {
+        min-height: calc(100vh - 56px);
+    }
+    .hero-hero {
+        background-attachment: scroll; /* betere performance op mobiel */
+    }
+    .hero-inner {
+        padding: 40px 18px 70px 18px;
+        margin-bottom: 0;
+    }
+    .hero-subtitle {
+        font-size: 1.05rem;
+    }
     .isc-grid {
         grid-template-columns: 1fr;
     }
 }
-
 </style>
 
 <!-- ========================= HERO SECTION ========================= -->
@@ -206,9 +233,8 @@ body {
         <div class="hero-overlay"></div>
 
         <div class="hero-inner">
-
             <!-- Logo op foto -->
-            <img src="{{ url_for('static', filename='logo.png') }}" class="hero-logo" alt="IConsult">
+            <img src="{{ url_for('static', filename='logo.png') }}" class="hero-logo" alt="IConsult logo">
 
             <!-- Verborgen titel (SEO) -->
             <h1 class="hero-title-hidden">IConsult</h1>
@@ -219,15 +245,12 @@ body {
             </p>
 
             {% if not session.get("user_id") %}
-
-                <!-- NIET INGLOGD -->
+                <!-- NIET INGELOGD -->
                 <a href="{{ url_for('main.login') }}" class="hero-cta-btn">
-                    Start your IConsult journey → 
+                    Start your IConsult journey →
                 </a>
-
             {% else %}
-
-                <!-- WEL INGLOGD -->
+                <!-- WEL INGELOGD -->
                 {% if session.get('role') == 'consultant' %}
                     <a href="{{ url_for('main.jobs_list') }}" class="hero-secondary-btn">
                         Search Jobs →
@@ -237,7 +260,6 @@ body {
                         Search Consultants →
                     </a>
                 {% endif %}
-
             {% endif %}
         </div>
 
@@ -251,7 +273,6 @@ body {
 <!-- ========================= HOW IT WORKS ========================= -->
 <section class="isc-section" id="isc-how-it-works">
     <div class="isc-container">
-
         <h2 class="isc-title">How the IConsult Match works</h2>
 
         <p class="isc-intro">
@@ -260,7 +281,6 @@ body {
         </p>
 
         <div class="isc-grid">
-
             <article class="isc-card">
                 <h3>⭐ Skills match (50%)</h3>
                 <p>We compare the required job skills with the consultant profile.</p>
@@ -278,31 +298,31 @@ body {
 
             <article class="isc-card">
                 <h3>🔥 Popularity (10%)</h3>
-                <p>More unlocks = small visibility boost.</p>
+                <p>More unlocks give a small visibility boost.</p>
             </article>
-
         </div>
 
         <div class="isc-summary">
             <h3>The IConsult score</h3>
-            <p>The final score is computed from all four factors shown above.</p>
+            <p>
+                The final match score is a combination of skills, search relevance,
+                recency and popularity — so you always see the most relevant results first.
+            </p>
         </div>
-
     </div>
 </section>
 
 <!-- ========================= UNLOCKING SECTION ========================= -->
 <section class="isc-section" id="isc-unlocking">
     <div class="isc-container">
-
         <h2 class="isc-title">The IConsult unlocking principle</h2>
 
         <p class="isc-intro">
             Consultants and companies unlock each other based on match preference.
+            This keeps things private at first, and intentional when you decide to connect.
         </p>
 
         <div class="isc-grid">
-
             <article class="isc-card">
                 <h3>🙈 Privacy by default</h3>
                 <p>Initials only until unlocked — for both sides.</p>
@@ -315,16 +335,14 @@ body {
 
             <article class="isc-card">
                 <h3>🤝 Two-sided matching</h3>
-                <p>Both sides unlock each other — equally.</p>
+                <p>Consultants unlock jobs, and companies unlock consultants.</p>
             </article>
 
             <article class="isc-card">
                 <h3>🌟 Meaningful connections</h3>
-                <p>Unlocked profiles get higher visibility.</p>
+                <p>Unlocked profiles gain visibility and lead to real collaborations.</p>
             </article>
-
         </div>
-
     </div>
 </section>
 
