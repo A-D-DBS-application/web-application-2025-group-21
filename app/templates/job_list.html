@@ -183,6 +183,42 @@
             </p>
             {% endif %}
 
+            {# 🔹 EXTRA: alleen voor companies – status + taken by #}
+            {% if user and user.role == UserRole.company %}
+                <div style="margin-bottom: 8px;">
+                    {% if job.is_active %}
+                        <span style="
+                            display:inline-block;
+                            padding:2px 8px;
+                            border-radius:4px;
+                            background-color:#28a745;
+                            color:white;
+                            font-size:12px;">
+                            Available
+                        </span>
+                    {% else %}
+                        <span style="
+                            display:inline-block;
+                            padding:2px 8px;
+                            border-radius:4px;
+                            background-color:#e24b4b;
+                            color:white;
+                            font-size:12px;">
+                            Unavailable
+                        </span>
+                        {% if job.hired_consultant %}
+                            <div style="margin-top:4px; font-size:13px;">
+                                Taken by:
+                                <a href="{{ url_for('main.consultant_detail',
+                                                    profile_id=job.hired_consultant.id) }}">
+                                    {{ job.hired_consultant.display_name_masked }}
+                                </a>
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            {% endif %}
+
             <div class="required-skills-summary">
                 <label class="skills-label-small">
                     <i class="fas fa-tools"></i> Required skills:

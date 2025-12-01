@@ -69,11 +69,22 @@
                 <span style="color: #e24b4b;">Unavailable</span>
             {% endif %}
         </p>
+        {# 🔹 ZINNETJE: met welke companies werk ik samen? #}
+        {% if consultant_active_collaborations is defined and consultant_active_collaborations %}
+            <p>
+                <strong>Collaborating with:</strong>
+                {% for collab in consultant_active_collaborations %}
+                    {{ collab.company.company_name_masked }}{% if not loop.last %}, {% endif %}
+                {% endfor %}
+            </p>
+        {% endif %}
 
         <a class="btn" href="{{ url_for('main.edit_consultant_skills') }}">Edit Skills</a>
         <a class="btn" href="{{ url_for('main.edit_consultant_profile') }}">Edit Profile</a>
 
     {% endif %}
+
+
 
     {% if user.role == UserRole.company %}
         <p><strong>Company name:</strong> {{ company.company_name_masked }}</p>
@@ -81,6 +92,19 @@
 
         <p><strong>Email address:</strong> {{ company.contact_email or "Not filled in" }}</p>
         <p><strong>Phone number:</strong> {{ company.phone_number or "Not filled in" }}</p>
+
+        {# 🔹 ZINNETJE: active collaborations: clickable consultants #}
+        {% if company_active_collaborations is defined and company_active_collaborations %}
+            <p>
+                <strong>Active collaborations:</strong>
+                {% for collab in company_active_collaborations %}
+                    <a href="{{ url_for('main.consultant_detail', profile_id=collab.consultant.id) }}">
+                        {{ collab.consultant.display_name_masked }}
+                    </a>{% if not loop.last %}, {% endif %}
+                {% endfor %}
+            </p>
+        {% endif %}
+
         <a class="btn" href="{{ url_for('main.job_new') }}">New Job Post</a>
         <a href="{{ url_for('main.company_jobs_list') }}">My Job Posts</a>
 

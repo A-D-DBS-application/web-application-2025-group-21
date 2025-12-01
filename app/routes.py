@@ -275,11 +275,56 @@ def dashboard():
 
         profile = None
         company = None
+        company_jobs = []
+        company_active_collaborations = []
+        consultant_active_collaborations = []
 
         if user.role == UserRole.consultant:
             profile = db.query(ConsultantProfile).filter_by(user_id=user.id).first()
+
+            if profile:
+                # 🔹 Actieve samenwerkingen voor deze consultant
+                consultant_active_collaborations = (
+                    db.query(Collaboration)
+                    .options(
+                        joinedload(Collaboration.company),
+                        joinedload(Collaboration.job_post),
+                    )
+                    .filter(
+                        Collaboration.consultant_id == profile.id,
+                        Collaboration.status == CollaborationStatus.active,
+                    )
+                    .order_by(Collaboration.started_at.desc())
+                    .all()
+                )
+
         elif user.role == UserRole.company:
             company = db.query(Company).filter_by(user_id=user.id).first()
+
+            if company:
+                # 🔹 Alle jobposts van dit bedrijf (zowel active als closed)
+                company_jobs = (
+                    db.query(JobPost)
+                    .options(joinedload(JobPost.hired_consultant))
+                    .filter(JobPost.company_id == company.id)
+                    .order_by(JobPost.created_at.desc())
+                    .all()
+                )
+
+                # 🔹 Actieve samenwerkingen voor deze company
+                company_active_collaborations = (
+                    db.query(Collaboration)
+                    .options(
+                        joinedload(Collaboration.consultant),
+                        joinedload(Collaboration.job_post),
+                    )
+                    .filter(
+                        Collaboration.company_id == company.id,
+                        Collaboration.status == CollaborationStatus.active,
+                    )
+                    .order_by(Collaboration.started_at.desc())
+                    .all()
+                )
 
         return render_template(
             "dashboard.html",
@@ -287,7 +332,11 @@ def dashboard():
             profile=profile,
             company=company,
             UserRole=UserRole,
+            company_jobs=company_jobs,
+            company_active_collaborations=company_active_collaborations,
+            consultant_active_collaborations=consultant_active_collaborations,
         )
+        
 
 
 # ------------------ CONSULTANTS ------------------
