@@ -5,11 +5,20 @@ from sqlalchemy import or_, func
 from sqlalchemy.orm import joinedload
 from flask_babel import gettext as _
 from .supabase_client import get_session
-from .models import User, ConsultantProfile, Company, JobPost, UserRole, Skill, Unlock, UnlockTarget, Collaboration, CollaborationStatus
+from .models import (
+    User,
+    ConsultantProfile,
+    Company,
+    JobPost,
+    UserRole,
+    Skill,
+    Unlock,
+    UnlockTarget,
+    Collaboration,
+    CollaborationStatus,
+)
 import os
 from werkzeug.utils import secure_filename
-from functools import wraps
-
 
 import requests
 from math import radians, sin, cos, sqrt, atan2
@@ -89,22 +98,29 @@ def get_current_user(db):
 
 def login_required(f):
     """Controleert of de gebruiker is ingelogd via de sessie."""
+
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if session.get("user_id") is None:
             flash(_("Gelieve in te loggen om deze actie uit te voeren."))
             return redirect(url_for("main.login"))
         return f(*args, **kwargs)
+
     return decorated_function
 
 
 def is_unlocked(db, unlocking_user_id, target_type, target_id):
     """Controleert of een gebruiker al de contactgegevens van een target heeft unlocked."""
-    return db.query(Unlock).filter(
-        Unlock.user_id == unlocking_user_id,
-        Unlock.target_type == target_type,
-        Unlock.target_id == target_id
-    ).first() is not None
+    return (
+        db.query(Unlock)
+        .filter(
+            Unlock.user_id == unlocking_user_id,
+            Unlock.target_type == target_type,
+            Unlock.target_id == target_id,
+        )
+        .first()
+        is not None
+    )
 
 
 # ------------------ HOME ------------------
@@ -139,7 +155,7 @@ def company_jobs_list():
             query = query.filter(
                 or_(
                     JobPost.title.ilike(f"%{q}%"),
-                    JobPost.description.ilike(f"%{q}%")
+                    JobPost.description.ilike(f"%{q}%"),
                 )
             )
 
@@ -153,9 +169,12 @@ def company_jobs_list():
             user=user,
             skills=all_skills,
             sort_by="none",
-            page_title=_("Mijn Vacatures"),
+            page_title=_("My job posts"),
             show_mode_selector=False,
             simple_search=True,
+            possible_contract_types=[],
+            current_contract_type=None,
+            UserRole=UserRole,
         )
 
 
@@ -209,7 +228,7 @@ def login():
                         user_id=user.id,
                         display_name_masked=username,
                         availability=True,
-                        created_at=datetime.utcnow()
+                        created_at=datetime.utcnow(),
                     )
                     db.add(prof)
 
@@ -217,21 +236,24 @@ def login():
                     comp = Company(
                         user_id=user.id,
                         company_name_masked=username,
-                        created_at=datetime.utcnow()
+                        created_at=datetime.utcnow(),
                     )
                     db.add(comp)
 
-                # ✅ admin heeft geen extra profiel nodig
+                # admin heeft geen extra profiel nodig
 
                 db.commit()
-                flash(_(f"Welcome, {username}. You are registered and logged in as {role_str}."))
+                flash(
+                    _(
+                        f"Welcome, {username}. You are registered and logged in as {role_str}."
+                    )
+                )
 
                 session["user_id"] = user.id
                 session["role"] = user.role.value
                 return redirect(url_for("main.dashboard"))
 
     return render_template("login.html")
-
 
 
 @main.route("/logout", methods=["POST"])
@@ -264,7 +286,7 @@ def dashboard():
             user=user,
             profile=profile,
             company=company,
-            UserRole=UserRole
+            UserRole=UserRole,
         )
 
 
@@ -279,9 +301,11 @@ def edit_consultant_profile():
             flash("Only consultants can edit their profile")
             return redirect(url_for("main.dashboard"))
 
-        profile = db.query(ConsultantProfile).filter(
-            ConsultantProfile.user_id == user.id
-        ).first()
+        profile = (
+            db.query(ConsultantProfile)
+            .filter(ConsultantProfile.user_id == user.id)
+            .first()
+        )
 
         if request.method == "POST":
             profile.display_name_masked = request.form.get("display_name")
@@ -291,18 +315,31 @@ def edit_consultant_profile():
             profile.contact_email = request.form.get("contact_email")
             profile.phone_number = request.form.get("phone_number")
 
-            # 🔽 Availability uit dropdown lezen
+            # 🔹 Years of experience
+            years_experience_raw = (request.form.get("years_experience") or "").strip()
+            try:
+                profile.years_experience = (
+                    int(years_experience_raw) if years_experience_raw else None
+                )
+            except ValueError:
+                profile.years_experience = None
+
+            # Availability uit dropdown lezen
             availability_value = request.form.get("availability_status", "available")
             was_available_before = profile.availability
-            profile.availability = (availability_value == "available")
+            profile.availability = availability_value == "available"
 
             # Als je jezelf weer 'available' maakt, actieve samenwerkingen afsluiten
             if (not was_available_before) and profile.availability:
                 now = datetime.now(timezone.utc)
-                active_collabs = db.query(Collaboration).filter(
-                    Collaboration.consultant_id == profile.id,
-                    Collaboration.status == CollaborationStatus.active
-                ).all()
+                active_collabs = (
+                    db.query(Collaboration)
+                    .filter(
+                        Collaboration.consultant_id == profile.id,
+                        Collaboration.status == CollaborationStatus.active,
+                    )
+                    .all()
+                )
                 for c in active_collabs:
                     c.status = CollaborationStatus.ended
                     c.ended_at = now
@@ -318,9 +355,21 @@ def edit_consultant_profile():
             # Profielfoto
             file = request.files.get("profile_image")
             if file and file.filename != "":
-                upload_folder = os.path.join(current_app.root_path, "static", "uploads")
+                upload_folder = os.path.join(
+                    current_app.root_path, "static", "uploads"
+                )
                 os.makedirs(upload_folder, exist_ok=True)
-                filename = f"user_{user.id}.jpg"
+
+                orig_name = secure_filename(file.filename)
+                _, ext = os.path.splitext(orig_name)
+                ext = ext.lower()
+                if ext not in {".png", ".jpg", ".jpeg", ".gif"}:
+                    flash(
+                        _("Invalid image type. Allowed: png/jpg/jpeg/gif."), "error"
+                    )
+                    return redirect(url_for("main.edit_consultant_profile"))
+
+                filename = f"user_{user.id}{ext}"
                 save_path = os.path.join(upload_folder, filename)
                 file.save(save_path)
                 profile.profile_image = f"/static/uploads/{filename}"
@@ -328,15 +377,18 @@ def edit_consultant_profile():
             # CV
             cv_file = request.files.get("cv_document")
             if cv_file and cv_file.filename != "":
-                upload_folder = os.path.join(current_app.root_path, "static", "uploads")
+                upload_folder = os.path.join(
+                    current_app.root_path, "static", "uploads"
+                )
                 os.makedirs(upload_folder, exist_ok=True)
 
-                _, ext = os.path.splitext(cv_file.filename)
+                orig_name = secure_filename(cv_file.filename)
+                _, ext = os.path.splitext(orig_name)
                 ext = ext.lower()
 
                 allowed_exts = {".pdf", ".doc", ".docx"}
                 if ext not in allowed_exts:
-                    flash("Invalid file type. Only upload pdf/doc/docx.")
+                    flash(_("Invalid file type. Only upload pdf/doc/docx."))
                     return redirect(url_for("main.edit_consultant_profile"))
 
                 cv_filename = f"cv_user_{user.id}{ext}"
@@ -348,8 +400,11 @@ def edit_consultant_profile():
             flash("Profile updated successfully")
             return redirect(url_for("main.dashboard"))
 
-        return render_template("edit_consultant_profile.html", profile=profile)
-
+        return render_template(
+            "edit_consultant_profile.html",
+            profile=profile,
+            UserRole=UserRole,
+        )
 
 
 @main.route("/consultant/skills/edit", methods=["GET", "POST"])
@@ -361,13 +416,19 @@ def edit_consultant_skills():
             flash(_("Only consultants can update their skills"))
             return redirect(url_for("main.dashboard"))
 
-        profile = db.query(ConsultantProfile).filter(
-            ConsultantProfile.user_id == user.id
-        ).first()
+        profile = (
+            db.query(ConsultantProfile)
+            .filter(ConsultantProfile.user_id == user.id)
+            .first()
+        )
 
         if request.method == "POST":
             selected_ids = list(map(int, request.form.getlist("skills")))
-            profile.skills = db.query(Skill).filter(Skill.id.in_(selected_ids)).all()
+            profile.skills = (
+                db.query(Skill).filter(Skill.id.in_(selected_ids)).all()
+                if selected_ids
+                else []
+            )
             db.commit()
 
             flash(_("Profile updated"))
@@ -377,16 +438,18 @@ def edit_consultant_skills():
         return render_template(
             "edit_consultant_skills.html",
             profile=profile,
-            skills=all_skills
+            skills=all_skills,
         )
 
 
 @main.route("/consultant/<int:profile_id>")
 def consultant_detail(profile_id):
     with get_session() as db:
-        profile = db.query(ConsultantProfile).filter(
-            ConsultantProfile.id == profile_id
-        ).first()
+        profile = (
+            db.query(ConsultantProfile)
+            .filter(ConsultantProfile.id == profile_id)
+            .first()
+        )
 
         if not profile:
             flash(_("Consultant not found"))
@@ -397,7 +460,9 @@ def consultant_detail(profile_id):
         is_unlocked_status = False
 
         if user:
-            is_unlocked_status = is_unlocked(db, user.id, UnlockTarget.consultant, profile_id)
+            is_unlocked_status = is_unlocked(
+                db, user.id, UnlockTarget.consultant, profile_id
+            )
 
         return render_template(
             "consultant_detail.html",
@@ -405,7 +470,7 @@ def consultant_detail(profile_id):
             user=user,
             UserRole=UserRole,
             is_owner=is_owner,
-            is_unlocked=is_unlocked_status
+            is_unlocked=is_unlocked_status,
         )
 
 
@@ -431,6 +496,15 @@ def consultants_list():
         country = request.args.get("country")
         text_query = request.args.get("q", None)
 
+        # 🔹 Min. jaren ervaring
+        min_experience_raw = (request.args.get("min_experience") or "").strip()
+        min_experience = None
+        if min_experience_raw:
+            try:
+                min_experience = int(min_experience_raw)
+            except ValueError:
+                min_experience = None
+
         # 🔹 Locatie-filters uit de query
         max_distance_raw = (request.args.get("max_distance_km", "") or "").strip()
         max_distance_km = None
@@ -453,15 +527,22 @@ def consultants_list():
 
         if company_profile:
             # meest recente JobPost gelinkt aan dit Company ID
-            required_job = db.query(JobPost).filter(
-                JobPost.company_id == company_profile.id
-            ).order_by(JobPost.created_at.desc()).first()
+            required_job = (
+                db.query(JobPost)
+                .filter(JobPost.company_id == company_profile.id)
+                .order_by(JobPost.created_at.desc())
+                .first()
+            )
 
             if required_job:
-                required_skill_ids = set(s.id for s in required_job.skills)
+                required_skill_ids = {s.id for s in required_job.skills}
 
         if not required_job and sort_by == "relevance":
-            flash(_("First, create a Job Post to enable the IConsult relevance filter based on your needs."))
+            flash(
+                _(
+                    "First, create a Job Post to enable the IConsult relevance filter based on your needs."
+                )
+            )
 
         company_lat = getattr(company_profile, "latitude", None) if company_profile else None
         company_lon = getattr(company_profile, "longitude", None) if company_profile else None
@@ -478,6 +559,9 @@ def consultants_list():
             .filter(ConsultantProfile.availability == True)
         )
 
+        if min_experience is not None:
+            query = query.filter(ConsultantProfile.years_experience >= min_experience)
+
         # Filters gelden ALLEEN in de 'Handmatige Filter' modus
         if sort_by != "relevance":
             if city:
@@ -488,11 +572,13 @@ def consultants_list():
             # Handmatige skill-filter (AND logica)
             if query_skills:
                 for skill_id in query_skills:
-                    query = query.filter(ConsultantProfile.skills.any(Skill.id == skill_id))
+                    query = query.filter(
+                        ConsultantProfile.skills.any(Skill.id == skill_id)
+                    )
 
         consultants = query.all()
 
-        # 🔹 4b. LOCATIE-FILTER toepassen (afstand + zelfde land)
+        # 🔹 LOCATIE-FILTER toepassen (afstand + zelfde land)
         filtered_consultants = []
         for profile in consultants:
             # Zelfde land (indien aangevinkt én company country gekend)
@@ -501,12 +587,16 @@ def consultants_list():
                 if prof_country and prof_country != company_country:
                     continue  # ander land → skip
 
-            # Afstand (als slider > 0, NIET ignore_distance, en coords aanwezig)
-            if (not ignore_distance) and max_distance_km is not None and company_lat is not None and company_lon is not None:
+            # Afstand
+            if (
+                not ignore_distance
+                and max_distance_km is not None
+                and company_lat is not None
+                and company_lon is not None
+            ):
                 prof_lat = getattr(profile, "latitude", None)
                 prof_lon = getattr(profile, "longitude", None)
 
-                # geen locatie op consultant → buiten filter
                 if prof_lat is None or prof_lon is None:
                     continue
 
@@ -521,10 +611,14 @@ def consultants_list():
         # 5. UNLOCK STATUS OPHALEN
         unlocked_profile_ids = set()
         if user and user.role == UserRole.company:
-            unlocked_profiles_rows = db.query(Unlock.target_id).filter(
-                Unlock.user_id == user.id,
-                Unlock.target_type == UnlockTarget.consultant
-            ).all()
+            unlocked_profiles_rows = (
+                db.query(Unlock.target_id)
+                .filter(
+                    Unlock.user_id == user.id,
+                    Unlock.target_type == UnlockTarget.consultant,
+                )
+                .all()
+            )
             unlocked_profile_ids = {row[0] for row in unlocked_profiles_rows}
 
         for consultant in consultants:
@@ -548,7 +642,6 @@ def consultants_list():
                 )
                 unlock_counts = {target_id: count for target_id, count in unlock_rows}
 
-            # Nieuwe wegingen (totaal 1.0, geen locatie)
             SKILL_WEIGHT = 0.50
             TEXT_WEIGHT = 0.20
             RECENCY_WEIGHT = 0.20
@@ -557,44 +650,49 @@ def consultants_list():
             def compute_score(profile):
                 if not required_job:
                     return {
-                        'total': 0.0,
-                        'skill': 0.0,
-                        'text': 0.0,
-                        'recency': 0.0,
-                        'popularity': 0.0,
-                        'skill_factor': 0.0,
-                        'text_factor': 0.0,
-                        'recency_factor': 0.0,
-                        'popularity_factor': 0.0,
-                        'unlock_count': 0,
+                        "total": 0.0,
+                        "skill": 0.0,
+                        "text": 0.0,
+                        "recency": 0.0,
+                        "popularity": 0.0,
+                        "skill_factor": 0.0,
+                        "text_factor": 0.0,
+                        "recency_factor": 0.0,
+                        "popularity_factor": 0.0,
+                        "unlock_count": 0,
                     }
 
                 # A. Skills
-                consultant_skill_ids = set(s.id for s in profile.skills)
+                consultant_skill_ids = {s.id for s in profile.skills}
                 matched = len(consultant_skill_ids & required_skill_ids)
                 max_skills = max(len(required_skill_ids), 1)
-                skill_similarity = (matched / max_skills)  # 0..1
+                skill_similarity = matched / max_skills
                 skill_weighted_score = skill_similarity * SKILL_WEIGHT
 
                 # B. Text
                 text_match = 0
                 if text_query:
-                    text_fields = " ".join(filter(None, [
-                        profile.display_name_masked,
-                        profile.headline,
-                        profile.location_city,
-                        profile.country
-                    ]))
+                    text_fields = " ".join(
+                        filter(
+                            None,
+                            [
+                                profile.display_name_masked,
+                                profile.headline,
+                                profile.location_city,
+                                profile.country,
+                            ],
+                        )
+                    )
                     if text_query.lower() in text_fields.lower():
                         text_match = 1
                 text_weighted_score = text_match * TEXT_WEIGHT
 
                 # C. Recency
                 days_old = (now - profile.created_at).days
-                recency_factor = max(0, 1 - days_old / 30)  # <30d ~1
+                recency_factor = max(0, 1 - days_old / 30)
                 recency_weighted_score = recency_factor * RECENCY_WEIGHT
 
-                # D. Populariteit (unlocks)
+                # D. Populariteit
                 unlock_count = unlock_counts.get(profile.id, 0)
                 max_unlocks = 50
                 popularity_factor = min(unlock_count / max_unlocks, 1.0)
@@ -608,22 +706,22 @@ def consultants_list():
                 )
 
                 return {
-                    'total': final_score,
-                    'skill': skill_weighted_score,
-                    'text': text_weighted_score,
-                    'recency': recency_weighted_score,
-                    'popularity': popularity_weighted_score,
-                    'skill_factor': skill_similarity,
-                    'text_factor': text_match,
-                    'recency_factor': recency_factor,
-                    'popularity_factor': popularity_factor,
-                    'unlock_count': unlock_count,
+                    "total": final_score,
+                    "skill": skill_weighted_score,
+                    "text": text_weighted_score,
+                    "recency": recency_weighted_score,
+                    "popularity": popularity_weighted_score,
+                    "skill_factor": skill_similarity,
+                    "text_factor": text_match,
+                    "recency_factor": recency_factor,
+                    "popularity_factor": popularity_factor,
+                    "unlock_count": unlock_count,
                 }
 
             scored_consultants = []
             for consultant in consultants:
                 score_data = compute_score(consultant)
-                consultant.score = score_data['total']
+                consultant.score = score_data["total"]
                 consultant.score_breakdown = score_data
                 scored_consultants.append(consultant)
 
@@ -632,7 +730,9 @@ def consultants_list():
         elif sort_by == "title":
             consultants = sorted(
                 consultants,
-                key=lambda c: c.display_name_masked if c.display_name_masked else c.user.username
+                key=lambda c: c.display_name_masked
+                if c.display_name_masked
+                else c.user.username,
             )
 
         # 7. Template Renderen
@@ -644,8 +744,8 @@ def consultants_list():
             skills=all_skills,
             user=user,
             sort_by=sort_by,
+            UserRole=UserRole,
         )
-
 
 
 # ------------------ COMPANY PROFILE ------------------
@@ -659,9 +759,7 @@ def edit_company_profile():
             flash(_("Only companies can edit their profile"))
             return redirect(url_for("main.dashboard"))
 
-        company = db.query(Company).filter(
-            Company.user_id == user.id
-        ).first()
+        company = db.query(Company).filter(Company.user_id == user.id).first()
 
         if request.method == "POST":
             company.company_name_masked = request.form.get("company_name")
@@ -707,7 +805,7 @@ def unlock_consultant(profile_id):
         new_unlock = Unlock(
             user_id=user.id,
             target_type=UnlockTarget.consultant,
-            target_id=profile_id
+            target_id=profile_id,
         )
         db.add(new_unlock)
         db.commit()
@@ -715,21 +813,20 @@ def unlock_consultant(profile_id):
         flash(_("Contact details successfully released!"), "success")
         return redirect(url_for("main.consultant_detail", profile_id=profile_id))
 
+
 @main.route("/consultant/<int:profile_id>/collaborate", methods=["POST"])
 @login_required
 def collaborate_with_consultant(profile_id):
     """
     Company klikt op 'Samenwerken' bij een consultant.
-    Voorwaarden:
-    - user is company
-    - consultant bestaat & is beschikbaar
-    - company heeft consultant unlocked
     """
     with get_session() as db:
         user = get_current_user(db)
 
         if not user or user.role != UserRole.company:
-            flash(_("Only companies can start a collaboration with a consultant."), "error")
+            flash(
+                _("Only companies can start a collaboration with a consultant."), "error"
+            )
             return redirect(url_for("main.consultant_detail", profile_id=profile_id))
 
         company = db.query(Company).filter_by(user_id=user.id).first()
@@ -746,12 +843,15 @@ def collaborate_with_consultant(profile_id):
             flash(_("This consultant is currently not available."), "error")
             return redirect(url_for("main.consultant_detail", profile_id=profile_id))
 
-        # ✅ eerst unlock checken
+        # eerst unlock checken
         if not is_unlocked(db, user.id, UnlockTarget.consultant, profile_id):
-            flash(_("First unlock this consultant before starting a collaboration."), "error")
+            flash(
+                _("First unlock this consultant before starting a collaboration."),
+                "error",
+            )
             return redirect(url_for("main.consultant_detail", profile_id=profile_id))
 
-        # ✅ Collaboration aanmaken zonder specifieke job
+        # Collaboration aanmaken zonder specifieke job
         collab = Collaboration(
             company_id=company.id,
             consultant_id=profile.id,
@@ -760,15 +860,19 @@ def collaborate_with_consultant(profile_id):
         )
         db.add(collab)
 
-        # ✅ Consultant unavailable + link naar current company
+        # Consultant unavailable + link naar current company
         profile.availability = False
         profile.current_company_id = company.id
 
         db.commit()
 
-        flash(_("You are now collaborating with this consultant. They have been marked as unavailable."), "success")
+        flash(
+            _(
+                "You are now collaborating with this consultant. They have been marked as unavailable."
+            ),
+            "success",
+        )
         return redirect(url_for("main.consultant_detail", profile_id=profile_id))
-
 
 
 @main.route("/unlock/job/<int:job_id>")
@@ -793,7 +897,7 @@ def unlock_job(job_id):
         new_unlock = Unlock(
             user_id=user.id,
             target_type=UnlockTarget.job,
-            target_id=job_id
+            target_id=job_id,
         )
         db.add(new_unlock)
         db.commit()
@@ -801,16 +905,12 @@ def unlock_job(job_id):
         flash(_("Contact details successfully released!"), "success")
         return redirect(url_for("main.job_detail", job_id=job_id))
 
+
 @main.route("/jobs/<int:job_id>/collaborate", methods=["POST"])
 @login_required
 def collaborate_on_job(job_id):
     """
     Consultant klikt op 'Ik wil samenwerken' bij een job.
-    Voorwaarden:
-    - user is consultant
-    - job bestaat & is actief
-    - consultant heeft job unlocked
-    - consultant is beschikbaar
     """
     with get_session() as db:
         user = get_current_user(db)
@@ -837,12 +937,12 @@ def collaborate_on_job(job_id):
             flash(_("You are currently marked as unavailable."), "error")
             return redirect(url_for("main.job_detail", job_id=job_id))
 
-        # ✅ check: job moet eerst unlocked zijn
+        # job moet eerst unlocked zijn
         if not is_unlocked(db, user.id, UnlockTarget.job, job_id):
             flash(_("First unlock this job before starting a collaboration."), "error")
             return redirect(url_for("main.job_detail", job_id=job_id))
 
-        # ✅ Collaboration aanmaken (archief)
+        # Collaboration aanmaken (archief)
         collab = Collaboration(
             company_id=job.company_id,
             consultant_id=profile.id,
@@ -851,7 +951,7 @@ def collaborate_on_job(job_id):
         )
         db.add(collab)
 
-        # ✅ Job sluiten + consultant unavailable maken
+        # Job sluiten + consultant unavailable maken
         job.is_active = False
         job.hired_consultant_id = profile.id
 
@@ -860,8 +960,14 @@ def collaborate_on_job(job_id):
 
         db.commit()
 
-        flash(_("You are now collaborating with this company. The job is closed and you are set to unavailable."), "success")
+        flash(
+            _(
+                "You are now collaborating with this company. The job is closed and you are set to unavailable."
+            ),
+            "success",
+        )
         return redirect(url_for("main.dashboard"))
+
 
 # ------------------ JOB POSTS ------------------
 
@@ -887,8 +993,7 @@ def jobs_list():
         contract_type = request.args.get("contract_type")
         text_query = request.args.get("q", None)
 
-        # 🔹 Locatie-filters uit de query
-        # Slider: max_distance_km (0 of leeg = geen afstandsfilter)
+        # Locatie-filters
         max_distance_raw = (request.args.get("max_distance_km", "") or "").strip()
         max_distance_km = None
         if max_distance_raw != "":
@@ -899,10 +1004,7 @@ def jobs_list():
             except ValueError:
                 max_distance_km = None
 
-        # Checkbox: afstand is niet van toepassing
         ignore_distance = request.args.get("ignore_distance") == "1"
-
-        # Checkbox: zelfde land
         same_country_only = request.args.get("same_country_only") == "1"
 
         # 3. Consultant profiel & skills / locatie
@@ -915,8 +1017,14 @@ def jobs_list():
         if consultant_profile:
             consultant_skill_ids = {s.id for s in consultant_profile.skills}
 
-        consultant_lat = getattr(consultant_profile, "latitude", None) if consultant_profile else None
-        consultant_lon = getattr(consultant_profile, "longitude", None) if consultant_profile else None
+        consultant_lat = (
+            getattr(consultant_profile, "latitude", None) if consultant_profile else None
+        )
+        consultant_lon = (
+            getattr(consultant_profile, "longitude", None)
+            if consultant_profile
+            else None
+        )
         consultant_country = (
             (consultant_profile.country or "").strip().lower()
             if consultant_profile and consultant_profile.country
@@ -930,41 +1038,53 @@ def jobs_list():
             .filter(JobPost.is_active == True)
         )
 
+        # 🔹 Contract type moet ALTIJD filteren (ook in relevance-modus)
+        if contract_type:
+            query = query.filter(JobPost.contract_type == contract_type)
 
+        # 🔹 Overige manual filters alleen in 'title'/manual mode
         if sort_by != "relevance":
             if city:
                 query = query.filter(JobPost.location_city.ilike(f"%{city}%"))
             if country:
                 query = query.filter(JobPost.country.ilike(f"%{country}%"))
-            if contract_type:
-                query = query.filter(JobPost.contract_type == contract_type)
             if query_skills:
                 for skill_id in query_skills:
                     query = query.filter(JobPost.skills.any(Skill.id == skill_id))
 
         jobs = query.all()
 
-        # 🔹 4b. LOCATIE-FILTER toepassen (afstand + zelfde land)
+        # Locatie-filter (afstand + zelfde land)
         filtered_jobs = []
         for job in jobs:
             company = job.company
 
-            # Zelfde land (indien aangevinkt én consultant country gekend)
+            # Zelfde land
             if same_country_only and consultant_country:
-                job_country = (job.country or (company.country if company else "") or "").strip().lower()
+                job_country = (
+                    job.country
+                    or (company.country if company else "")
+                    or ""
+                ).strip().lower()
                 if job_country and job_country != consultant_country:
-                    continue  # ander land → skip
+                    continue
 
-            # Afstand (als slider > 0 én NIET ignore_distance én consultant heeft locatie)
-            if (not ignore_distance) and max_distance_km is not None and consultant_lat is not None and consultant_lon is not None:
+            # Afstand
+            if (
+                not ignore_distance
+                and max_distance_km is not None
+                and consultant_lat is not None
+                and consultant_lon is not None
+            ):
                 comp_lat = getattr(company, "latitude", None) if company else None
                 comp_lon = getattr(company, "longitude", None) if company else None
 
-                # geen locatie op company → buiten filter
                 if comp_lat is None or comp_lon is None:
                     continue
 
-                distance = haversine_km(consultant_lat, consultant_lon, comp_lat, comp_lon)
+                distance = haversine_km(
+                    consultant_lat, consultant_lon, comp_lat, comp_lon
+                )
                 if distance is None or distance > max_distance_km:
                     continue
 
@@ -972,19 +1092,23 @@ def jobs_list():
 
         jobs = filtered_jobs
 
-        # 5. UNLOCK STATUS OPHALEN (zoals vroeger)
+        # 5. UNLOCK STATUS OPHALEN
         job_ids_unlocked_by_user = set()
         if user and user.role == UserRole.consultant:
-            unlocked_jobs = db.query(Unlock.target_id).filter(
-                Unlock.user_id == user.id,
-                Unlock.target_type == UnlockTarget.job
-            ).all()
+            unlocked_jobs = (
+                db.query(Unlock.target_id)
+                .filter(
+                    Unlock.user_id == user.id,
+                    Unlock.target_type == UnlockTarget.job,
+                )
+                .all()
+            )
             job_ids_unlocked_by_user = {row[0] for row in unlocked_jobs}
 
         for job in jobs:
             job.is_unlocked_for_me = job.id in job_ids_unlocked_by_user
 
-        # 6. Sortering & Relevantie Berekening (LOCATIE NIET MEER IN SCORE)
+        # 6. Sortering & Relevantie Berekening
         if sort_by == "relevance":
             now = datetime.now(timezone.utc)
             job_ids = [j.id for j in jobs]
@@ -1004,7 +1128,6 @@ def jobs_list():
 
             MAX_UNLOCKS = 50
 
-            # Nieuwe wegingen – locatie niet in deze score
             SKILL_WEIGHT = 0.50
             TEXT_WEIGHT = 0.20
             RECENCY_WEIGHT = 0.20
@@ -1097,8 +1220,10 @@ def jobs_list():
         all_skills = db.query(Skill).order_by(Skill.name).all()
 
         possible_contract_types = [
-            ("Freelance", _("Freelance")), ("Full-time", _("Full-time")),
-            ("Part-time", _("Part-time")), ("Project-based", _("Project-based")),
+            ("Freelance", _("Freelance")),
+            ("Full-time", _("Full-time")),
+            ("Part-time", _("Part-time")),
+            ("Project-based", _("Project-based")),
         ]
 
         return render_template(
@@ -1109,7 +1234,12 @@ def jobs_list():
             sort_by=sort_by,
             possible_contract_types=possible_contract_types,
             current_contract_type=contract_type,
+            simple_search=False,
+            show_mode_selector=True,
+            page_title=_("Available jobs"),
+            UserRole=UserRole,
         )
+
 
 
 @main.route("/jobs/<int:job_id>", methods=["GET"])
@@ -1126,11 +1256,11 @@ def job_detail(job_id):
 
         is_owner = user and company_posting and user.id == company_posting.user_id
 
-        # 🔒 Als job ingevuld/inactief is: alleen eigenaar mag de detailpagina nog zien
+        # Als job ingevuld/inactief is: alleen eigenaar mag de detailpagina nog zien
         if not job.is_active and not is_owner:
             flash(_("This job is no longer available."))
             return redirect(url_for("main.jobs_list"))
-        
+
         is_unlocked_status = False
 
         if user:
@@ -1143,7 +1273,7 @@ def job_detail(job_id):
             company=company_posting,
             UserRole=UserRole,
             is_owner=is_owner,
-            is_unlocked=is_unlocked_status
+            is_unlocked=is_unlocked_status,
         )
 
 
@@ -1181,7 +1311,11 @@ def job_new():
             )
 
             if selected_skill_ids:
-                selected_skills = db.query(Skill).filter(Skill.id.in_(selected_skill_ids)).all()
+                selected_skills = (
+                    db.query(Skill)
+                    .filter(Skill.id.in_(selected_skill_ids))
+                    .all()
+                )
                 job.skills = selected_skills
 
             db.add(job)
@@ -1218,7 +1352,11 @@ def job_edit(job_id):
             job.contract_type = request.form.get("contract_type")
 
             selected_skill_ids = [int(x) for x in request.form.getlist("skills")]
-            job.skills = db.query(Skill).filter(Skill.id.in_(selected_skill_ids)).all()
+            job.skills = (
+                db.query(Skill).filter(Skill.id.in_(selected_skill_ids)).all()
+                if selected_skill_ids
+                else []
+            )
 
             db.commit()
             flash(_("Job updated!"))
@@ -1248,6 +1386,7 @@ def job_delete(job_id):
         flash(_("Job deleted"))
         return redirect(url_for("main.jobs_list"))
 
+
 # ------------------ ADMIN DECORATOR ------------------
 
 def admin_required(f):
@@ -1261,6 +1400,7 @@ def admin_required(f):
             return redirect(url_for("main.dashboard"))
 
         return f(*args, **kwargs)
+
     return decorated_function
 
 
@@ -1279,7 +1419,7 @@ def admin_collaborations():
 
         return render_template(
             "admin_collaborations.html",
-            collaborations=collaborations
+            collaborations=collaborations,
         )
 
 
@@ -1290,3 +1430,4 @@ def admin_collaborations():
 @admin_required
 def admin_dashboard():
     return render_template("admin_dashboard.html")
+

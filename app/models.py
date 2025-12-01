@@ -60,6 +60,7 @@ class ConsultantProfile(Base):
     availability = Column(Boolean, nullable=False, default=True)
     rate_value = Column(DECIMAL(10, 2))
     created_at = Column(TIMESTAMP, nullable=False, server_default=func.now())
+    years_experience = Column(Integer, nullable=True)
 
     profile_image = Column(String(300), nullable=True)
     cv_document = Column(String(300), nullable=True)

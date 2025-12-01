@@ -2,65 +2,179 @@
 {% block title %}Edit Company Profile{% endblock %}
 
 {% block content %}
-    <h1>Edit company profile</h1>
+<h1>Edit company profile</h1>
 
-    <form method="post">
-        
-        <label style="display:block; margin-bottom: 10px;">
-            Company name:
-            <input
-                type="text"
-                name="company_name"
-                value="{{ company.company_name_masked }}"
-                required
-            >
-        </label>
+<form method="post" class="company-form">
 
-        <label style="display:block; margin-bottom: 10px;">
-            City:
-            <input
-                type="text"
-                name="location_city"
-                value="{{ company.location_city or '' }}"
-                style="width: 300px;"
-            >
-        </label>
+    <!-- COMPANY NAME -->
+    <label class="field-label">
+        Company name:
+        <input
+            type="text"
+            id="company_name"
+            name="company_name"
+            value="{{ company.company_name_masked or '' }}"
+            required
+        >
+    </label>
 
-        <label style="display:block; margin-bottom: 10px;">
-            Country:
-            <input
-                type="text"
-                name="country"
-                value="{{ company.country or '' }}"
-                style="width: 300px;"
-            >
-        </label>
-        
-        <hr style="margin: 20px 0;">
-        <h3>Contact information (shown when unlocked)</h3>
+    <!-- CITY -->
+    <label class="field-label">
+        City:
+        <input
+            type="text"
+            id="location_city"
+            name="location_city"
+            value="{{ company.location_city or '' }}"
+        >
+    </label>
 
-        <label style="display:block; margin-bottom: 10px;">
-            Email address:
-            <input
-                type="email"
-                name="contact_email"
-                value="{{ company.contact_email or '' }}"
-                style="width: 300px;"
-            >
-        </label>
+    <!-- COUNTRY -->
+    <label class="field-label">
+        Country:
+        <input
+            type="text"
+            id="country"
+            name="country"
+            value="{{ company.country or '' }}"
+        >
+    </label>
 
-        <label style="display:block; margin-bottom: 10px;">
-            Phone number:
-            <input
-                type="tel"
-                name="phone_number"
-                value="{{ company.phone_number or '' }}"
-                style="width: 300px;"
-            >
-        </label>
-        <hr style="margin: 20px 0;">
+    <hr>
 
+    <h3>Contact information (shown when unlocked)</h3>
 
-        <button class="btn" type="submit">Save changes</button>
-    </form>
+    <!-- EMAIL -->
+    <label class="field-label">
+        Email address:
+        <input
+            type="email"
+            id="contact_email"
+            name="contact_email"
+            value="{{ company.contact_email or '' }}"
+        >
+    </label>
+
+    <!-- PHONE -->
+    <label class="field-label">
+        Phone number:
+        <input
+            type="tel"
+            id="phone_number"
+            name="phone_number"
+            value="{{ company.phone_number or '' }}"
+        >
+    </label>
+
+    <hr>
+
+    <button class="btn" type="submit">Save changes</button>
+</form>
+
+<!-- FIELD HELPER POPUP -->
+<div id="field-helper" class="field-helper">
+    <div class="field-helper-title">
+        <span id="field-helper-label">Field guide</span>
+    </div>
+    <div id="field-helper-text" class="field-helper-text">
+        Click a field to get instructions.
+    </div>
+</div>
+
+<style>
+.company-form {
+    max-width: 600px;
+}
+
+.field-label {
+    display: block;
+    margin-bottom: 16px;
+    font-weight: 600;
+}
+
+.field-label input {
+    margin-top: 6px;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Helper popup – zelfde stijl als bij consultant */
+.field-helper {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    max-width: 350px;
+    background: #ffffff;
+    color: #1f2937;
+    border-radius: 12px;
+    padding: 14px 16px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+    border: 2px solid #2563eb;
+    animation: fadeIn 0.3s ease-out;
+    z-index: 2000;
+}
+
+.field-helper-title {
+    font-weight: 800;
+    color: #2563eb;
+    margin-bottom: 6px;
+    font-size: 1rem;
+}
+
+.field-helper-text {
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 600px) {
+    .field-helper {
+        left: 10px;
+        right: 10px;
+        bottom: 10px;
+        max-width: none;
+    }
+}
+</style>
+
+<script>
+(function () {
+    const helperText = document.getElementById("field-helper-text");
+    const helperLabel = document.getElementById("field-helper-label");
+
+    function guide(label, text) {
+        helperLabel.textContent = label;
+        helperText.textContent = text;
+    }
+
+    function bind(fieldId, label, text) {
+        const field = document.getElementById(fieldId);
+        if (!field) return;
+        field.addEventListener("focus", () => guide(label, text));
+    }
+
+    bind("company_name", "Company name",
+        "Use your official company or brand name. This is shown to consultants once they unlock your jobs.");
+
+    bind("location_city", "City",
+        "Enter the city where your main office or hiring location is. This is used for distance and location-based matching.");
+
+    bind("country", "Country",
+        "Enter the country in which this office or hiring location is based. This helps consultants filter and match.");
+
+    bind("contact_email", "Email address",
+        "This email is shared with consultants after they unlock your job posts. Use an inbox that is actively monitored.");
+
+    bind("phone_number", "Phone number",
+        "A direct phone number can increase trust and response speed once you start collaborating, will be made available once you are unlocked by a consultant");
+})();
+</script>
+
 {% endblock %}

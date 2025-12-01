@@ -68,6 +68,20 @@
             background: #e5e7eb;
         }
 
+        /* right-hand side: logo + login/logout */
+        .nav-right {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-logo {
+            height: 26px;
+            width: auto;
+            display: block;
+        }
+
         main {
             max-width: 900px;
             margin: 24px auto;
@@ -124,6 +138,7 @@
             text-decoration: underline;
             color: var(--blue);
         }
+
         @media (max-width: 600px) {
 
             nav {
@@ -178,6 +193,7 @@
                 display: block;
                 text-align: center;
             }
+
             .mode-selector-container {
                 display: flex;
                 flex-direction: column;
@@ -189,6 +205,16 @@
                 text-align: center;
                 display: block;
             }
+
+            .nav-right {
+                width: 100%;
+                justify-content: flex-end;
+                margin-left: 0;
+            }
+
+            .nav-logo {
+                height: 22px;
+            }
         }
         
     </style>
@@ -197,36 +223,42 @@
 <body>
 
     <header>
-    <nav>
-        <a href="{{ url_for('main.index') }}">{{ _("Home") }}</a>
+        <nav>
+            <a href="{{ url_for('main.index') }}">{{ _("Home") }}</a>
 
-        {# 👇 COMPANY: alleen Consultants tonen (en optioneel eigen vacatures) #}
-        {% if session.get('role') == 'company' %}
-            <a href="{{ url_for('main.consultants_list') }}">{{ _("Consultants") }}</a>
-            {# Als je later ook een link naar je eigen jobs wil: #}
-            {# <a href="{{ url_for('main.company_jobs_list') }}">{{ _("My Jobs") }}</a> #}
-        {% endif %}
+            {# COMPANY: only show Consultants (and optionally own jobs) #}
+            {% if session.get('role') == 'company' %}
+                <a href="{{ url_for('main.consultants_list') }}">{{ _("Consultants") }}</a>
+                {# <a href="{{ url_for('main.company_jobs_list') }}">{{ _("My Jobs") }}</a> #}
+            {% endif %}
 
-        {# 👇 CONSULTANT: alleen Jobs tonen #}
-        {% if session.get('role') == 'consultant' %}
-            <a href="{{ url_for('main.jobs_list') }}">{{ _("Jobs") }}</a>
-        {% endif %}
+            {# CONSULTANT: only show Jobs #}
+            {% if session.get('role') == 'consultant' %}
+                <a href="{{ url_for('main.jobs_list') }}">{{ _("Jobs") }}</a>
+            {% endif %}
 
-        <a href="{{ url_for('main.dashboard') }}">{{ _("Dashboard") }}</a>
+            <a href="{{ url_for('main.dashboard') }}">{{ _("Dashboard") }}</a>
 
-        {% if session.get('user_id') %}
-            <form action="{{ url_for('main.logout') }}" method="post" style="margin-left:auto; display:inline;">
-                <button class="btn" type="submit">{{ _("Logout") }}</button>
-            </form>
-        {% else %}
-            <a class="btn" style="margin-left:auto;" href="{{ url_for('main.login') }}">{{ _("Login") }}</a>
-        {% endif %}
+            {% if session.get("role") == "admin" %}
+                <a href="{{ url_for('main.admin_dashboard') }}">Admin</a>
+            {% endif %}
 
-        {% if session.get("role") == "admin" %}
-            <a href="{{ url_for('main.admin_dashboard') }}">Admin</a>
-        {% endif %}
+            <div class="nav-right">
+                <img
+                    src="{{ url_for('static', filename='logo.png') }}"
+                    alt="IConsult logo"
+                    class="nav-logo"
+                >
 
-    </nav>
+                {% if session.get('user_id') %}
+                    <form action="{{ url_for('main.logout') }}" method="post" style="display:inline;">
+                        <button class="btn" type="submit">{{ _("Logout") }}</button>
+                    </form>
+                {% else %}
+                    <a class="btn" href="{{ url_for('main.login') }}">{{ _("Login") }}</a>
+                {% endif %}
+            </div>
+        </nav>
     </header>
 
     <main>

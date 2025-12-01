@@ -1,6 +1,331 @@
 {% extends "base.html" %}
-{% block title %}{{ _("Home") }}{% endblock %}
+{% block title %}IConsult | Smart matching for consultants and companies{% endblock %}
+
 {% block content %}
-  <h1>{{ _("Home") }}</h1>
-  <p>{{ _("Welcome! Use the navigation above.") }}</p>
+
+<style>
+
+/* Remove padding inherited from base */
+body {
+    padding: 0 !important;
+}
+
+:root {
+    --color-primary: #fbbf24;
+    --color-secondary: #10b981;
+    --color-text: #1f2937;
+    --color-muted: #4b5563;
+    --color-bg-light: #f9fafb;
+}
+
+/* ===== HERO SECTION ===== */
+.hero-section {
+    margin: -20px -20px 0 -20px;
+    position: relative;
+    height: 100vh;
+}
+
+.hero-hero {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+
+    background-image: url("{{ url_for('static', filename='images/nasa-Q1p7bh3SHj8-unsplash.jpg') }}");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    color: #ffffff;
+}
+
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to bottom right,
+        rgba(31, 41, 55, 0.85),
+        rgba(16, 185, 129, 0.5)
+    );
+}
+
+.hero-inner {
+    position: relative;
+    z-index: 2;
+    padding: 50px 10%;
+    max-width: 700px;
+    margin-top: auto;
+    margin-bottom: 10vh;
+}
+
+/* ---- LOGO OP DE FOTO ---- */
+.hero-logo {
+    height: 90px;                /* Grootte logo */
+    width: auto;
+    margin-bottom: 20px;
+    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.7));  
+}
+
+/* SEO-hidden H1 (screenreaders only) */
+.hero-title-hidden {
+    position:absolute;
+    left:-9999px;
+    top:auto;
+    width:1px;
+    height:1px;
+    overflow:hidden;
+}
+
+.hero-subtitle {
+    font-size: 1.25rem;
+    margin-bottom: 25px;
+    line-height: 1.6;
+    max-width: 600px;
+    opacity: 0.95;
+    font-weight: 300;
+}
+
+/* CTA buttons */
+.hero-cta-btn,
+.hero-secondary-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 14px 30px;
+    border-radius: 999px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.hero-cta-btn {
+    background: var(--color-primary);
+    color: var(--color-text);
+    box-shadow: 0 10px 25px rgba(251, 191, 36, 0.6);
+}
+
+.hero-cta-btn:hover {
+    background: #f59e0b;
+    transform: translateY(-2px);
+}
+
+.hero-secondary-btn {
+    background: var(--color-secondary);
+    color: #fff;
+    box-shadow: 0 8px 20px rgba(16,185,129,0.4);
+}
+
+.hero-secondary-btn:hover {
+    background:#059669;
+    transform: translateY(-2px);
+}
+
+.hero-scroll-hint {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    font-size: 1rem;
+    color: #ffffff;
+    z-index: 2;
+}
+
+/* ===== CONTENT SECTIONS ===== */
+.isc-section {
+    padding: 60px 0 90px 0;
+    background-color: var(--color-bg-light);
+}
+
+.isc-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 25px;
+}
+
+.isc-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 15px;
+    color: var(--color-text);
+    border-bottom: 4px solid var(--color-primary);
+    display: inline-block;
+}
+
+.isc-intro {
+    max-width: 800px;
+    color: var(--color-muted);
+    font-size: 1.1rem;
+    margin-bottom: 30px;
+}
+
+.isc-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 25px;
+}
+
+.isc-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid #e5e7eb;
+    transition: 0.3s;
+    box-shadow: 0 6px 15px rgba(15,23,42,0.1);
+}
+.isc-card:hover {
+    transform: translateY(-5px);
+}
+
+.isc-summary {
+    background: #eff6ff;
+    border-radius: 16px;
+    padding: 25px;
+    border: 2px solid var(--color-secondary);
+    margin-top: 20px;
+}
+
+@media (max-width: 900px) {
+    .isc-grid {
+        grid-template-columns: repeat(2,1fr);
+    }
+}
+@media (max-width: 600px) {
+    .isc-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+</style>
+
+<!-- ========================= HERO SECTION ========================= -->
+<section class="hero-section">
+    <div class="hero-hero">
+        <div class="hero-overlay"></div>
+
+        <div class="hero-inner">
+
+            <!-- Logo op foto -->
+            <img src="{{ url_for('static', filename='logo.png') }}" class="hero-logo" alt="IConsult">
+
+            <!-- Verborgen titel (SEO) -->
+            <h1 class="hero-title-hidden">IConsult</h1>
+
+            <p class="hero-subtitle">
+                Smart matching between expert consultants and ambitious companies.
+                Achieve your goals faster with a perfect match every time.
+            </p>
+
+            {% if not session.get("user_id") %}
+
+                <!-- NIET INGLOGD -->
+                <a href="{{ url_for('main.login') }}" class="hero-cta-btn">
+                    Start your IConsult journey → 
+                </a>
+
+            {% else %}
+
+                <!-- WEL INGLOGD -->
+                {% if session.get('role') == 'consultant' %}
+                    <a href="{{ url_for('main.jobs_list') }}" class="hero-secondary-btn">
+                        Search Jobs →
+                    </a>
+                {% elif session.get('role') == 'company' %}
+                    <a href="{{ url_for('main.consultants_list') }}" class="hero-secondary-btn">
+                        Search Consultants →
+                    </a>
+                {% endif %}
+
+            {% endif %}
+        </div>
+
+        <div class="hero-scroll-hint">
+            Scroll down to learn how the IConsult Match works<br>
+            <i class="fas fa-chevron-down"></i>
+        </div>
+    </div>
+</section>
+
+<!-- ========================= HOW IT WORKS ========================= -->
+<section class="isc-section" id="isc-how-it-works">
+    <div class="isc-container">
+
+        <h2 class="isc-title">How the IConsult Match works</h2>
+
+        <p class="isc-intro">
+            IConsult uses a transparent scoring system to match consultants and jobs.
+            Each result gets a score based on four weighted factors.
+        </p>
+
+        <div class="isc-grid">
+
+            <article class="isc-card">
+                <h3>⭐ Skills match (50%)</h3>
+                <p>We compare the required job skills with the consultant profile.</p>
+            </article>
+
+            <article class="isc-card">
+                <h3>🔍 Search relevance (20%)</h3>
+                <p>Your search terms boost matches that contain your keywords.</p>
+            </article>
+
+            <article class="isc-card">
+                <h3>⏰ Recency (20%)</h3>
+                <p>Newer profiles and jobs score higher.</p>
+            </article>
+
+            <article class="isc-card">
+                <h3>🔥 Popularity (10%)</h3>
+                <p>More unlocks = small visibility boost.</p>
+            </article>
+
+        </div>
+
+        <div class="isc-summary">
+            <h3>The IConsult score</h3>
+            <p>The final score is computed from all four factors shown above.</p>
+        </div>
+
+    </div>
+</section>
+
+<!-- ========================= UNLOCKING SECTION ========================= -->
+<section class="isc-section" id="isc-unlocking">
+    <div class="isc-container">
+
+        <h2 class="isc-title">The IConsult unlocking principle</h2>
+
+        <p class="isc-intro">
+            Consultants and companies unlock each other based on match preference.
+        </p>
+
+        <div class="isc-grid">
+
+            <article class="isc-card">
+                <h3>🙈 Privacy by default</h3>
+                <p>Initials only until unlocked — for both sides.</p>
+            </article>
+
+            <article class="isc-card">
+                <h3>🔓 You choose who to unlock</h3>
+                <p>Reveal full details only when you decide.</p>
+            </article>
+
+            <article class="isc-card">
+                <h3>🤝 Two-sided matching</h3>
+                <p>Both sides unlock each other — equally.</p>
+            </article>
+
+            <article class="isc-card">
+                <h3>🌟 Meaningful connections</h3>
+                <p>Unlocked profiles get higher visibility.</p>
+            </article>
+
+        </div>
+
+    </div>
+</section>
+
 {% endblock %}

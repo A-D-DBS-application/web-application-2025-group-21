@@ -43,6 +43,10 @@
         {% endif %}
 
         <p><strong>Name:</strong> {{ profile.display_name_masked }}</p>
+        {% if profile.years_experience is not none %}
+        <p><strong>Experience:</strong> {{ profile.years_experience }} year{% if profile.years_experience != 1 %}s{% endif %}</p>
+        {% endif %}
+
         <p><strong>Location:</strong> {{ profile.location_city }} , {{ profile.country }}</p>
         <p><strong>Headline:</strong> {{ profile.headline or "No headline" }}</p>
 

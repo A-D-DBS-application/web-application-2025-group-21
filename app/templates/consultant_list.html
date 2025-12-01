@@ -1,137 +1,127 @@
 {% extends "base.html" %}
-{% block title %}Consultants | Lijst{% endblock %}
+{% block title %}Consultants | List{% endblock %}
 {% block content %}
 
+{# Config variables #}
+{% set page_title = page_title if page_title is defined else "Available consultants" %}
 {% set current_sort = sort_by if sort_by is defined else 'relevance' %}
-{% set show_mode_selector = show_mode_selector if show_mode_selector is defined else True %}
 
-<h1 class="page-title">Consultants</h1>
+<h1 class="page-title">{{ page_title }}</h1>
 
-{% if show_mode_selector %}
 <div class="mode-selector-container">
     <h2 class="h5">Choose your search mode:</h2>
-   
+
     <a href="{{ url_for('main.consultants_list', sort_by='relevance') }}"
        class="mode-btn {% if current_sort == 'relevance' %}active-mode{% else %}inactive-mode{% endif %}">
-        🧠 IConsult Match (Best Relevance)
+        🧠 IConsult Match (Best relevance)
     </a>
 
     <a href="{{ url_for('main.consultants_list', sort_by='title') }}"
        class="mode-btn {% if current_sort != 'relevance' %}active-mode{% else %}inactive-mode{% endif %}">
-        🔧 Manual Filter & Sorting
+        🔧 Manual filter & sorting
     </a>
 </div>
-{% endif %}
 
-<form method="GET" action="{{ url_for('main.consultants_list') }}" class="filter-form">
+<form method="GET" action="{{ url_for('main.consultants_list') }} " class="filter-form">
     <input type="hidden" name="sort_by" value="{{ current_sort }}">
 
-    {# 🔹 LOCATIE-FILTER BLOK (altijd zichtbaar, bovenaan) #}
+    {# distance slider value #}
     {% set current_distance = request.args.get('max_distance_km', '') %}
     {% if current_distance == '' %}
         {% set current_distance = 0 %}
     {% endif %}
 
-    <div class="location-filter-block">
-        <h3 class="location-filter-title">
-            <i class="fas fa-map-marker-alt"></i> Location
-        </h3>
-        <div class="location-controls">
-            <div class="location-range-wrapper">
-                <label for="max_distance_km" class="location-label">
-                    Maximum distance from your company:
-                </label>
-                <input type="range"
-                       id="max_distance_km"
-                       name="max_distance_km"
-                       min="0" max="400" step="10"
-                       value="{{ current_distance }}">
-                <span id="distance-display" class="distance-display">
-                    {% if current_distance|int == 0 %}
-                        No distance filter
-                    {% else %}
-                        {{ current_distance }} km
-                    {% endif %}
-                </span>
-            </div>
+    {# TOP ROW: search + min_experience + distance #}
+    <div class="top-filter-row">
+        <div class="top-filter-left">
+            <label class="top-label" for="q">Search</label>
+            <input type="text" id="q" name="q"
+                   placeholder="Search by name, headline, location..."
+                   value="{{ request.args.get('q', '') }}">
+        </div>
+
+        <div class="top-filter-middle">
+            <label class="top-label" for="min_experience">Min. years of experience</label>
+            <input type="number"
+                   id="min_experience"
+                   name="min_experience"
+                   min="0"
+                   class="form-control-select"
+                   value="{{ request.args.get('min_experience', '') }}">
+        </div>
+
+        <div class="top-filter-right">
+            <label class="top-label" for="max_distance_km">
+                Maximum distance
+            </label>
+            <input type="range"
+                   id="max_distance_km"
+                   name="max_distance_km"
+                   min="0" max="400" step="10"
+                   value="{{ current_distance }}">
+            <span id="distance-display" class="distance-display">
+                {% if current_distance|int == 0 %}
+                    No distance filter
+                {% else %}
+                    {{ current_distance }} km
+                {% endif %}
+            </span>
 
             <div class="location-checkboxes">
                 <label class="checkbox-inline">
-                    <input type="checkbox" name="ignore_distance" value="1"
-                        {% if request.args.get('ignore_distance') == '1' %}checked{% endif %}>
-                    Distance not relevant
-                </label>
-
-                <label class="checkbox-inline">
                     <input type="checkbox" name="same_country_only" value="1"
-                        {% if request.args.get('same_country_only') == '1' %}checked{% endif %}>
+                           {% if request.args.get('same_country_only') == '1' %}checked{% endif %}>
                     Same country only
                 </label>
             </div>
         </div>
     </div>
 
+    {# LOWER FILTERS – different per mode #}
     {% if current_sort != 'relevance' %}
         <p class="form-instruction">
             Use the fields below to filter manually.
-            Results are sorted by Name (A–Z).
+            Results are sorted alphabetically by consultant.
         </p>
 
         <div class="input-grid manual-filter-grid">
-            <input type="text" name="q" placeholder="Zoek op naam/headline"
-                   value="{{ request.args.get('q', '') }}">
-            <input type="text" name="city" placeholder="Stad"
+            <input type="text" name="city" placeholder="City"
                    value="{{ request.args.get('city', '') }}">
-            <input type="text" name="country" placeholder="Land"
+            <input type="text" name="country" placeholder="Country"
                    value="{{ request.args.get('country', '') }}">
-
+            <div></div>
         </div>
 
         <div class="skills-filter">
             <label class="skills-label">
-                Skills (filter – select the required skills):
+                Skills (filter – check required skills):
             </label>
             <div class="skills-checkboxes">
                 {% for skill in skills %}
                     <label class="skill-label">
                         <input type="checkbox" name="skills" value="{{ skill.id }}"
                             {% if request.args.getlist('skills') and
-                                  (skill.id|string in request.args.getlist('skills')) %}
-                                  checked
-                            {% endif %}>
+                                  (skill.id|string in request.args.getlist('skills')) %}checked{% endif %}>
                         {{ skill.name }}
                     </label>
                 {% endfor %}
             </div>
         </div>
 
-        <button type="submit" class="btn btn-primary apply-btn">Filters Toepassen</button>
+        <button type="submit" class="btn btn-primary apply-btn">Apply filters</button>
         <a href="{{ url_for('main.consultants_list', sort_by='title') }}"
-           class="btn btn-secondary reset-btn">Reset Filters</a>
+           class="btn btn-secondary reset-btn">Reset filters</a>
 
     {% else %}
-        <p class="alert alert-info">
-            In IConsult mode, the score is calculated based on your latest job posting
-            (skills, search term, recency and popularity).
-        </p>
-
-        <div class="relevance-search-block">
-            <label class="relevance-label">
-                Search term (included in score calculation):
-            </label>
-            <div class="input-group relevance-input-group">
-                <input type="text" name="q"
-                       placeholder="Bijvoorbeeld: .NET, data engineer, scrum..."
-                       value="{{ request.args.get('q', '') }}">
-                <button type="submit" class="btn btn-primary relevance-button">
-                    🔍 Search & Recalculate Score
-                </button>
-            </div>
+        <div class="center-button-row">
+            <button type="submit" class="btn btn-primary center-isc-score-btn">
+                🔍 Calculate IConsult score
+            </button>
         </div>
     {% endif %}
 </form>
 
-<div class="job-grid" style="margin-top: 20px;">
+<div class="consultant-grid" style="margin-top: 20px;">
     {% for c in consultants %}
         {% if current_sort == 'relevance' and c.score is defined %}
             {% set match_score_perc = (c.score * 100) | round(1) %}
@@ -143,51 +133,62 @@
             {% endif %}
         {% endif %}
 
-        <div class="job-card">
-            <div class="job-meta-top">
-                <span class="contract-type-tag">
-                    <i class="fas fa-user-tie"></i> Consultant
+        {# card gets extra class if consultant is unlocked #}
+        <div class="consultant-card {% if c.is_unlocked_for_me %}unlocked-card{% endif %}">
+            <div class="consultant-meta-top">
+                <span class="consultant-name">
+                    <a href="{{ url_for('main.consultant_detail', profile_id=c.id) }}">
+                        {% if c.is_unlocked_for_me %}
+                            {{ c.display_name_masked or c.user.username }}
+                        {% else %}
+                            {{ c.initials }}
+                        {% endif %}
+                    </a>
                 </span>
 
                 {% if c.location_city or c.country %}
-                    <span class="job-location">
+                    <span class="consultant-location">
                         <i class="fas fa-map-marker-alt"></i>
                         {{ c.location_city }}{% if c.location_city and c.country %}, {% endif %}{{ c.country }}
                     </span>
                 {% endif %}
             </div>
 
-            {# 🔴 ENIGE AANPASSING: naam vervangen door initialen tenzij eigenaar of unlocked #}
-            <h3 class="job-title-link">
-                <a href="{{ url_for('main.consultant_detail', profile_id=c.id) }}">
-                    {% if user and user.id == c.user_id %}
-                        {{ c.display_name_masked }}
-                    {% elif c.is_unlocked_for_me %}
-                        {{ c.display_name_masked }}
-                    {% else %}
-                        {{ c.initials }}
-                    {% endif %}
-                </a>
-            </h3>
-
             {% if c.headline %}
-            <p class="company-name">
-                {{ c.headline }}
-            </p>
+                <p class="consultant-headline">
+                    {{ c.headline }}
+                </p>
             {% endif %}
 
-            <div class="required-skills-summary">
+            <div class="consultant-meta-second">
+                <span class="experience-tag">
+                    <i class="fas fa-briefcase"></i>
+                    {% if c.years_experience is not none %}
+                        {{ c.years_experience }} year{% if c.years_experience != 1 %}s{% endif %} experience
+                    {% else %}
+                        Experience not specified
+                    {% endif %}
+                </span>
+
+                {% if c.is_unlocked_for_me %}
+                    <span class="unlock-badge unlock-yes">
+                        <i class="fas fa-unlock"></i> Contact unlocked
+                    </span>
+                {% endif %}
+            </div>
+
+            <div class="skills-summary">
                 <label class="skills-label-small">
                     <i class="fas fa-tools"></i> Skills:
                 </label>
                 <div class="skill-tags-wrapper">
-                    {% for skill in c.skills[:3] %}
+                    {% for skill in c.skills[:5] %}
                         <span class="required-skill-tag">{{ skill.name }}</span>
                     {% endfor %}
-                    {% if c.skills|length > 3 %}
+                    {% if c.skills|length > 5 %}
                         <span class="required-skill-tag more-skills">
                             <i class="fas fa-plus-circle"></i>
-                            {{ c.skills|length - 3 }} more
+                            {{ c.skills|length - 5 }} more
                         </span>
                     {% endif %}
                 </div>
@@ -197,66 +198,62 @@
                 <div class="score-summary">
                     <span class="relevance-badge {{ match_class }}">
                         <i class="fas fa-check-circle"></i>
-                        Match: **{{ match_score_perc }}%**
+                        Match: {{ match_score_perc }}%
                     </span>
 
                     <details class="breakdown-details">
                         <summary>
-                            <i class="fas fa-chart-bar"></i> Score Breakdown
+                            <i class="fas fa-chart-bar"></i> Score breakdown
                         </summary>
                         <div class="score-breakdown">
                             {% set total_score_perc = (c.score * 100) %}
 
                             <div class="bar-item">
                                 <span class="bar-label">
-                                    <i class="fas fa-star"></i> Skills (50%):
+                                    <i class="fas fa-star"></i> Skills:
                                 </span>
                                 {% set score_perc = (c.score_breakdown.skill_factor * 100) %}
                                 <div class="progress-bar-container">
                                     <div class="progress-bar skill-bar"
                                          style="width: {{ score_perc | round(0) }}%;"></div>
                                 </div>
-                                <span class="bar-value">{{ score_perc | round(0) }}%</span>
                             </div>
 
                             <div class="bar-item">
                                 <span class="bar-label">
-                                    <i class="fas fa-search"></i> Search Term (20%):
+                                    <i class="fas fa-search"></i> Search term:
                                 </span>
                                 {% set score_perc = (c.score_breakdown.text_factor * 100) %}
                                 <div class="progress-bar-container">
                                     <div class="progress-bar text-bar"
                                          style="width: {{ score_perc | round(0) }}%;"></div>
                                 </div>
-                                <span class="bar-value">{{ score_perc | round(0) }}%</span>
                             </div>
 
                             <div class="bar-item">
                                 <span class="bar-label">
-                                    <i class="fas fa-clock"></i> Recency (20%):
+                                    <i class="fas fa-clock"></i> Recency:
                                 </span>
                                 {% set score_perc = (c.score_breakdown.recency_factor * 100) %}
                                 <div class="progress-bar-container">
                                     <div class="progress-bar recency-bar"
                                          style="width: {{ score_perc | round(0) }}%;"></div>
                                 </div>
-                                <span class="bar-value">{{ score_perc | round(0) }}%</span>
                             </div>
 
                             <div class="bar-item">
                                 <span class="bar-label">
-                                    <i class="fas fa-fire"></i> Popularity (10%):
+                                    <i class="fas fa-fire"></i> Popularity:
                                 </span>
                                 {% set score_perc = (c.score_breakdown.popularity_factor * 100) %}
                                 <div class="progress-bar-container">
                                     <div class="progress-bar popularity-bar"
                                          style="width: {{ score_perc | round(0) }}%;"></div>
                                 </div>
-                                <span class="bar-value">{{ score_perc | round(0) }}%</span>
                             </div>
 
                             <p class="score-total">
-                                Totaal: {{ total_score_perc | round(1) }}%
+                                Total: {{ total_score_perc | round(1) }}%
                             </p>
                         </div>
                     </details>
@@ -265,7 +262,7 @@
 
             <a class="btn btn-primary-card"
                href="{{ url_for('main.consultant_detail', profile_id=c.id) }}">
-                View profile
+                View consultant
             </a>
         </div>
     {% endfor %}
@@ -273,13 +270,11 @@
 
 {% if not consultants %}
     <p class="alert alert-warning">
-        No consultants found matching your criteria.
+        No consultants found matching your filters.
     </p>
 {% endif %}
 
 <style>
-/* Zelfde look & feel als job_list.html */
-
 /* --- MATCH BADGES --- */
 .relevance-badge.match-low {
     background: #dc3545 !important;
@@ -306,13 +301,14 @@
     margin-left: 0;
     color: white;
 }
+.relevance-badge i { margin-right: 8px; }
 
-/* SCORE BREAKDOWN */
+/* SCORE BREAKDOWN – shared with jobs */
 .bar-item {
     display: grid;
-    grid-template-columns: 140px 1fr 40px;
+    grid-template-columns: 160px 1fr;
     align-items: center;
-    gap: 5px;
+    gap: 8px;
     margin-bottom: 10px;
 }
 .progress-bar-container {
@@ -334,19 +330,13 @@
 .recency-bar    { background-color: #17a2b8 !important; }
 .popularity-bar { background-color: #6b7280 !important; }
 
-.bar-value {
-    font-weight: 700;
-    text-align: right;
-    font-size: 1.05rem;
-}
-
-/* KAARTEN (zelfde grid als jobs) */
-.job-grid {
+/* CONSULTANT CARDS */
+.consultant-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 25px;
 }
-.job-card {
+.consultant-card {
     background: #ffffff;
     border: 1px solid #dce6f5;
     border-radius: 12px;
@@ -357,92 +347,92 @@
     flex-direction: column;
     align-items: flex-start;
 }
-.job-card:hover {
+.consultant-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 10px 20px rgba(0,0,0,0.12);
 }
-.job-meta-top {
+
+/* unlocked card – light green */
+.unlocked-card {
+    background: #e6ffed;
+    border-color: #a7f3d0;
+}
+
+.consultant-meta-top {
     display: flex;
     justify-content: space-between;
     width: 100%;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
     padding-bottom: 10px;
     border-bottom: 1px solid #f0f4f9;
 }
-.job-location {
+.consultant-name a {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #2b63c6;
+    text-decoration: none;
+}
+.consultant-location {
     font-size: 0.95rem;
     color: #4a6fa1;
     display: flex;
     align-items: center;
     font-weight: 500;
 }
-.job-location i {
+.consultant-location i {
     margin-right: 5px;
     color: #2b63c6;
 }
-.contract-type-tag {
+.consultant-headline {
+    margin: 8px 0 8px 0;
+    font-size: 0.95rem;
+    color: #444;
+}
+.consultant-meta-second {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.experience-tag {
     font-size: 0.9rem;
-    background: #dce6f5;
-    color: #2b63c6;
+    background: #eef3ff;
+    color: #1f2937;
     padding: 5px 10px;
-    border-radius: 6px;
+    border-radius: 14px;
     display: inline-flex;
     align-items: center;
     font-weight: 600;
 }
-.contract-type-tag i { margin-right: 5px; }
+.experience-tag i {
+    margin-right: 6px;
+    color: #2b63c6;
+}
 
-.job-title-link,
-.company-name {
-    width: 100%;
-    text-align: left;
-}
-.job-title-link a {
-    color: #2b63c6 !important;
-    text-decoration: none;
-    font-weight: 800;
-    font-size: 1.5rem;
-    display: block;
-}
-.company-name {
-    font-size: 1.05rem;
-    color: #555;
-    margin-bottom: 15px;
+.unlock-badge {
+    font-size: 0.85rem;
+    padding: 4px 10px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
     font-weight: 600;
-    border-bottom: 1px dashed #e0e0e0;
-    padding-bottom: 15px;
 }
-
-/* Score Summary */
-.score-summary {
-    margin-top: auto;
-    padding-top: 15px;
-    border-top: 1px solid #e0e0e0;
-    margin-bottom: 15px;
-    text-align: left;
-    width: 100%;
+.unlock-badge i {
+    margin-right: 5px;
 }
-.relevance-badge i { margin-right: 8px; font-size: 1.1em; }
-.btn-primary-card {
-    background: #2b63c6;
-    color: white;
-    border: 1px solid #1a4f99;
-    padding: 12px 20px;
-    border-radius: 8px;
-    text-decoration: none;
-    font-weight: 700;
-    margin-top: 10px;
-    text-align: center;
-    transition: background 0.2s;
-    align-self: stretch;
+.unlock-yes {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #34d399;
 }
-.btn-primary-card:hover { background: #1a4f99; }
 
 /* Skills tags */
-.required-skills-summary {
-    margin-bottom: 20px;
+.skills-summary {
+    margin-top: 10px;
+    margin-bottom: 15px;
     border-top: 1px dashed #f0f0f0;
-    padding-top: 15px;
+    padding-top: 10px;
     width: 100%;
 }
 .skills-label-small {
@@ -477,6 +467,30 @@
     border: 1px solid #dce6f5;
     color: #4a6fa1;
 }
+
+/* Score Summary */
+.score-summary {
+    margin-top: auto;
+    padding-top: 15px;
+    border-top: 1px solid #e0e0e0;
+    margin-bottom: 15px;
+    text-align: left;
+    width: 100%;
+}
+.btn-primary-card {
+    background: #2b63c6;
+    color: white;
+    border: 1px solid #1a4f99;
+    padding: 10px 18px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 700;
+    margin-top: 5px;
+    text-align: center;
+    transition: background 0.2s;
+    align-self: stretch;
+}
+.btn-primary-card:hover { background: #1a4f99; }
 
 /* Filter & Mode */
 .page-title { margin-bottom: 20px; }
@@ -529,6 +543,36 @@
     margin-bottom: 15px;
     font-size: 0.95rem;
 }
+
+/* top row grid */
+.top-filter-row {
+    display: grid;
+    grid-template-columns: minmax(200px, 1.5fr) minmax(150px, 0.9fr) minmax(220px, 1.4fr);
+    gap: 20px;
+    margin-bottom: 20px;
+}
+.top-label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+.top-filter-left input[type="text"],
+#min_experience {
+    padding: 12px;
+    border-radius: 8px;
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #dce6f5;
+}
+.top-filter-middle .form-control-select {
+    width: 100%;
+}
+.top-filter-right {
+    display: flex;
+    flex-direction: column;
+}
+
+/* manual grid */
 .manual-filter-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -542,14 +586,14 @@
     box-sizing: border-box;
     border: 1px solid #dce6f5;
 }
-.input-group {
-    gap: 15px;
-    display: flex;
-}
-.input-group input[type="text"] {
-    flex-grow: 1;
-    padding: 12px;
-    margin: 0;
+.filter-form .form-control-select {
+    padding: 10px;
+    border-radius: 8px;
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #dce6f5;
+    background-color: white;
+    appearance: menulist;
 }
 .alert-info {
     padding: 18px;
@@ -558,6 +602,8 @@
     background: #d9e9ff;
     border-radius: 8px;
 }
+
+/* skills filter */
 .skills-filter {
     margin-top: 15px;
     margin-bottom: 20px;
@@ -617,6 +663,15 @@
 }
 .apply-btn { margin-top: 10px; }
 
+/* center button */
+.center-button-row {
+    text-align: center;
+    margin-top: 10px;
+}
+.center-isc-score-btn {
+    min-width: 260px;
+}
+
 /* Score Breakdown details */
 .breakdown-details {
     margin-top: 10px;
@@ -675,38 +730,7 @@
     color: #2b63c6;
 }
 
-/* 🔹 Extra styles voor locatieblok & relevance-knop */
-.location-filter-block {
-    margin-bottom: 20px;
-    padding: 15px;
-    border-radius: 10px;
-    background: #eef3ff;
-    border: 1px solid #d4ddff;
-}
-.location-filter-title {
-    margin-top: 0;
-    margin-bottom: 10px;
-    font-weight: 600;
-    color: #1f2937;
-}
-.location-controls {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    align-items: center;
-    justify-content: space-between;
-}
-.location-range-wrapper {
-    flex: 1 1 260px;
-}
-.location-label {
-    display: block;
-    margin-bottom: 6px;
-    font-weight: 500;
-}
-#max_distance_km {
-    width: 100%;
-}
+/* distance display */
 .distance-display {
     display: inline-block;
     margin-top: 6px;
@@ -718,55 +742,21 @@
     display: flex;
     flex-direction: column;
     gap: 6px;
-    min-width: 200px;
+    margin-top: 6px;
 }
 .checkbox-inline {
     font-size: 0.9rem;
 }
 
-/* relevance zoekblok */
-.relevance-search-block {
-    margin-top: 20px;
-}
-.relevance-label {
-    display: block;
-    margin-bottom: 6px;
-    font-weight: 500;
-}
-.relevance-input-group {
-    align-items: stretch;
-}
-.relevance-button {
-    white-space: nowrap;
-}
-
 /* Responsiveness */
-@media (max-width: 640px) {
-    .location-controls {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    .relevance-input-group {
-        flex-direction: column;
-    }
-    .relevance-button {
-        width: 100%;
+@media (max-width: 768px) {
+    .top-filter-row {
+        grid-template-columns: 1fr;
     }
 }
 @media (max-width: 640px) {
-
-    .mode-selector-container {
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 12px !important;
-    }
-
-    .mode-btn {
-        width: 100% !important;
-        display: block !important;
-        margin-right: 0 !important;
-        margin-bottom: 12px !important;
-        text-align: center !important;
+    .btn-primary {
+        width: 100%;
     }
 }
 </style>
@@ -779,7 +769,7 @@
         var updateText = function() {
             var v = parseInt(slider.value || '0', 10);
             if (v === 0) {
-                display.textContent = 'Geen afstandsfilter';
+                display.textContent = 'No distance filter';
             } else {
                 display.textContent = v + ' km';
             }

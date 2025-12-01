@@ -1,9 +1,9 @@
 {% extends "base.html" %}
-{% block title %}Job | Job list{% endblock %}
+{% block title %}Jobs | Job list{% endblock %}
 {% block content %}
 
-{# Config variabelen #}
-{% set page_title = page_title if page_title is defined else "Vacatures" %}
+{# Config variables #}
+{% set page_title = page_title if page_title is defined else "Jobs" %}
 {% set current_sort = sort_by if sort_by is defined else 'relevance' %}
 {% set show_mode_selector = show_mode_selector if show_mode_selector is defined else True %}
 {% set simple_search = simple_search if simple_search is defined else False %}
@@ -13,15 +13,15 @@
 {% if show_mode_selector %}
 <div class="mode-selector-container">
     <h2 class="h5">Choose your search mode:</h2>
-   
+
     <a href="{{ url_for('main.jobs_list', sort_by='relevance') }}"
        class="mode-btn {% if current_sort == 'relevance' %}active-mode{% else %}inactive-mode{% endif %}">
-        🧠 IConsult Match (Beste Relevance)
+        🧠 IConsult Match (Best relevance)
     </a>
 
     <a href="{{ url_for('main.jobs_list', sort_by='title') }}"
        class="mode-btn {% if current_sort != 'relevance' %}active-mode{% else %}inactive-mode{% endif %}">
-        🔧 Manual Filter & Sorting
+        🔧 Manual filter & sorting
     </a>
 </div>
 {% endif %}
@@ -29,20 +29,48 @@
 <form method="GET" action="{{ url_for(request.endpoint) }}" class="filter-form">
     <input type="hidden" name="sort_by" value="{{ current_sort }}">
 
-    {# 🔹 LOCATIE-FILTER BLOK (altijd zichtbaar, bovenaan) #}
-    {% set current_distance = request.args.get('max_distance_km', '') %}
-    {% if current_distance == '' %}
-        {% set current_distance = 0 %}
-    {% endif %}
+    {# SIMPLE SEARCH – used by /company/jobs #}
+    {% if simple_search %}
+        <div class="input-group">
+            <input type="text" name="q" placeholder="Search by title or description"
+                   value="{{ request.args.get('q', '') }}">
+            <button type="submit" class="btn btn-primary">Search</button>
+        </div>
 
-    <div class="location-filter-block">
-        <h3 class="location-filter-title">
-            <i class="fas fa-map-marker-alt"></i> Location
-        </h3>
-        <div class="location-controls">
-            <div class="location-range-wrapper">
-                <label for="max_distance_km" class="location-label">
-                    Maximum distance:
+    {% else %}
+        {# distance slider value #}
+        {% set current_distance = request.args.get('max_distance_km', '') %}
+        {% if current_distance == '' %}
+            {% set current_distance = 0 %}
+        {% endif %}
+
+        {# TOP ROW: search + contract type + distance #}
+        <div class="top-filter-row">
+            <div class="top-filter-left">
+                <label class="top-label" for="q">Search</label>
+                <input type="text" id="q" name="q"
+                       placeholder="For example: Python, .NET, project manager..."
+                       value="{{ request.args.get('q', '') }}">
+            </div>
+
+            <div class="top-filter-middle">
+                <label class="top-label" for="contract_type">Contract type</label>
+                <select name="contract_type" id="contract_type" class="form-control-select">
+                    <option value="">All contract types</option>
+                    {% if possible_contract_types is defined %}
+                        {% for value, label in possible_contract_types %}
+                            <option value="{{ value }}"
+                                    {% if current_contract_type == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    {% endif %}
+                </select>
+            </div>
+
+            <div class="top-filter-right">
+                <label class="top-label" for="max_distance_km">
+                    Maximum distance
                 </label>
                 <input type="range"
                        id="max_distance_km"
@@ -56,57 +84,31 @@
                         {{ current_distance }} km
                     {% endif %}
                 </span>
-            </div>
 
-            <div class="location-checkboxes">
-                <label class="checkbox-inline">
-                    <input type="checkbox" name="ignore_distance" value="1"
-                        {% if request.args.get('ignore_distance') == '1' %}checked{% endif %}>
-                    Distance not applicable
-                </label>
-
-                <label class="checkbox-inline">
-                    <input type="checkbox" name="same_country_only" value="1"
-                        {% if request.args.get('same_country_only') == '1' %}checked{% endif %}>
-                    Same country only
-                </label>
+                <div class="location-checkboxes">
+                    <label class="checkbox-inline">
+                        <input type="checkbox" name="same_country_only" value="1"
+                               {% if request.args.get('same_country_only') == '1' %}checked{% endif %}>
+                        Same country only
+                    </label>
+                </div>
             </div>
         </div>
-    </div>
 
-    {# SIMPELE ZOEKMODUS (voor /company/jobs) #}
-    {% if simple_search %}
-        <div class="input-group">
-            <input type="text" name="q" placeholder="Search by Title/Description"
-                   value="{{ request.args.get('q', '') }}">
-            <button type="submit" class="btn btn-primary">Search</button>
-        </div>
-
-    {# VOLLEDIGE /jobs LOGICA #}
-    {% else %}
+        {# LOWER FILTERS – different per mode #}
         {% if current_sort != 'relevance' %}
             <p class="form-instruction">
                 Use the fields below to filter manually.
-                Results are sorted alphabetically by Title.
+                Results are sorted alphabetically by title.
             </p>
 
             <div class="input-grid manual-filter-grid">
-                <input type="text" name="q" placeholder="Zoek op Titel/Omschrijving"
-                       value="{{ request.args.get('q', '') }}">
-                <input type="text" name="city" placeholder="Stad"
+                <input type="text" name="city" placeholder="City"
                        value="{{ request.args.get('city', '') }}">
-                <input type="text" name="country" placeholder="Land"
+                <input type="text" name="country" placeholder="Country"
                        value="{{ request.args.get('country', '') }}">
 
-                <select name="contract_type" id="contract_type" class="form-control-select">
-                    <option value="">Contract type (All)</option>
-                    {% for value, label in possible_contract_types %}
-                        <option value="{{ value }}"
-                                {% if current_contract_type == value %}selected{% endif %}>
-                            {{ label }}
-                        </option>
-                    {% endfor %}
-                </select>
+                <div></div>
             </div>
 
             <div class="skills-filter">
@@ -118,9 +120,7 @@
                         <label class="skill-label">
                             <input type="checkbox" name="skills" value="{{ skill.id }}"
                                 {% if request.args.getlist('skills') and
-                                      (skill.id|string in request.args.getlist('skills')) %}
-                                      checked
-                                {% endif %}>
+                                      (skill.id|string in request.args.getlist('skills')) %}checked{% endif %}>
                             {{ skill.name }}
                         </label>
                     {% endfor %}
@@ -129,26 +129,13 @@
 
             <button type="submit" class="btn btn-primary apply-btn">Apply filters</button>
             <a href="{{ url_for('main.jobs_list', sort_by='title') }}"
-               class="btn btn-secondary reset-btn">Reset Filters</a>
+               class="btn btn-secondary reset-btn">Reset filters</a>
 
         {% else %}
-            <p class="alert alert-info">
-                For a detailed explanation of the applied filtering and
-                scoring methodology, please refer to the information at the bottom of this page.
-            </p>
-
-            <div class="relevance-search-block">
-                <label class="relevance-label">
-                    Search term (included in scoring):
-                </label>
-                <div class="input-group relevance-input-group">
-                    <input type="text" name="q"
-                           placeholder="Bijvoorbeeld: Python, .NET, project manager..."
-                           value="{{ request.args.get('q', '') }}">
-                    <button type="submit" class="btn btn-primary relevance-button">
-                        🔍 Search & Recalculate Score
-                    </button>
-                </div>
+            <div class="center-button-row">
+                <button type="submit" class="btn btn-primary center-isc-score-btn">
+                    🧠 Calculate IConsult score
+                </button>
             </div>
         {% endif %}
     {% endif %}
@@ -156,7 +143,6 @@
 
 <div class="job-grid" style="margin-top: 20px;">
     {% for job in jobs %}
-        {# Score & kleur alleen in relevance-modus #}
         {% if current_sort == 'relevance' and job.score is defined %}
             {% set match_score_perc = (job.score * 100) | round(1) %}
             {% set match_class = 'match-high' %}
@@ -166,15 +152,15 @@
                 {% set match_class = 'match-medium' %}
             {% endif %}
         {% endif %}
-   
-        <div class="job-card">
+
+        <div class="job-card {% if job.is_unlocked_for_me %}job-card-unlocked{% endif %}">
             <div class="job-meta-top">
                 {% if job.contract_type %}
                     <span class="contract-type-tag">
                         <i class="fas fa-file-contract"></i> {{ job.contract_type }}
                     </span>
                 {% endif %}
-           
+
                 {% if job.location_city or job.country %}
                     <span class="job-location">
                         <i class="fas fa-map-marker-alt"></i>
@@ -186,7 +172,7 @@
             <h3 class="job-title-link">
                 <a href="{{ url_for('main.job_detail', job_id=job.id) }}">{{ job.title }}</a>
             </h3>
-       
+
             {% if job.company %}
             <p class="company-name">
                 {% if job.is_unlocked_for_me %}
@@ -199,7 +185,7 @@
 
             <div class="required-skills-summary">
                 <label class="skills-label-small">
-                    <i class="fas fa-tools"></i> Required Skills:
+                    <i class="fas fa-tools"></i> Required skills:
                 </label>
                 <div class="skill-tags-wrapper">
                     {% for skill in job.skills[:3] %}
@@ -213,17 +199,17 @@
                     {% endif %}
                 </div>
             </div>
-       
+
             {% if current_sort == 'relevance' and job.score is defined %}
                 <div class="score-summary">
                     <span class="relevance-badge {{ match_class }}">
                         <i class="fas fa-check-circle"></i>
-                        Match: **{{ match_score_perc }}%**
+                        Match: {{ match_score_perc }}%
                     </span>
-               
+
                     <details class="breakdown-details">
                         <summary>
-                            <i class="fas fa-chart-bar"></i> Score breakdwon
+                            <i class="fas fa-chart-bar"></i> Score breakdown
                         </summary>
                         <div class="score-breakdown">
                             {% set total_score_perc = (job.score * 100) %}
@@ -237,7 +223,6 @@
                                     <div class="progress-bar skill-bar"
                                          style="width: {{ score_perc | round(0) }}%;"></div>
                                 </div>
-                                <span class="bar-value">{{ score_perc | round(0) }}%</span>
                             </div>
 
                             <div class="bar-item">
@@ -249,7 +234,6 @@
                                     <div class="progress-bar text-bar"
                                          style="width: {{ score_perc | round(0) }}%;"></div>
                                 </div>
-                                <span class="bar-value">{{ score_perc | round(0) }}%</span>
                             </div>
 
                             <div class="bar-item">
@@ -261,7 +245,6 @@
                                     <div class="progress-bar recency-bar"
                                          style="width: {{ score_perc | round(0) }}%;"></div>
                                 </div>
-                                <span class="bar-value">{{ score_perc | round(0) }}%</span>
                             </div>
 
                             <div class="bar-item">
@@ -273,11 +256,10 @@
                                     <div class="progress-bar popularity-bar"
                                          style="width: {{ score_perc | round(0) }}%;"></div>
                                 </div>
-                                <span class="bar-value">{{ score_perc | round(0) }}%</span>
                             </div>
-                           
+
                             <p class="score-total">
-                                Totaal: {{ total_score_perc | round(1) }}%
+                                Total: {{ total_score_perc | round(1) }}%
                             </p>
                         </div>
                     </details>
@@ -286,7 +268,7 @@
 
             <a class="btn btn-primary-card"
                href="{{ url_for('main.job_detail', job_id=job.id) }}">
-                Bekijk Vacature
+                View job
             </a>
         </div>
     {% endfor %}
@@ -325,13 +307,14 @@
     margin-left: 0;
     color: white;
 }
+.relevance-badge i { margin-right: 8px; }
 
-/* SCORE BREAKDOWN */
+/* SCORE BREAKDOWN – identical to consultants */
 .bar-item {
     display: grid;
-    grid-template-columns: 140px 1fr 40px;
+    grid-template-columns: 160px 1fr;
     align-items: center;
-    gap: 5px;
+    gap: 8px;
     margin-bottom: 10px;
 }
 .progress-bar-container {
@@ -353,12 +336,6 @@
 .recency-bar    { background-color: #17a2b8 !important; }
 .popularity-bar { background-color: #6b7280 !important; }
 
-.bar-value {
-    font-weight: 700;
-    text-align: right;
-    font-size: 1.05rem;
-}
-
 /* JOB CARDS */
 .job-grid {
     display: grid;
@@ -371,7 +348,7 @@
     border-radius: 12px;
     padding: 25px;
     box-shadow: 0 6px 15px rgba(0,0,0,0.08);
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s, border-color 0.2s;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -380,6 +357,14 @@
     transform: translateY(-5px);
     box-shadow: 0 10px 20px rgba(0,0,0,0.12);
 }
+
+/* unlocked job – light green look */
+.job-card-unlocked {
+    background: #ecfdf3;
+    border-color: #22c55e;
+    box-shadow: 0 6px 18px rgba(34, 197, 94, 0.25);
+}
+
 .job-meta-top {
     display: flex;
     justify-content: space-between;
@@ -441,7 +426,6 @@
     text-align: left;
     width: 100%;
 }
-.relevance-badge i { margin-right: 8px; font-size: 1.1em; }
 .btn-primary-card {
     background: #2b63c6;
     color: white;
@@ -548,6 +532,35 @@
     margin-bottom: 15px;
     font-size: 0.95rem;
 }
+
+/* top row grid */
+.top-filter-row {
+    display: grid;
+    grid-template-columns: minmax(200px, 1.5fr) minmax(160px, 1fr) minmax(220px, 1.4fr);
+    gap: 20px;
+    margin-bottom: 20px;
+}
+.top-label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+.top-filter-left input[type="text"] {
+    padding: 12px;
+    border-radius: 8px;
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #dce6f5;
+}
+.top-filter-middle .form-control-select {
+    width: 100%;
+}
+.top-filter-right {
+    display: flex;
+    flex-direction: column;
+}
+
+/* manual grid */
 .manual-filter-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -645,6 +658,15 @@
 }
 .apply-btn { margin-top: 10px; }
 
+/* center button */
+.center-button-row {
+    text-align: center;
+    margin-top: 10px;
+}
+.center-isc-score-btn {
+    min-width: 260px;
+}
+
 /* Score Breakdown details */
 .breakdown-details {
     margin-top: 10px;
@@ -703,38 +725,7 @@
     color: #2b63c6;
 }
 
-/* 🔹 Extra styles voor locatieblok & relevance-knop */
-.location-filter-block {
-    margin-bottom: 20px;
-    padding: 15px;
-    border-radius: 10px;
-    background: #eef3ff;
-    border: 1px solid #d4ddff;
-}
-.location-filter-title {
-    margin-top: 0;
-    margin-bottom: 10px;
-    font-weight: 600;
-    color: #1f2937;
-}
-.location-controls {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    align-items: center;
-    justify-content: space-between;
-}
-.location-range-wrapper {
-    flex: 1 1 260px;
-}
-.location-label {
-    display: block;
-    margin-bottom: 6px;
-    font-weight: 500;
-}
-#max_distance_km {
-    width: 100%;
-}
+/* distance display + checkboxes */
 .distance-display {
     display: inline-block;
     margin-top: 6px;
@@ -746,38 +737,23 @@
     display: flex;
     flex-direction: column;
     gap: 6px;
-    min-width: 200px;
+    margin-top: 6px;
 }
 .checkbox-inline {
     font-size: 0.9rem;
 }
 
-/* relevance zoekblok */
-.relevance-search-block {
-    margin-top: 20px;
-}
-.relevance-label {
-    display: block;
-    margin-bottom: 6px;
-    font-weight: 500;
-}
-.relevance-input-group {
-    align-items: stretch;
-}
-.relevance-button {
-    white-space: nowrap;
-}
-
 /* Responsiveness */
+@media (max-width: 768px) {
+    .top-filter-row {
+        grid-template-columns: 1fr;
+    }
+}
 @media (max-width: 640px) {
-    .location-controls {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    .relevance-input-group {
+    .input-group {
         flex-direction: column;
     }
-    .relevance-button {
+    .btn-primary {
         width: 100%;
     }
 }
@@ -791,7 +767,7 @@
         var updateText = function() {
             var v = parseInt(slider.value || '0', 10);
             if (v === 0) {
-                display.textContent = 'Geen afstandsfilter';
+                display.textContent = 'No distance filter';
             } else {
                 display.textContent = v + ' km';
             }
