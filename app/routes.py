@@ -1452,6 +1452,40 @@ def admin_required(f):
     return decorated_function
 
 
+# ------------------ ADMIN CONSULTANTS ------------------
+
+@main.route("/admin/consultants")
+@login_required
+@admin_required
+def admin_consultants():
+    with get_session() as db:
+        consultants = db.query(ConsultantProfile).all()
+        return render_template("admin_consultants.html", consultants=consultants)
+    
+
+#------------------- ADMIN JOBPOSTS ---------------------
+
+@main.route("/admin/companies")
+@login_required
+@admin_required
+def admin_companies():
+    with get_session() as db:
+        companies = db.query(Company).all()
+
+        # Voor elke company jobposts ophalen
+        jobs_by_company = {
+            company.id: db.query(JobPost).filter(JobPost.company_id == company.id).all()
+            for company in companies
+        }
+
+        return render_template(
+            "admin_companies.html",
+            companies=companies,
+            jobs_by_company=jobs_by_company
+        )
+
+
+
 # ------------------ ADMIN COLLABORATIONS ------------------
 
 @main.route("/admin/collaborations")

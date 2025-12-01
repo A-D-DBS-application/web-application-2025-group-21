@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}All Consultants{% endblock %}
+{% block content %}
+
+<h2 style="text-align:center; margin-bottom: 20px;">All Consultants</h2>
+
+<div class="admin-table-card">
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Availability</th>
+                <th>Country</th>
+                <th>City</th>
+            </tr>
+        </thead>
+
+        <tbody>
+        {% for c in consultants %}
+            <tr>
+                <td>{{ c.display_name_masked }}</td>
+
+                <td>
+                    {% if c.availability %}
+                        <span class="status available">Available</span>
+                    {% else %}
+                        <span class="status unavailable">Unavailable</span>
+                    {% endif %}
+                </td>
+
+                <td>{{ c.country if c.country else "-" }}</td>
+                <td>{{ c.location_city if c.location_city else "-" }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

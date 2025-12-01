@@ -1,21 +1,32 @@
 {% extends "base.html" %}
 {% block title %}Admin Dashboard{% endblock %}
-
 {% block content %}
 
 <h1>Admin Dashboard</h1>
 
-<div class="card">
-  <p>Beheer van het platform.</p>
+<div class="admin-container">
+    <div class="admin-grid">
+
+        <div class="card">
+            <h3>Collaborations</h3>
+            <p>Overview of all active and past collaborations.</p>
+            <a class="btn" href="{{ url_for('main.admin_collaborations') }}">View collaborations</a>
+        </div>
+
+        <div class="card">
+            <h3>Consultants</h3>
+            <p>View all consultants and their availability.</p>
+            <a class="btn" href="{{ url_for('main.admin_consultants') }}">View consultants</a>
+        </div>
+
+        <div class="card">
+            <h3>Companies & Jobs</h3>
+            <p>Overview of all companies and their job posts.</p>
+            <a class="btn" href="{{ url_for('main.admin_companies') }}">View companies & jobs</a>
+        </div>
+
+    </div>
 </div>
 
-<div class="card">
-  <h3>Samenwerkingen</h3>
-  <p>Overzicht van alle actieve en afgelopen samenwerkingen.</p>
-
-  <a class="btn" href="{{ url_for('main.admin_collaborations') }}">
-    Bekijk samenwerkingen
-  </a>
-</div>
 
 {% endblock %}

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>All Companies & Job Posts</h2>
+
+{% for comp in companies %}
+<div class="card" style="margin-bottom:20px; padding:20px;">
+
+    <h3>{{ comp.company_name_masked }}</h3>
+
+    <p>
+        Availability:
+        {% if comp.current_consultant_id %}
+            <span class="status unavailable">Unavailable (has active consultant)</span>
+        {% else %}
+            <span class="status available">Available</span>
+        {% endif %}
+    </p>
+
+    <h4>Job Posts:</h4>
+    <ul>
+        {% for job in jobs_by_company[comp.id] %}
+        <li>
+            {{ job.title }} –
+            {% if job.is_active %}
+                <span class="status available">Active</span>
+            {% else %}
+                <span class="status unavailable">Closed</span>
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+
+</div>
+{% endfor %}
+
+{% endblock %}

@@ -126,6 +126,80 @@
             color: var(--blue);
         }
 
+        .admin-container {
+            max-width: 1200px; /* genoeg ruimte voor 3 kaarten */
+            margin: 0 auto;
+        }
+
+        .admin-grid {
+            display: flex;
+            flex-wrap: nowrap; /* GEEN nieuwe rij */
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .admin-grid .card {
+            width: 280px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        }
+        .status {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status.available {
+            background: #d1fae5;   /* lichtgroen */
+            color: #065f46;        /* donker groen */
+        }
+
+        .status.unavailable {
+            background: #fee2e2;   /* lichtrood */
+            color: #b91c1c;        /* donker rood */
+        }
+        .admin-table th,
+        .admin-table td {
+            padding: 14px 30px; /* meer horizontale ruimte */
+        }
+        .admin-table {
+            width: 100%;
+            table-layout: fixed;
+            border-collapse: collapse;
+        }
+
+        .admin-table th,
+        .admin-table td {
+            white-space: nowrap;
+        }
+
+        /* Kolombreedtes */
+        .admin-table th:nth-child(1),
+        .admin-table td:nth-child(1) {
+            width: 18%;
+        }
+        .admin-table th:nth-child(2),
+        .admin-table td:nth-child(2) {
+            width: 20%;
+        }
+        .admin-table th:nth-child(3),
+        .admin-table td:nth-child(3) {
+            width: 25%;
+        }
+        .admin-table th:nth-child(4),
+        .admin-table td:nth-child(4) {
+            width: 12%;
+        }
+        .admin-table th:nth-child(5),
+        .admin-table td:nth-child(5) {
+            width: 25%;
+        }
+
+
         /* ===== RESPONSIVE ===== */
         @media (max-width: 600px) {
 
