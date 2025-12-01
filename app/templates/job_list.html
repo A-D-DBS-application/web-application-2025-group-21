@@ -3,7 +3,7 @@
 {% block content %}
 
 {# Config variables #}
-{% set page_title = page_title if page_title is defined else "Jobs" %}
+{% set page_title = page_title if page_title is defined else "" %}
 {% set current_sort = sort_by if sort_by is defined else 'relevance' %}
 {% set show_mode_selector = show_mode_selector if show_mode_selector is defined else True %}
 {% set simple_search = simple_search if simple_search is defined else False %}
@@ -12,7 +12,7 @@
 
 {% if show_mode_selector %}
 <div class="mode-selector-container">
-    <h2 class="h5">Choose your search mode:</h2>
+    <h2 class="h5"></h2>
 
     <a href="{{ url_for('main.jobs_list', sort_by='relevance') }}"
        class="mode-btn {% if current_sort == 'relevance' %}active-mode{% else %}inactive-mode{% endif %}">

@@ -3,13 +3,13 @@
 {% block content %}
 
 {# Config variables #}
-{% set page_title = page_title if page_title is defined else "Available consultants" %}
+{% set page_title = page_title if page_title is defined else "" %}
 {% set current_sort = sort_by if sort_by is defined else 'relevance' %}
 
 <h1 class="page-title">{{ page_title }}</h1>
 
 <div class="mode-selector-container">
-    <h2 class="h5">Choose your search mode:</h2>
+    <h2 class="h5"></h2>
 
     <a href="{{ url_for('main.consultants_list', sort_by='relevance') }}"
        class="mode-btn {% if current_sort == 'relevance' %}active-mode{% else %}inactive-mode{% endif %}">

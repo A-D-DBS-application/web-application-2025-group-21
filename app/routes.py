@@ -1236,7 +1236,6 @@ def jobs_list():
             current_contract_type=contract_type,
             simple_search=False,
             show_mode_selector=True,
-            page_title=_("Available jobs"),
             UserRole=UserRole,
         )
 
