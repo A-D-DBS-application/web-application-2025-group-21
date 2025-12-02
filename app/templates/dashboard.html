@@ -30,6 +30,8 @@
         max-width: 180px !important; /* Grotere max breedte */
         width: 100% !important;
         height: auto !important;
+        /* Zorgt dat de cirkel behouden blijft */
+        object-fit: cover;
     }
 
     .profile-details {
@@ -67,9 +69,12 @@
 
 <h1>Dashboard</h1>
 
+{# DEZE SECTIE IS VERWIJDERD: HET WELKOM BERICHT IS NU ENKEL DE FLASH MESSAGE #}
+{# 
 {% if user %}
     <p>Welcome, <strong>{{ user.username }}</strong>!</p>
-{% endif %}
+{% endif %} 
+#}
 
 <div class="card">
     <h2>Profile Details</h2>
@@ -83,26 +88,24 @@
 
         <div class="profile-header-grid">
             
-            {# 1. PROFIELFOTO (Wordt Rechts getoond op desktop door flex-direction: row-reverse) #}
+            {# 1. PROFIELFOTO (Rechts op desktop) #}
             <div class="profile-media">
                 {% if profile.profile_image %}
                     <img
                         src="{{ profile.profile_image }}"
                         alt="Profile Picture"
-                        {# INLINE STIJLEN VERWIJDERD EN VERPLAATST NAAR <style> #}
-                        style="border-radius:50%; object-fit:cover; margin-bottom:12px;"
+                        style="border-radius:50%; margin-bottom:12px;"
                     >
                 {% else %}
                     <img
                         src="{{ url_for('static', filename='img/default-avatar.png') }}"
                         alt="No profile picture"
-                        {# INLINE STIJLEN VERWIJDERD EN VERPLAATST NAAR <style> #}
-                        style="border-radius:50%; object-fit:cover; margin-bottom:12px;"
+                        style="border-radius:50%; margin-bottom:12px;"
                     >
                 {% endif %}
             </div>
 
-            {# 2. BASIS DETAILS (Wordt Links getoond op desktop) #}
+            {# 2. BASIS DETAILS (Links op desktop) #}
             <div class="profile-details">
                 <h3>Consultant Details</h3>
                 <p><strong>Name:</strong> {{ profile.display_name_masked }}</p>
