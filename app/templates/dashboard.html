@@ -2,10 +2,73 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
+<style>
+    /* Styling voor de Profile/Contact Grids */
+    .profile-header-grid {
+        display: flex;
+        gap: 30px;
+        align-items: flex-start;
+        margin-bottom: 20px;
+        /* Keert de volgorde om op desktop */
+        flex-direction: row-reverse; 
+    }
+
+    .profile-media {
+        flex-shrink: 0;
+        /* AANGEPAST: Vergroot de breedte van de container */
+        width: 200px; 
+        padding-top: 10px;
+        /* NIEUW: Zorgt ervoor dat de inhoud van de media container gecentreerd is 
+                   (gezien de parent flex-direction: row-reverse heeft, is dit rechts) */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    /* NIEUW: De profielfoto zelf groter maken */
+    .profile-media img {
+        max-width: 180px !important; /* Grotere max breedte */
+        width: 100% !important;
+        height: auto !important;
+    }
+
+    .profile-details {
+        flex-grow: 1;
+        min-width: 250px;
+    }
+
+    .contact-details-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 10px 30px;
+        margin-top: 15px;
+    }
+    
+    /* Zorgt ervoor dat de naam/details op breed scherm links uitlijnen */
+    .profile-details h3 {
+        margin-top: 0;
+    }
+
+    /* Responsiviteit */
+    @media (max-width: 600px) {
+        .profile-header-grid {
+            /* Zorgt ervoor dat op mobiel de foto weer BOVENAAN komt */
+            flex-direction: column; 
+            gap: 20px;
+        }
+        .profile-media {
+            width: 100%;
+            /* Op mobiel de foto weer links uitlijnen */
+            align-items: flex-start; 
+            padding-top: 0;
+        }
+    }
+</style>
+
 <h1>Dashboard</h1>
 
 {% if user %}
-    <p>Welcome, <strong>{{ user.username }}</strong>!</p>
+    <p>Welcome, <strong>{{ user.username }}</strong>!</p>
 {% endif %}
 
 <div class="card">
@@ -15,22 +78,57 @@
     <p><strong>Role:</strong> {{ user.role.value }}</p>
 
     {% if user.role == UserRole.consultant %}
-        {% if profile.profile_image %}
-            <img
-                src="{{ profile.profile_image }}"
-                alt="Profile Picture"
-                style="max-width:140px; width:100%; height:auto; border-radius:50%; object-fit:cover; margin-bottom:12px;"
-            >
+        
+        <hr>
 
-        {% else %}
-            <img
-                src="{{ url_for('static', filename='img/default-avatar.png') }}"
-                alt="No profile picture"
-                style="max-width:140px; width:100%; height:auto; border-radius:50%; object-fit:cover; margin-bottom:12px;"
-            >
+        <div class="profile-header-grid">
+            
+            {# 1. PROFIELFOTO (Wordt Rechts getoond op desktop door flex-direction: row-reverse) #}
+            <div class="profile-media">
+                {% if profile.profile_image %}
+                    <img
+                        src="{{ profile.profile_image }}"
+                        alt="Profile Picture"
+                        {# INLINE STIJLEN VERWIJDERD EN VERPLAATST NAAR <style> #}
+                        style="border-radius:50%; object-fit:cover; margin-bottom:12px;"
+                    >
+                {% else %}
+                    <img
+                        src="{{ url_for('static', filename='img/default-avatar.png') }}"
+                        alt="No profile picture"
+                        {# INLINE STIJLEN VERWIJDERD EN VERPLAATST NAAR <style> #}
+                        style="border-radius:50%; object-fit:cover; margin-bottom:12px;"
+                    >
+                {% endif %}
+            </div>
 
-        {% endif %}
-
+            {# 2. BASIS DETAILS (Wordt Links getoond op desktop) #}
+            <div class="profile-details">
+                <h3>Consultant Details</h3>
+                <p><strong>Name:</strong> {{ profile.display_name_masked }}</p>
+                
+                {% if profile.years_experience is not none %}
+                    <p><strong>Experience:</strong> {{ profile.years_experience }} year{% if profile.years_experience != 1 %}s{% endif %}</p>
+                {% endif %}
+                
+                <p><strong>Location:</strong> {{ profile.location_city }} , {{ profile.country }}</p>
+                <p><strong>Headline:</strong> {{ profile.headline or "No headline" }}</p>
+                
+                <p style="margin-bottom: 20px;">
+                    <strong>Skills:</strong>
+                    {% if profile.skills %}
+                        {{ profile.skills | map(attribute='name') | join(', ') }}
+                    {% else %}
+                        No skills selected
+                    {% endif %}
+                </p>
+            </div>
+        </div> 
+        
+        <hr>
+        
+        {# 3. CV DOCUMENT #}
+        <h3 style="margin-top: 20px;">Documents</h3>
         {% if profile.cv_document %}
             <p>
                 <strong>CV:</strong>
@@ -41,36 +139,34 @@
         {% else %}
             <p><strong>CV:</strong> Not yet added</p>
         {% endif %}
+        
+        <hr>
+        
+        {# 4. CONTACT & BESCHIKBAARHEID #}
+        <h3 style="margin-top: 20px;">Contact & Availability</h3>
+        <div class="contact-details-grid">
+            <div>
+                <p><strong>Email address:</strong> {{ profile.contact_email or "Not filled in" }}</p>
+            </div>
+            <div>
+                <p><strong>Phone number:</strong> {{ profile.phone_number or "Not filled in" }}</p>
+            </div>
+            <div>
+                <p>
+                    <strong>Availability:</strong>
+                    {% if profile.availability %}
+                        <span style="color: #28a745;">Available for new jobs</span>
+                    {% else %}
+                        <span style="color: #e24b4b;">Unavailable</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
 
-        <p><strong>Name:</strong> {{ profile.display_name_masked }}</p>
-        {% if profile.years_experience is not none %}
-        <p><strong>Experience:</strong> {{ profile.years_experience }} year{% if profile.years_experience != 1 %}s{% endif %}</p>
-        {% endif %}
-
-        <p><strong>Location:</strong> {{ profile.location_city }} , {{ profile.country }}</p>
-        <p><strong>Headline:</strong> {{ profile.headline or "No headline" }}</p>
-
-        <p><strong>Email address:</strong> {{ profile.contact_email or "Not filled in" }}</p>
-        <p><strong>Phone number:</strong> {{ profile.phone_number or "Not filled in" }}</p>
-
-        <p><strong>Skills:</strong>
-            {% if profile.skills %}
-                {{ profile.skills | map(attribute='name') | join(', ') }}
-            {% else %}
-                No skills selected
-            {% endif %}
-        </p>
-
-        <p>
-            <strong>Availability:</strong>
-            {% if profile.availability %}
-                <span style="color: #28a745;">Available for new jobs</span>
-            {% else %}
-                <span style="color: #e24b4b;">Unavailable</span>
-            {% endif %}
-        </p>
-        {# 🔹 ZINNETJE: met welke companies werk ik samen? #}
+        {# 5. COLLABORATIONS #}
         {% if consultant_active_collaborations is defined and consultant_active_collaborations %}
+            <hr>
+            <h3 style="margin-top: 20px;">Active Collaborations</h3>
             <p>
                 <strong>Collaborating with:</strong>
                 {% for collab in consultant_active_collaborations %}
@@ -79,24 +175,39 @@
             </p>
         {% endif %}
 
-        <a class="btn" href="{{ url_for('main.edit_consultant_skills') }}">Edit Skills</a>
-        <a class="btn" href="{{ url_for('main.edit_consultant_profile') }}">Edit Profile</a>
+        {# 6. EDIT KOPPELINGEN #}
+        <div style="margin-top: 20px;">
+            <a class="btn" href="{{ url_for('main.edit_consultant_profile') }}">Edit Profile</a>
+            <a class="btn" href="{{ url_for('main.edit_consultant_skills') }}">Edit Skills</a>
+        </div>
+        
 
     {% endif %}
 
 
-
     {% if user.role == UserRole.company %}
+        <hr>
+        <h3>Company Details</h3>
+        
         <p><strong>Company name:</strong> {{ company.company_name_masked }}</p>
         <p><strong>Sector:</strong> {{ company.industry or "Not filled in" }}</p>
 
-        <p><strong>Email address:</strong> {{ company.contact_email or "Not filled in" }}</p>
-        <p><strong>Phone number:</strong> {{ company.phone_number or "Not filled in" }}</p>
+        <h3 style="margin-top: 20px;">Contact Information</h3>
+        <div class="contact-details-grid">
+            <div>
+                <p><strong>Email address:</strong> {{ company.contact_email or "Not filled in" }}</p>
+            </div>
+            <div>
+                <p><strong>Phone number:</strong> {{ company.phone_number or "Not filled in" }}</p>
+            </div>
+        </div>
 
-        {# 🔹 ZINNETJE: active collaborations: clickable consultants #}
+        {# 🔹 Active collaborations #}
         {% if company_active_collaborations is defined and company_active_collaborations %}
+            <hr>
+            <h3 style="margin-top: 20px;">Active Collaborations</h3>
             <p>
-                <strong>Active collaborations:</strong>
+                <strong>Collaborating with:</strong>
                 {% for collab in company_active_collaborations %}
                     <a href="{{ url_for('main.consultant_detail', profile_id=collab.consultant.id) }}">
                         {{ collab.consultant.display_name_masked }}
@@ -105,10 +216,11 @@
             </p>
         {% endif %}
 
-        <a class="btn" href="{{ url_for('main.job_new') }}">New Job Post</a>
-        <a href="{{ url_for('main.company_jobs_list') }}">My Job Posts</a>
-
-        <a class="btn" href="{{ url_for('main.edit_company_profile') }}">Edit Profile</a>
+        <div style="margin-top: 20px;">
+            <a class="btn" href="{{ url_for('main.edit_company_profile') }}">Edit Profile</a>
+            <a class="btn" href="{{ url_for('main.job_new') }}">New Job Post</a>
+            <a href="{{ url_for('main.company_jobs_list') }}" class="btn">My Job Posts</a>
+        </div>
     {% endif %}
 </div>
 {% endblock %}

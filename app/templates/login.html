@@ -1,24 +1,96 @@
 {% extends "base.html" %}
 {% block title %}Login{% endblock %}
 {% block content %}
-  <h1>Login (MVP)</h1>
 
-  <form method="post">
+<style>
+    .login-form { 
+        max-width: 450px; 
+        margin: 0 auto; 
+        background: #ffffff;
+        border: 1px solid #dce6f5;
+        border-radius: 14px;
+        padding: 30px; 
+        box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    }
+    
+    .field-label {
+        display: block;
+        margin-bottom: 16px;
+        font-weight: 600;
+    }
+    
+    .field-label input,
+    .field-label select {
+        margin-top: 6px;
+        padding: 10px;
+        border-radius: 6px;
+        border: 1px solid #d1d5db;
+        width: 100%;
+        box-sizing: border-box;
+    }
 
-    <label>Username</label>
-    <input name="username" required>
+    .admin-section {
+        margin-top: 25px;
+        padding-top: 25px;
+        border-top: 2px dashed #e0e0e0;
+        text-align: center;
+    }
 
-    <label>Rol</label>
-    <select name="role">
-      <option value="consultant">consultant</option>
-      <option value="company">company</option>
-      <option value="admin">admin</option>
-    </select>
+    .admin-section h3 {
+        margin-top: 0;
+        color: #e24b4b;
+    }
 
-    <label>Admin code (alleen voor admin)</label>
-    <input type="password" name="admin_code">
+    .admin-input-group {
+        text-align: left;
+    }
 
-    <button class="btn" type="submit">Log in</button>
-  </form>
+    .btn {
+        width: 100%;
+        margin-top: 20px;
+        font-size: 1.1rem;
+        padding: 12px;
+        font-weight: 700;
+    }
+</style>
+
+<div class="login-form">
+    <h1>Login</h1>
+
+    <form method="post">
+
+        <div class="user-section">
+            <label class="field-label">
+                Username
+                <input name="username" required>
+            </label>
+
+            <label class="field-label">
+                Role
+                <select name="role">
+                    <option value="consultant">Consultant</option>
+                    <option value="company">Company</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </label>
+        </div>
+        
+        <div class="admin-section">
+            <h3>Admin Access Only</h3>
+            
+            <div class="admin-input-group">
+                <label class="field-label">
+                    Admin Code
+                    <input type="password" name="admin_code">
+                </label>
+                <p style="font-size: 0.85rem; color: #6b7280; margin-top: -10px;">
+                    (Required only if Role 'Admin' is selected)
+                </p>
+            </div>
+        </div>
+
+        <button class="btn" type="submit">Log in</button>
+    </form>
+</div>
+
 {% endblock %}
-#loginpagina en doorgestuurd nr dashboard
