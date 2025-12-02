@@ -122,7 +122,76 @@ def is_unlocked(db, unlocking_user_id, target_type, target_id):
         is not None
     )
 
+# ------------------ NIEUWE GECORRIGEERDE HELPERFUNCTIE ------------------
+def check_profile_completion(user, profile, company):
+    """
+    Controleert of essentiële velden zijn ingevuld en stuurt een Engelse melding, 
+    inclusief een hint naar de benodigde edit-URL.
+    """
+    missing_fields = []
+    edit_target = 'profile' # Default target: Edit Profile
 
+    if user.role == UserRole.consultant:
+        if not profile:
+            return 
+        
+        # 1. Essentiële Matching Velden
+        if not profile.headline or profile.headline == "":
+            missing_fields.append("Headline")
+        if profile.years_experience is None:
+            missing_fields.append("Years of experience")
+        if not profile.location_city or profile.location_city == "":
+            missing_fields.append("City")
+        if not profile.country or profile.country == "":
+            missing_fields.append("Country")
+        
+        # 2. Skills (vereist aparte edit pagina)
+        if not profile.skills:
+             missing_fields.append("Skills")
+             edit_target = 'skills' # Als skills ontbreken, stuur naar de skills editor
+
+        # 3. Profielkwaliteit (niet strikt essentieel voor matching, maar wel voor unlock)
+        if not profile.profile_image:
+             missing_fields.append("Profile Picture")
+        if not profile.cv_document:
+             missing_fields.append("CV Document")
+        
+        # Controleer of de display_name de default username is
+        if profile.display_name_masked == user.username:
+             missing_fields.append("Full Name")
+
+
+        if missing_fields:
+            fields_str = ", ".join(missing_fields)
+            
+            # De flash melding krijgt nu de edit_target mee in de categorie, 
+            # zodat base.html weet naar welke pagina te linken.
+            flash(
+                (f"Your profile is incomplete! Please update the following details for better matching: {fields_str}."),
+                f"warning-link-{edit_target}"
+            )
+
+    elif user.role == UserRole.company:
+        if not company:
+            return 
+        
+        # Velden die we als essentieel beschouwen voor bedrijven
+        if company.company_name_masked == user.username:
+            missing_fields.append("Company Name")
+        if not company.location_city or company.location_city == "":
+            missing_fields.append("City")
+        if not company.country or company.country == "":
+            missing_fields.append("Country")
+
+        if missing_fields:
+            fields_str = ", ".join(missing_fields)
+            # Bedrijven linken altijd naar de algemene edit_company_profile
+            flash(
+                f"Your company profile is incomplete! Please update the following details: {fields_str}.",
+                "warning-link-profile" 
+            )
+
+# EINDE GECORRIGEERDE HELPERFUNCTIE
 # ------------------ HOME ------------------
 
 @main.route("/company/jobs", methods=["GET"])
@@ -325,6 +394,9 @@ def dashboard():
                     .order_by(Collaboration.started_at.desc())
                     .all()
                 )
+
+        # 🟢 NIEUW: Roep de check functie aan
+        check_profile_completion(user, profile, company)
 
         return render_template(
             "dashboard.html",

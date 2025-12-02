@@ -107,6 +107,13 @@
             margin-bottom: 16px;
         }
 
+        .flash-warning {
+            background: #fffbeb !important;
+            border-left: 4px solid #d92d06 !important;
+            color: #9f3c0a !important;
+            font-weight: 500;
+        }
+
         .footer {
             background-color: #f8f9fa;
             border-top: 1px solid #e9ecef;
@@ -269,14 +276,31 @@
         </nav>
     </header>
 
-    <main>
-        {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                {% for m in messages %}
-                    <div class="flash">{{ m }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
+<main>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, m in messages %}
+                    {# 1. Bepaal de doel-URL op basis van de categorie #}
+                    {% set target_url = '' %}
+                    {% if 'warning-link-profile' in category %}
+                        {% set target_url = url_for('main.edit_consultant_profile') if session.get('role') == 'consultant' else url_for('main.edit_company_profile') %}
+                    {% elif 'warning-link-skills' in category %}
+                        {% set target_url = url_for('main.edit_consultant_skills') %}
+                    {% endif %}
+                    
+                    {# 2. Toon de link als het een waarschuwing is, anders de standaard div #}
+                    {% if target_url %}
+                        <a href="{{ target_url }}" class="flash flash-warning" 
+                           style="cursor: pointer; text-decoration: none; display: block;">
+                            <strong style="color: #b90606;">Profile Incomplete:</strong> {{ m }} 
+                            (Click here to update)
+                        </a>
+                    {% else %}
+                        <div class="flash {{ category }}">{{ m }}</div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
 
         {% block content %}{% endblock %}
     </main>
