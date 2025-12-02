@@ -3,6 +3,13 @@
 {% block content %}
 <h2 style="text-align:center; margin-bottom: 20px;">All Matches (Collaborations)</h2>
 
+<form method="GET" style="text-align:center; margin-bottom:20px;">
+    <input type="text" name="q" placeholder="Search consultant, company, or job..."
+           value="{{ request.args.get('q','') }}"
+           style="padding:8px; width:300px;">
+    <button type="submit" class="btn">Search</button>
+</form>
+
 <div class="admin-table-card">
     <table class="admin-table">
         <thead>

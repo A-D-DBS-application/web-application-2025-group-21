@@ -3,6 +3,13 @@
 {% block content %}
 <h2>All Companies & Job Posts</h2>
 
+<form method="GET" style="text-align:center; margin-bottom:20px;">
+    <input type="text" name="q" placeholder="Search company..."
+           value="{{ request.args.get('q','') }}"
+           style="padding:8px; width:250px;">
+    <button type="submit" class="btn">Search</button>
+</form>
+
 {% for comp in companies %}
 <div class="card" style="margin-bottom:20px; padding:20px;">
 

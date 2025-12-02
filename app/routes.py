@@ -1530,9 +1530,20 @@ def admin_required(f):
 @login_required
 @admin_required
 def admin_consultants():
+    q = request.args.get("q", "").lower()
+
     with get_session() as db:
         consultants = db.query(ConsultantProfile).all()
-        return render_template("admin_consultants.html", consultants=consultants)
+
+    # zoekfilter
+    if q:
+        consultants = [
+            c for c in consultants
+            if q in c.display_name_masked.lower()
+        ]
+
+    return render_template("admin_consultants.html", consultants=consultants)
+
     
 
 #------------------- ADMIN JOBPOSTS ---------------------
@@ -1541,21 +1552,29 @@ def admin_consultants():
 @login_required
 @admin_required
 def admin_companies():
+    q = request.args.get("q", "").lower()
+
     with get_session() as db:
         companies = db.query(Company).all()
+        jobs = db.query(JobPost).all()
 
-        # Voor elke company jobposts ophalen
-        jobs_by_company = {
-            company.id: db.query(JobPost).filter(JobPost.company_id == company.id).all()
-            for company in companies
-        }
+    # groepeer jobs per company
+    jobs_by_company = {}
+    for job in jobs:
+        jobs_by_company.setdefault(job.company_id, []).append(job)
 
-        return render_template(
-            "admin_companies.html",
-            companies=companies,
-            jobs_by_company=jobs_by_company
-        )
+    # zoekfilter
+    if q:
+        companies = [
+            c for c in companies
+            if q in c.company_name_masked.lower()
+        ]
 
+    return render_template(
+        "admin_companies.html",
+        companies=companies,
+        jobs_by_company=jobs_by_company
+    )
 
 
 # ------------------ ADMIN COLLABORATIONS ------------------
@@ -1564,17 +1583,40 @@ def admin_companies():
 @login_required
 @admin_required
 def admin_collaborations():
+    q = request.args.get("q", "").lower()
+
     with get_session() as db:
-        collaborations = (
+        # BASISQUERY
+        query = (
             db.query(Collaboration)
             .order_by(Collaboration.started_at.desc())
-            .all()
         )
+
+        # ALS ER EEN ZOEKTERM IS — FILTEREN
+        if q:
+            # JOIN MET CONSULTANT, COMPANY EN JOBPOST
+            query = (
+                query.join(Collaboration.consultant)
+                     .join(Collaboration.company)
+                     .outerjoin(Collaboration.job_post)
+                     .filter(
+                        or_(
+                            func.lower(ConsultantProfile.display_name_masked).like(f"%{q}%"),
+                            func.lower(Company.company_name_masked).like(f"%{q}%"),
+                            func.lower(JobPost.title).like(f"%{q}%")
+                        )
+                     )
+            )
+
+        collaborations = query.all()
 
         return render_template(
             "admin_collaborations.html",
             collaborations=collaborations,
+            q=q
         )
+
+
 
 
 # ------------------ ADMIN DASHBOARD ------------------
