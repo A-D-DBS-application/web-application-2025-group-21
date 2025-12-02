@@ -3,34 +3,28 @@
 
 {% block content %}
 <style>
-    /* Styling voor de Profile/Contact Grids */
+    /* Styling voor de Profile/Contact Grids (ongewijzigd) */
     .profile-header-grid {
         display: flex;
         gap: 30px;
         align-items: flex-start;
         margin-bottom: 20px;
-        /* Keert de volgorde om op desktop */
         flex-direction: row-reverse; 
     }
 
     .profile-media {
         flex-shrink: 0;
-        /* AANGEPAST: Vergroot de breedte van de container */
         width: 200px; 
         padding-top: 10px;
-        /* NIEUW: Zorgt ervoor dat de inhoud van de media container gecentreerd is 
-                   (gezien de parent flex-direction: row-reverse heeft, is dit rechts) */
         display: flex;
         flex-direction: column;
         align-items: center;
     }
     
-    /* NIEUW: De profielfoto zelf groter maken */
     .profile-media img {
-        max-width: 180px !important; /* Grotere max breedte */
+        max-width: 180px !important; 
         width: 100% !important;
         height: auto !important;
-        /* Zorgt dat de cirkel behouden blijft */
         object-fit: cover;
     }
 
@@ -46,7 +40,6 @@
         margin-top: 15px;
     }
     
-    /* Zorgt ervoor dat de naam/details op breed scherm links uitlijnen */
     .profile-details h3 {
         margin-top: 0;
     }
@@ -54,13 +47,11 @@
     /* Responsiviteit */
     @media (max-width: 600px) {
         .profile-header-grid {
-            /* Zorgt ervoor dat op mobiel de foto weer BOVENAAN komt */
             flex-direction: column; 
             gap: 20px;
         }
         .profile-media {
             width: 100%;
-            /* Op mobiel de foto weer links uitlijnen */
             align-items: flex-start; 
             padding-top: 0;
         }
@@ -68,13 +59,6 @@
 </style>
 
 <h1>Dashboard</h1>
-
-{# DEZE SECTIE IS VERWIJDERD: HET WELKOM BERICHT IS NU ENKEL DE FLASH MESSAGE #}
-{# 
-{% if user %}
-    <p>Welcome, <strong>{{ user.username }}</strong>!</p>
-{% endif %} 
-#}
 
 <div class="card">
     <h2>Profile Details</h2>
@@ -86,9 +70,10 @@
         
         <hr>
 
+        {# CONSULTANT SECTION: Basis Details, Media #}
         <div class="profile-header-grid">
             
-            {# 1. PROFIELFOTO (Rechts op desktop) #}
+            {# PROFIELFOTO (Rechts op desktop) #}
             <div class="profile-media">
                 {% if profile.profile_image %}
                     <img
@@ -105,7 +90,7 @@
                 {% endif %}
             </div>
 
-            {# 2. BASIS DETAILS (Links op desktop) #}
+            {# BASIS DETAILS (Links op desktop) #}
             <div class="profile-details">
                 <h3>Consultant Details</h3>
                 <p><strong>Name:</strong> {{ profile.display_name_masked }}</p>
@@ -130,7 +115,7 @@
         
         <hr>
         
-        {# 3. CV DOCUMENT #}
+        {# CV DOCUMENT #}
         <h3 style="margin-top: 20px;">Documents</h3>
         {% if profile.cv_document %}
             <p>
@@ -145,7 +130,7 @@
         
         <hr>
         
-        {# 4. CONTACT & BESCHIKBAARHEID #}
+        {# CONTACT & BESCHIKBAARHEID #}
         <h3 style="margin-top: 20px;">Contact & Availability</h3>
         <div class="contact-details-grid">
             <div>
@@ -166,7 +151,7 @@
             </div>
         </div>
 
-        {# 5. COLLABORATIONS #}
+        {# COLLABORATIONS #}
         {% if consultant_active_collaborations is defined and consultant_active_collaborations %}
             <hr>
             <h3 style="margin-top: 20px;">Active Collaborations</h3>
@@ -178,23 +163,26 @@
             </p>
         {% endif %}
 
-        {# 6. EDIT KOPPELINGEN #}
+        {# EDIT KOPPELINGEN #}
         <div style="margin-top: 20px;">
             <a class="btn" href="{{ url_for('main.edit_consultant_profile') }}">Edit Profile</a>
             <a class="btn" href="{{ url_for('main.edit_consultant_skills') }}">Edit Skills</a>
         </div>
         
-
     {% endif %}
 
 
     {% if user.role == UserRole.company %}
+        
+        {# COMPANY DETAILS #}
         <hr>
-        <h3>Company Details</h3>
+        <h3 style="margin-top: 20px;">Company Details</h3>
         
         <p><strong>Company name:</strong> {{ company.company_name_masked }}</p>
         <p><strong>Sector:</strong> {{ company.industry or "Not filled in" }}</p>
 
+        {# CONTACT INFORMATION (NU BINNEN EEN DUIDELIJKE SECTIE) #}
+        <hr>
         <h3 style="margin-top: 20px;">Contact Information</h3>
         <div class="contact-details-grid">
             <div>
@@ -205,7 +193,7 @@
             </div>
         </div>
 
-        {# 🔹 Active collaborations #}
+        {# Active collaborations #}
         {% if company_active_collaborations is defined and company_active_collaborations %}
             <hr>
             <h3 style="margin-top: 20px;">Active Collaborations</h3>
