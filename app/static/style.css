@@ -6,6 +6,21 @@
     --card-bg: #ffffff;
     --border: #e5e7eb;
 }
+/* Extra kleur-variabelen voor hero & gradients */
+:root {
+    --color-primary: #60a5fa;     /* light blue accent */
+    --color-secondary: #2563eb;   /* deep blue CTA */
+    --color-text: #1f2937;
+    --color-muted: #4b5563;
+    --color-bg-light: #f3f4f6;
+
+    /* NIEUW: gradient thema */
+    --gradient-primary: linear-gradient(135deg, #2563eb, #4f46e5);
+    --gradient-soft: linear-gradient(135deg, rgba(37,99,235,0.10), rgba(79,70,229,0.12));
+    --gradient-hero: radial-gradient(circle at top left, rgba(248,250,252,0.18), transparent 55%),
+                     linear-gradient(to bottom right, rgba(37,99,235,0.85), rgba(79,70,229,0.70));
+}
+
 
 /* ===== GENERIC ===== */
 body {
@@ -27,11 +42,15 @@ main {
 
 /* ===== NAVBAR ===== */
 header {
-    background: var(--blue);
+    background: var(--gradient-primary);   /* paars-blauw */
     color: #fff;
     padding: 12px 20px;
+
+    /* subtielere diepte, minder zwaar dan vorige versie */
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
 }
 
+/* behoudt exact jouw layout */
 nav {
     display: flex;
     align-items: center;
@@ -50,25 +69,36 @@ nav {
     display: block;
 }
 
+/* ===== NAV LINKS ===== */
 nav a {
-    color: #fff;
+    color: #eef2ff;               /* lichter blauw/wit */
     text-decoration: none;
     font-weight: 500;
-    padding: 6px 10px;
-    border-radius: 6px;
-    transition: background 0.2s;
+    padding: 6px 14px;
+    border-radius: 999px;
+
+    /* nieuwe overgang: smooth & modern */
+    transition: 
+        background 0.25s ease,
+        transform 0.15s ease,
+        box-shadow 0.25s ease;
 }
 
+/* hover krijgt subtiele paarse-blauwe glans */
 nav a:hover {
-    background: rgba(255, 255, 255, 0.15);
+    background: var(--gradient-soft);
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.35);
+    transform: translateY(-1px);
 }
 
+/* ===== RIGHT SIDE (login/logout) ===== */
 .nav-right {
     margin-left: auto;
     display: flex;
     align-items: center;
     gap: 12px;
 }
+
 
 /* ===== BUTTONS ===== */
 .btn {
@@ -1740,5 +1770,256 @@ nav a:hover {
 
     .hero-stats-grid {
         grid-template-columns: 1fr;
+    }
+}
+/* ===== Fancy header in filter card ===== */
+
+.filter-form {
+    position: relative;
+    overflow: hidden;
+}
+
+/* dun kleurbalkje bovenaan de kaart */
+.filter-form::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #2563eb, #60a5fa, #a855f7);
+}
+
+/* header zelf */
+.filter-form-header {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 18px;
+    padding: 6px 6px 14px 6px;
+    border-bottom: 1px dashed #d1d5db;
+}
+
+.filter-form-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    background: #e0f2fe;
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+}
+
+.filter-form-title {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #111827;
+}
+
+.filter-form-subtitle {
+    margin: 2px 0 0;
+    font-size: 0.9rem;
+    color: #6b7280;
+}
+
+.filter-form-tag {
+    font-size: 0.8rem;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: #eef2ff;
+    color: #4f46e5;
+    font-weight: 600;
+    border: 1px solid #c7d2fe;
+}
+
+/* ===== Match based on job post row ===== */
+
+.match-job-row {
+    display: grid;
+    grid-template-columns: minmax(190px, 1.4fr) minmax(200px, 1.6fr);
+    gap: 16px;
+    padding: 14px 14px;
+    margin-bottom: 18px;
+    border-radius: 12px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 3px 10px rgba(15, 23, 42, 0.05);
+}
+
+.match-job-label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.match-job-pill {
+    display: inline-flex;
+    align-items: center;
+    font-weight: 700;
+    font-size: 0.95rem;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+}
+
+.match-job-help {
+    margin: 0;
+    font-size: 0.88rem;
+    color: #6b7280;
+}
+
+.match-job-select .form-control-select {
+    height: 44px;
+    font-size: 0.95rem;
+}
+
+/* responsive voor match-job-row */
+@media (max-width: 768px) {
+    .match-job-row {
+        grid-template-columns: 1fr;
+    }
+}
+/* ===== Centered, impressive mode selector (jobs & consultants) ===== */
+
+.mode-selector-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 25px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.mode-selector-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #4b5563;
+}
+
+.mode-selector-buttons {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+/* upgrade de knoppen zelf */
+.mode-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 28px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 1.02rem;
+    text-decoration: none;
+    border: 2px solid transparent;
+    box-shadow: 0 4px 10px rgba(15,23,42,0.12);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+}
+
+.active-mode {
+    background: linear-gradient(135deg, #2563eb, #4f46e5);
+    color: #ffffff;
+    border-color: rgba(59,130,246,0.9);
+    box-shadow: 0 8px 20px rgba(37,99,235,0.45);
+}
+
+.inactive-mode {
+    background: #f3f4ff;
+    color: #1d4ed8;
+    border-color: #c7d2fe;
+}
+
+.mode-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(15,23,42,0.18);
+}
+
+/* op mobiel knoppen full-width onder elkaar */
+@media (max-width: 480px) {
+    .mode-selector-buttons {
+        width: 100%;
+        flex-direction: column;
+    }
+    .mode-btn {
+        width: 100%;
+    }
+}
+/* ===== Centered, impressive mode selector (jobs & consultants) ===== */
+
+.mode-selector-container {
+    margin-bottom: 25px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: center;          /* center de knoppen zonder flex-column */
+}
+
+.mode-selector-title {
+    margin: 0 0 4px 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #4b5563;
+}
+
+/* wrapper gebruik ik enkel op jobs-page; consultants hebben gewoon de <a>’s direct */
+.mode-selector-buttons {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+/* upgrade de knoppen zelf */
+.mode-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 28px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 1.02rem;
+    text-decoration: none;
+    border: 2px solid transparent;
+    box-shadow: 0 4px 10px rgba(15,23,42,0.12);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+}
+
+.active-mode {
+    background: linear-gradient(135deg, #2563eb, #4f46e5);
+    color: #ffffff;
+    border-color: rgba(59,130,246,0.9);
+    box-shadow: 0 8px 20px rgba(37,99,235,0.45);
+}
+
+.inactive-mode {
+    background: #f3f4ff;
+    color: #1d4ed8;
+    border-color: #c7d2fe;
+}
+
+.mode-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(15,23,42,0.18);
+}
+
+/* mobiel: knoppen netjes onder elkaar, dat mag */
+@media (max-width: 480px) {
+    .mode-selector-buttons {
+        width: 100%;
+        flex-direction: column;
+    }
+    .mode-btn {
+        width: 100%;
     }
 }

@@ -25,7 +25,7 @@
 <form method="GET" action="{{ url_for('main.consultants_list') }}" class="filter-form">
     <input type="hidden" name="sort_by" value="{{ current_sort }}">
 
-    {# 🔹 Job-selector voor matching #}
+    {# Job-selector voor matching, zonder emoji en zonder extra tekst #}
     {% if company_jobs is defined and company_jobs %}
         <div class="top-filter-row" style="margin-bottom: 10px;">
             <div class="top-filter-left">
@@ -41,9 +41,6 @@
                         </option>
                     {% endfor %}
                 </select>
-                <p class="selected-job-hint">
-                    Matches are calculated using the required skills of the selected job post.
-                </p>
             </div>
         </div>
     {% endif %}
@@ -227,7 +224,6 @@
                         <div class="score-breakdown">
                             {% set total_score_perc = (c.score * 100) %}
 
-                            {# SKILLS #}
                             <div class="bar-item">
                                 {% set skill_pct = (c.score_breakdown.skill_factor * 100) %}
                                 <span class="bar-label">
@@ -240,7 +236,6 @@
                                 </div>
                             </div>
 
-                            {# SEARCH TERM #}
                             <div class="bar-item">
                                 {% set text_pct = (c.score_breakdown.text_factor * 100) %}
                                 <span class="bar-label">
@@ -253,7 +248,6 @@
                                 </div>
                             </div>
 
-                            {# RECENCY #}
                             <div class="bar-item">
                                 {% set recency_pct = (c.score_breakdown.recency_factor * 100) %}
                                 <span class="bar-label">
@@ -266,7 +260,6 @@
                                 </div>
                             </div>
 
-                            {# POPULARITY #}
                             <div class="bar-item">
                                 {% set popularity_pct = (c.score_breakdown.popularity_factor * 100) %}
                                 <span class="bar-label">

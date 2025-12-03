@@ -12,17 +12,21 @@
 
 {% if show_mode_selector %}
 <div class="mode-selector-container">
-    <h2 class="h5"></h2>
+    <h2 class="mode-selector-title">
+        Choose your matching mode
+    </h2>
 
-    <a href="{{ url_for('main.jobs_list', sort_by='relevance') }}"
-       class="mode-btn {% if current_sort == 'relevance' %}active-mode{% else %}inactive-mode{% endif %}">
-        🧠 IConsult Match
-    </a>
+    <div class="mode-selector-buttons">
+        <a href="{{ url_for('main.jobs_list', sort_by='relevance') }}"
+           class="mode-btn {% if current_sort == 'relevance' %}active-mode{% else %}inactive-mode{% endif %}">
+            🧠 IConsult Match
+        </a>
 
-    <a href="{{ url_for('main.jobs_list', sort_by='title') }}"
-       class="mode-btn {% if current_sort != 'relevance' %}active-mode{% else %}inactive-mode{% endif %}">
-        🔧 Manual filter & sorting
-    </a>
+        <a href="{{ url_for('main.jobs_list', sort_by='title') }}"
+           class="mode-btn {% if current_sort != 'relevance' %}active-mode{% else %}inactive-mode{% endif %}">
+            🔧 Manual filter & sorting
+        </a>
+    </div>
 </div>
 {% endif %}
 
@@ -38,6 +42,37 @@
         </div>
 
     {% else %}
+        {# ===== Fancy header in filter card (zoals bij consultants) ===== #}
+        <div class="filter-form-header">
+            <div class="filter-form-icon">
+                {% if current_sort == 'relevance' %}
+                    🧠
+                {% else %}
+                    🔧
+                {% endif %}
+            </div>
+            <div class="filter-form-text">
+                {% if current_sort == 'relevance' %}
+                    <h3 class="filter-form-title">Smart job matching</h3>
+                    <p class="filter-form-subtitle">
+                        Use search terms, contract type and distance to calculate your personalised IConsult match.
+                    </p>
+                {% else %}
+                    <h3 class="filter-form-title">Manual job filtering</h3>
+                    <p class="filter-form-subtitle">
+                        Combine search terms contract type, distance and skills to build a precise job shortlist.
+                    </p>
+                {% endif %}
+            </div>
+            <span class="filter-form-tag">
+                {% if current_sort == 'relevance' %}
+                    Auto-match mode
+                {% else %}
+                    Manual mode
+                {% endif %}
+            </span>
+        </div>
+
         {# distance slider value #}
         {% set current_distance = request.args.get('max_distance_km', '') %}
         {% if current_distance == '' %}
@@ -134,7 +169,7 @@
         {% else %}
             <div class="center-button-row">
                 <button type="submit" class="btn btn-primary center-isc-score-btn">
-                    Calculate IConsult score
+                    🧠 Calculate IConsult score
                 </button>
             </div>
         {% endif %}
@@ -344,4 +379,3 @@
 </script>
 
 {% endblock %}
-
