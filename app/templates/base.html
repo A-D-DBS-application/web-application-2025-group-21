@@ -32,15 +32,17 @@
                 <a href="{{ url_for('main.jobs_list') }}">Jobs</a>
             {% endif %}
 
-            <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
-
             {% if session.get("role") == "admin" %}
                 <a href="{{ url_for('main.admin_dashboard') }}">Admin</a>
             {% endif %}
 
-            <!-- LOGIN / LOGOUT -->
+            <!-- RECHTSBOVEN: My profile + Logout / Login -->
             <div class="nav-right">
                 {% if session.get('user_id') %}
+                    <a href="{{ url_for('main.dashboard') }}" class="nav-link">
+                        My profile
+                    </a>
+
                     <form action="{{ url_for('main.logout') }}" method="post">
                         <button class="btn" type="submit">Logout</button>
                     </form>
@@ -56,15 +58,14 @@
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, m in messages %}
-                    {# Bepaal eventueel een doel-URL #}
                     {% set target_url = '' %}
+
                     {% if 'warning-link-profile' in category %}
                         {% set target_url = url_for('main.edit_consultant_profile') if session.get('role') == 'consultant' else url_for('main.edit_company_profile') %}
                     {% elif 'warning-link-skills' in category %}
                         {% set target_url = url_for('main.edit_consultant_skills') %}
                     {% endif %}
 
-                    {# Bepaal CSS-klassen voor de flash #}
                     {% set css_classes = 'flash' %}
                     {% if 'warning' in category %}
                         {% set css_classes = css_classes + ' flash-warning' %}
