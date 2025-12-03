@@ -5,22 +5,20 @@
     --text: #1f2937;
     --card-bg: #ffffff;
     --border: #e5e7eb;
-}
-/* Extra kleur-variabelen voor hero & gradients */
-:root {
+
+    /* Extra kleur-variabelen voor hero & gradients */
     --color-primary: #60a5fa;     /* light blue accent */
     --color-secondary: #2563eb;   /* deep blue CTA */
     --color-text: #1f2937;
     --color-muted: #4b5563;
     --color-bg-light: #f3f4f6;
 
-    /* NIEUW: gradient thema */
+    /* Gradient thema */
     --gradient-primary: linear-gradient(135deg, #2563eb, #4f46e5);
     --gradient-soft: linear-gradient(135deg, rgba(37,99,235,0.10), rgba(79,70,229,0.12));
     --gradient-hero: radial-gradient(circle at top left, rgba(248,250,252,0.18), transparent 55%),
                      linear-gradient(to bottom right, rgba(37,99,235,0.85), rgba(79,70,229,0.70));
 }
-
 
 /* ===== GENERIC ===== */
 body {
@@ -45,12 +43,9 @@ header {
     background: var(--gradient-primary);   /* paars-blauw */
     color: #fff;
     padding: 12px 20px;
-
-    /* subtielere diepte, minder zwaar dan vorige versie */
     box-shadow: 0 6px 12px rgba(0,0,0,0.15);
 }
 
-/* behoudt exact jouw layout */
 nav {
     display: flex;
     align-items: center;
@@ -76,15 +71,12 @@ nav a {
     font-weight: 500;
     padding: 6px 14px;
     border-radius: 999px;
-
-    /* nieuwe overgang: smooth & modern */
-    transition: 
+    transition:
         background 0.25s ease,
         transform 0.15s ease,
         box-shadow 0.25s ease;
 }
 
-/* hover krijgt subtiele paarse-blauwe glans */
 nav a:hover {
     background: var(--gradient-soft);
     box-shadow: 0 4px 10px rgba(37, 99, 235, 0.35);
@@ -98,7 +90,6 @@ nav a:hover {
     align-items: center;
     gap: 12px;
 }
-
 
 /* ===== BUTTONS ===== */
 .btn {
@@ -192,12 +183,11 @@ nav a:hover {
     border-spacing: 0;
 }
 
-/* desktop: nette tabel, tekst netjes in het vak */
 .admin-table th,
 .admin-table td {
     padding: 10px 16px;
-    white-space: normal;          /* tekst mag afbreken */
-    word-break: break-word;       /* lange woorden (timestamps) breken netjes */
+    white-space: normal;
+    word-break: break-word;
     text-align: left;
     vertical-align: middle;
     font-size: 0.95rem;
@@ -211,7 +201,6 @@ nav a:hover {
 .admin-table td {
     border-bottom: 1px solid #f3f4f6;
 }
-
 
 .admin-table th:nth-child(1),
 .admin-table td:nth-child(1) { width: 18%; }
@@ -337,7 +326,6 @@ nav a:hover {
     }
 }
 
-
 /* ===== CONSULTANT DETAIL ===== */
 .consultant-photo {
     max-width: 140px;
@@ -428,6 +416,7 @@ nav a:hover {
     gap: 8px;
     margin-bottom: 10px;
 }
+
 .progress-bar-container {
     height: 14px;
     border-radius: 7px;
@@ -435,6 +424,7 @@ nav a:hover {
     overflow: hidden;
     box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
 }
+
 .progress-bar {
     height: 100%;
     border-radius: 7px;
@@ -442,6 +432,7 @@ nav a:hover {
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     min-width: 5px;
 }
+
 .skill-bar      { background-color: #38c172 !important; }
 .text-bar       { background-color: #ffc107 !important; }
 .recency-bar    { background-color: #17a2b8 !important; }
@@ -454,6 +445,7 @@ nav a:hover {
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 25px;
 }
+
 .consultant-card {
     background: #ffffff;
     border: 1px solid #dce6f5;
@@ -465,10 +457,12 @@ nav a:hover {
     flex-direction: column;
     align-items: flex-start;
 }
+
 .consultant-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 10px 20px rgba(0,0,0,0.12);
 }
+
 
 /* unlocked card – light green */
 .unlocked-card {
@@ -689,6 +683,7 @@ nav a:hover {
     display: flex;
     flex-direction: column;
 }
+
 
 /* manual grid */
 .manual-filter-grid {
@@ -1885,25 +1880,25 @@ nav a:hover {
         grid-template-columns: 1fr;
     }
 }
-/* ===== Centered, impressive mode selector (jobs & consultants) ===== */
+/* ===== Mode selector (IConsult Match / Manual) ===== */
 
 .mode-selector-container {
     display: flex;
-    flex-direction: column;
+    justify-content: center;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     margin-bottom: 25px;
     padding-bottom: 18px;
     border-bottom: 1px solid #e5e7eb;
+    text-align: center;
 }
 
-.mode-selector-title {
-    margin: 0;
-    font-size: 1rem;
-    font-weight: 600;
-    color: #4b5563;
+/* eventueel lege <h2> verbergen (companies/consultants) */
+.mode-selector-container h2 {
+    display: none;
 }
 
+/* jobs-pagina gebruikt deze wrapper, consultants niet – beide werken */
 .mode-selector-buttons {
     display: inline-flex;
     justify-content: center;
@@ -1912,7 +1907,7 @@ nav a:hover {
     flex-wrap: wrap;
 }
 
-/* upgrade de knoppen zelf */
+/* de knoppen zelf */
 .mode-btn {
     display: inline-flex;
     align-items: center;
@@ -1924,7 +1919,11 @@ nav a:hover {
     text-decoration: none;
     border: 2px solid transparent;
     box-shadow: 0 4px 10px rgba(15,23,42,0.12);
-    transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease,
+        background 0.18s ease,
+        border-color 0.18s ease;
 }
 
 .active-mode {
@@ -1945,78 +1944,9 @@ nav a:hover {
     box-shadow: 0 10px 24px rgba(15,23,42,0.18);
 }
 
-/* op mobiel knoppen full-width onder elkaar */
+/* mobiel: knoppen netjes onder elkaar en full-width */
 @media (max-width: 480px) {
-    .mode-selector-buttons {
-        width: 100%;
-        flex-direction: column;
-    }
-    .mode-btn {
-        width: 100%;
-    }
-}
-/* ===== Centered, impressive mode selector (jobs & consultants) ===== */
-
-.mode-selector-container {
-    margin-bottom: 25px;
-    padding-bottom: 18px;
-    border-bottom: 1px solid #e5e7eb;
-    text-align: center;          /* center de knoppen zonder flex-column */
-}
-
-.mode-selector-title {
-    margin: 0 0 4px 0;
-    font-size: 1rem;
-    font-weight: 600;
-    color: #4b5563;
-}
-
-/* wrapper gebruik ik enkel op jobs-page; consultants hebben gewoon de <a>’s direct */
-.mode-selector-buttons {
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-
-/* upgrade de knoppen zelf */
-.mode-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 12px 28px;
-    border-radius: 999px;
-    font-weight: 700;
-    font-size: 1.02rem;
-    text-decoration: none;
-    border: 2px solid transparent;
-    box-shadow: 0 4px 10px rgba(15,23,42,0.12);
-    transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, border-color 0.18s ease;
-}
-
-.active-mode {
-    background: linear-gradient(135deg, #2563eb, #4f46e5);
-    color: #ffffff;
-    border-color: rgba(59,130,246,0.9);
-    box-shadow: 0 8px 20px rgba(37,99,235,0.45);
-}
-
-.inactive-mode {
-    background: #f3f4ff;
-    color: #1d4ed8;
-    border-color: #c7d2fe;
-}
-
-.mode-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 24px rgba(15,23,42,0.18);
-}
-
-/* mobiel: knoppen netjes onder elkaar, dat mag */
-@media (max-width: 480px) {
-    .mode-selector-buttons {
-        width: 100%;
+    .mode-selector-container {
         flex-direction: column;
     }
     .mode-btn {
