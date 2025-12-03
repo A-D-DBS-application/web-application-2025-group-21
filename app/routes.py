@@ -249,7 +249,26 @@ def company_jobs_list():
 
 @main.route("/", methods=["GET"])
 def index():
-    return render_template("index.html")
+    with get_session() as db:
+        # aantal consultants die beschikbaar staan
+        open_consultants_count = (
+            db.query(func.count(ConsultantProfile.id))
+            .filter(ConsultantProfile.availability == True)
+            .scalar()
+        )
+
+        # aantal actieve jobs
+        active_jobs_count = (
+            db.query(func.count(JobPost.id))
+            .filter(JobPost.is_active == True)
+            .scalar()
+        )
+
+        return render_template(
+            "index.html",
+            open_consultants_count=open_consultants_count,
+            active_jobs_count=active_jobs_count,
+        )
 
 
 # ------------------ LOGIN / LOGOUT ------------------

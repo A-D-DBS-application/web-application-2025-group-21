@@ -371,6 +371,26 @@ nav a:hover {
 .relevance-badge i { margin-right: 8px; }
 
 /* SCORE BREAKDOWN */
+.bar-label {
+    font-weight: 600;
+    color: #333;
+    display: flex;
+    align-items: center;
+}
+
+.bar-label .bar-value {
+    margin-left: auto;
+    font-weight: 600;
+    color: #1f2937;
+    font-size: 0.9rem;
+}
+
+.selected-job-hint {
+    margin-top: 6px;
+    font-size: 0.9rem;
+    color: #4b5563;
+}
+
 .bar-item {
     display: grid;
     grid-template-columns: 160px 1fr;
@@ -919,6 +939,24 @@ nav a:hover {
     margin: 0 !important;
     padding: 0 !important;
 }
+/* Stats on homepage */
+.isc-stat-card {
+    text-align: left;
+}
+
+.isc-stat-number {
+    font-size: 2.4rem;
+    font-weight: 800;
+    margin: 6px 0 4px;
+    color: var(--color-secondary);
+}
+
+.isc-stat-caption {
+    margin: 0;
+    color: var(--color-muted);
+    font-size: 0.95rem;
+}
+
 
 /* Extra kleur-variabelen voor hero */
 :root {
@@ -1589,5 +1627,118 @@ nav a:hover {
     /* zorg dat de filterkaart altijd duidelijk onder de knoppen start */
     .filter-form {
         margin-top: 16px;
+    }
+}
+.isc-card h3 {
+    margin-top: 0;
+    margin-bottom: 8px;
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+.isc-summary h3 {
+    margin-top: 0;
+    margin-bottom: 8px;
+    font-size: 1.1rem;
+}
+
+.hero-stats-panel {
+    position: absolute;
+    right: 6%;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 3;
+    max-width: 360px;
+}
+
+.hero-stats-label {
+    margin: 0 0 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #e5e7eb;
+}
+
+.hero-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+/* Zorg dat stats op mobiel onder de hero komen */
+@media (max-width: 768px) {
+    .hero-stats-panel {
+        position: static;
+        transform: none;
+        max-width: 100%;
+        padding: 0 18px 24px 18px;
+        margin-top: -40px;
+    }
+
+    .hero-stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+/* ================= HERO STATS PANEL (BIGGER + HIGHER) ================= */
+
+.hero-stats-panel {
+    position: absolute;
+    right: 6%;
+    top: 35%;                 /* hoger */
+    transform: translateY(-35%);
+    z-index: 3;
+    max-width: 420px;         /* groter */
+}
+
+.hero-stats-label {
+    margin: 0 0 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.hero-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+
+.hero-stat-card {
+    padding: 26px !important;        /* kaart groter */
+    border-radius: 18px !important;  /* mooi afgerond */
+}
+
+.hero-stat-card .isc-stat-number {
+    font-size: 3rem !important;      /* getallen groter */
+    margin-bottom: 6px;
+}
+
+.hero-stat-card h3 {
+    font-size: 1.15rem;
+    font-weight: 800;
+    margin-bottom: 10px;
+}
+
+.hero-stat-card p {
+    font-size: 0.95rem;
+}
+
+
+/* MOBILE (verplaatst naar onder hero) */
+@media (max-width: 768px) {
+
+    .hero-stats-panel {
+        position: static;
+        transform: none;
+        max-width: 100%;
+        padding: 0 18px 24px;
+        margin-top: -30px;
+    }
+
+    .hero-stats-grid {
+        grid-template-columns: 1fr;
     }
 }

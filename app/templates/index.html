@@ -10,11 +10,10 @@
     <div class="hero-hero">
         <div class="hero-overlay"></div>
 
+        <!-- LEFT SIDE CONTENT -->
         <div class="hero-inner">
-            <!-- Logo on top of the hero image -->
             <img src="{{ url_for('static', filename='logo.png') }}" class="hero-logo" alt="IConsult logo">
 
-            <!-- Hidden H1 for SEO -->
             <h1 class="hero-title-hidden">IConsult</h1>
 
             <p class="hero-subtitle">
@@ -23,72 +22,108 @@
             </p>
 
             {% if not session.get("user_id") %}
-                <!-- Not logged in -->
                 <a href="{{ url_for('main.login') }}" class="hero-cta-btn">
                     Start your IConsult journey →
                 </a>
             {% else %}
-                <!-- Logged in -->
                 {% if session.get('role') == 'consultant' %}
                     <a href="{{ url_for('main.jobs_list') }}" class="hero-secondary-btn">
-                        Search Jobs →
+                        Search jobs →
                     </a>
                 {% elif session.get('role') == 'company' %}
                     <a href="{{ url_for('main.consultants_list') }}" class="hero-secondary-btn">
-                        Search Consultants →
+                        Search consultants →
                     </a>
                 {% endif %}
             {% endif %}
         </div>
 
+        <!-- RIGHT-SIDE LIVE STATUS PANEL -->
+        <div class="hero-stats-panel">
+
+            <p class="hero-stats-label">🟢 Live platform status</p>
+
+            <div class="hero-stats-grid">
+
+                <!-- Consultants available -->
+                <article class="isc-card isc-stat-card hero-stat-card">
+                    <h3>👩‍💻 Consultants available</h3>
+                    <div class="isc-stat-number">
+                        {{ open_consultants_count }}
+                    </div>
+                    <p class="isc-stat-caption">
+                        consultants currently open for new projects.
+                    </p>
+                </article>
+
+                <!-- Open job posts -->
+                <article class="isc-card isc-stat-card hero-stat-card">
+                    <h3>🏢 Open job posts</h3>
+                    <div class="isc-stat-number">
+                        {{ active_jobs_count }}
+                    </div>
+                    <p class="isc-stat-caption">
+                        active job posts from companies.
+                    </p>
+                </article>
+
+            </div>
+        </div>
+
         <div class="hero-scroll-hint">
-            Scroll down to learn how the IConsult Match works<br>
+            Scroll down to see how IConsult Match works<br>
             <i class="fas fa-chevron-down"></i>
         </div>
     </div>
 </section>
 
-<!-- ========================= HOW IT WORKS ========================= -->
-<section class="isc-section" id="isc-how-it-works">
-    <div class="isc-container">
-        <h2 class="isc-title">How the IConsult Match works</h2>
 
+
+<!-- ========================= MATCH SCORE SECTION ========================= -->
+<section class="isc-section" id="isc-match-score">
+    <div class="isc-container">
+        <h2 class="isc-title">How the IConsult Match score works</h2>
         <p class="isc-intro">
-            IConsult uses a transparent scoring system to match consultants and jobs.
-            Each result gets a score based on four weighted factors.
+            Each match receives a score between 0 and 100%.
+            We calculate this score using four weighted factors.
         </p>
 
         <div class="isc-grid">
             <article class="isc-card">
                 <h3>⭐ Skills match (50%)</h3>
-                <p>We compare the required job skills with the consultant profile.</p>
+                <p>The more required skills overlap with the profile, the higher the score.</p>
             </article>
 
             <article class="isc-card">
                 <h3>🔍 Search relevance (20%)</h3>
-                <p>Your search terms boost matches that contain your keywords.</p>
+                <p>Your search keywords boost results that contain your terms.</p>
             </article>
 
             <article class="isc-card">
                 <h3>⏰ Recency (20%)</h3>
-                <p>Newer profiles and jobs score higher.</p>
+                <p>Newer jobs and profiles rank higher, gradually decreasing over time.</p>
             </article>
 
             <article class="isc-card">
                 <h3>🔥 Popularity (10%)</h3>
-                <p>More unlocks give a small visibility boost.</p>
+                <p>Frequently unlocked profiles receive a small visibility boost.</p>
             </article>
         </div>
 
         <div class="isc-summary">
-            <h3>The IConsult score</h3>
+            <h3>Putting it all together</h3>
+            <p style="margin-bottom: 8px;">
+                <strong>Total Score = Skills (50%) + Text (20%) + Recency (20%) + Popularity (10%)</strong>
+            </p>
             <p>
-                The final match score is a combination of skills, search relevance,
-                recency and popularity — so you always see the most relevant results first.
+                This ensures the most relevant results appear first — balancing
+                <strong>hard requirements</strong> with real engagement.
             </p>
         </div>
     </div>
 </section>
+
+
 
 <!-- ========================= UNLOCKING SECTION ========================= -->
 <section class="isc-section" id="isc-unlocking">
@@ -96,29 +131,29 @@
         <h2 class="isc-title">The IConsult unlocking principle</h2>
 
         <p class="isc-intro">
-            Consultants and companies unlock each other based on match preference.
-            This keeps things private at first, and intentional when you decide to connect.
+            Privacy-first matchmaking. Consultants and companies can unlock each other
+            only when they intentionally choose to connect.
         </p>
 
         <div class="isc-grid">
             <article class="isc-card">
                 <h3>🙈 Privacy by default</h3>
-                <p>Initials only until unlocked — for both sides.</p>
+                <p>Both sides remain masked until a deliberate unlock.</p>
             </article>
 
             <article class="isc-card">
-                <h3>🔓 You choose who to unlock</h3>
-                <p>Reveal full details only when you decide.</p>
+                <h3>🔓 You decide who sees your details</h3>
+                <p>Your profile is only revealed when you unlock intentionally.</p>
             </article>
 
             <article class="isc-card">
                 <h3>🤝 Two-sided matching</h3>
-                <p>Consultants unlock jobs, and companies unlock consultants.</p>
+                <p>Companies can unlock consultants, and consultants can unlock job posts.</p>
             </article>
 
             <article class="isc-card">
                 <h3>🌟 Meaningful connections</h3>
-                <p>Unlocked profiles gain visibility and lead to real collaborations.</p>
+                <p>Unlocks boost visibility and lead to high-quality matches.</p>
             </article>
         </div>
     </div>

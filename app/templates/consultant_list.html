@@ -25,7 +25,7 @@
 <form method="GET" action="{{ url_for('main.consultants_list') }}" class="filter-form">
     <input type="hidden" name="sort_by" value="{{ current_sort }}">
 
-    {# 🔹 Job-selector voor matching (zonder "Use latest job automatically") #}
+    {# 🔹 Job-selector voor matching #}
     {% if company_jobs is defined and company_jobs %}
         <div class="top-filter-row" style="margin-bottom: 10px;">
             <div class="top-filter-left">
@@ -41,6 +41,9 @@
                         </option>
                     {% endfor %}
                 </select>
+                <p class="selected-job-hint">
+                    Matches are calculated using the required skills of the selected job post.
+                </p>
             </div>
         </div>
     {% endif %}
@@ -224,47 +227,55 @@
                         <div class="score-breakdown">
                             {% set total_score_perc = (c.score * 100) %}
 
+                            {# SKILLS #}
                             <div class="bar-item">
+                                {% set skill_pct = (c.score_breakdown.skill_factor * 100) %}
                                 <span class="bar-label">
-                                    <i class="fas fa-star"></i> Skills:
+                                    <i class="fas fa-star"></i> Skills
+                                    <span class="bar-value">{{ skill_pct | round(1) }}%</span>
                                 </span>
-                                {% set score_perc = (c.score_breakdown.skill_factor * 100) %}
                                 <div class="progress-bar-container">
                                     <div class="progress-bar skill-bar"
-                                         style="width: {{ score_perc | round(0) }}%;"></div>
+                                         style="width: {{ skill_pct | round(0) }}%;"></div>
                                 </div>
                             </div>
 
+                            {# SEARCH TERM #}
                             <div class="bar-item">
+                                {% set text_pct = (c.score_breakdown.text_factor * 100) %}
                                 <span class="bar-label">
-                                    <i class="fas fa-search"></i> Search term:
+                                    <i class="fas fa-search"></i> Search term
+                                    <span class="bar-value">{{ text_pct | round(1) }}%</span>
                                 </span>
-                                {% set score_perc = (c.score_breakdown.text_factor * 100) %}
                                 <div class="progress-bar-container">
                                     <div class="progress-bar text-bar"
-                                         style="width: {{ score_perc | round(0) }}%;"></div>
+                                         style="width: {{ text_pct | round(0) }}%;"></div>
                                 </div>
                             </div>
 
+                            {# RECENCY #}
                             <div class="bar-item">
+                                {% set recency_pct = (c.score_breakdown.recency_factor * 100) %}
                                 <span class="bar-label">
-                                    <i class="fas fa-clock"></i> Recency:
+                                    <i class="fas fa-clock"></i> Recency
+                                    <span class="bar-value">{{ recency_pct | round(1) }}%</span>
                                 </span>
-                                {% set score_perc = (c.score_breakdown.recency_factor * 100) %}
                                 <div class="progress-bar-container">
                                     <div class="progress-bar recency-bar"
-                                         style="width: {{ score_perc | round(0) }}%;"></div>
+                                         style="width: {{ recency_pct | round(0) }}%;"></div>
                                 </div>
                             </div>
 
+                            {# POPULARITY #}
                             <div class="bar-item">
+                                {% set popularity_pct = (c.score_breakdown.popularity_factor * 100) %}
                                 <span class="bar-label">
-                                    <i class="fas fa-fire"></i> Popularity:
+                                    <i class="fas fa-fire"></i> Popularity
+                                    <span class="bar-value">{{ popularity_pct | round(1) }}%</span>
                                 </span>
-                                {% set score_perc = (c.score_breakdown.popularity_factor * 100) %}
                                 <div class="progress-bar-container">
                                     <div class="progress-bar popularity-bar"
-                                         style="width: {{ score_perc | round(0) }}%;"></div>
+                                         style="width: {{ popularity_pct | round(0) }}%;"></div>
                                 </div>
                             </div>
 

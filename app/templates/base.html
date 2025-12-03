@@ -56,6 +56,7 @@
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, m in messages %}
+                    {# Bepaal eventueel een doel-URL #}
                     {% set target_url = '' %}
                     {% if 'warning-link-profile' in category %}
                         {% set target_url = url_for('main.edit_consultant_profile') if session.get('role') == 'consultant' else url_for('main.edit_company_profile') %}
@@ -63,13 +64,19 @@
                         {% set target_url = url_for('main.edit_consultant_skills') %}
                     {% endif %}
 
-                    {% if target_url %}
-                        <a href="{{ target_url }}" class="flash flash-warning">
-                            <strong style="color: #b90606;">Profile Incomplete:</strong> {{ m }} (Click here)
-                        </a>
-                    {% else %}
-                        <div class="flash {{ category }}">{{ m }}</div>
+                    {# Bepaal CSS-klassen voor de flash #}
+                    {% set css_classes = 'flash' %}
+                    {% if 'warning' in category %}
+                        {% set css_classes = css_classes + ' flash-warning' %}
                     {% endif %}
+
+                    <div class="{{ css_classes }}">
+                        {{ m }}
+                        {% if target_url %}
+                            <br>
+                            <a href="{{ target_url }}" class="flash-link">(Click here)</a>
+                        {% endif %}
+                    </div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
