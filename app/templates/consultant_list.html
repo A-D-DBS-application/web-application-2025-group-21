@@ -22,8 +22,28 @@
     </a>
 </div>
 
-<form method="GET" action="{{ url_for('main.consultants_list') }} " class="filter-form">
+<form method="GET" action="{{ url_for('main.consultants_list') }}" class="filter-form">
     <input type="hidden" name="sort_by" value="{{ current_sort }}">
+
+    {# 🔹 Job-selector voor matching (zonder "Use latest job automatically") #}
+    {% if company_jobs is defined and company_jobs %}
+        <div class="top-filter-row" style="margin-bottom: 10px;">
+            <div class="top-filter-left">
+                <label class="top-label" for="job_id">
+                    Match based on job post
+                </label>
+                <select id="job_id" name="job_id" class="form-control-select">
+                    {% for job in company_jobs %}
+                        <option value="{{ job.id }}"
+                            {% if selected_job_id is defined and selected_job_id == job.id %}selected{% endif %}>
+                            {{ job.title }}
+                            {% if job.location_city %} – {{ job.location_city }}{% endif %}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    {% endif %}
 
     {% set current_distance = request.args.get('max_distance_km', '') %}
     {% if current_distance == '' %}

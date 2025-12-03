@@ -640,28 +640,44 @@ def consultants_list():
         ignore_distance = request.args.get("ignore_distance") == "1"
         same_country_only = request.args.get("same_country_only") == "1"
 
-        # 3. Company-profiel (voor locatie & skills)
+        # 🔹 Nieuwe: expliciet gekozen job voor matching
+        selected_job_id = request.args.get("job_id", type=int)
+
+        # 3. Company-profiel (voor locatie & jobs)
         company_profile = db.query(Company).filter_by(user_id=user.id).first()
 
         required_job = None
         required_skill_ids = set()
+        company_jobs = []
 
         if company_profile:
-            # meest recente JobPost gelinkt aan dit Company ID
-            required_job = (
+            # alle jobs van dit bedrijf (nieuwste eerst)
+            company_jobs = (
                 db.query(JobPost)
                 .filter(JobPost.company_id == company_profile.id)
                 .order_by(JobPost.created_at.desc())
-                .first()
+                .all()
             )
+
+            # eerst proberen: job_id uit query
+            if selected_job_id:
+                required_job = next(
+                    (job for job in company_jobs if job.id == selected_job_id),
+                    None,
+                )
+
+            # geen geldige gekozen job → fallback: nieuwste job
+            if not required_job and company_jobs:
+                required_job = company_jobs[0]
 
             if required_job:
                 required_skill_ids = {s.id for s in required_job.skills}
 
+        # Als we in relevance-modus zitten maar geen job hebben
         if not required_job and sort_by == "relevance":
             flash(
                 _(
-                    "First, create a Job Post to enable the IConsult relevance filter based on your needs."
+                    "First, create a Job Post (or select one) to enable the IConsult relevance filter based on your needs."
                 )
             )
 
@@ -856,7 +872,7 @@ def consultants_list():
                 else c.user.username,
             )
 
-        # 7. Template Renderen
+        # 7. Template Renderen  ✅ altijd een return
         all_skills = db.query(Skill).order_by(Skill.name).all()
 
         return render_template(
@@ -865,8 +881,11 @@ def consultants_list():
             skills=all_skills,
             user=user,
             sort_by=sort_by,
+            company_jobs=company_jobs,
+            selected_job_id=selected_job_id,
             UserRole=UserRole,
         )
+
 
 
 # ------------------ COMPANY PROFILE ------------------
