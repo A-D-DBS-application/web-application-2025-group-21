@@ -4,241 +4,19 @@
     <meta charset="utf-8">
     <title>{% block title %}IConsult Match{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-   
-    {% set now = now() %}
 
-    <style>
-        :root {
-            --blue: #2563eb;
-            --blue-light: #3b82f6;
-            --bg: #f9fafb;
-            --text: #1f2937;
-            --card-bg: #ffffff;
-            --border: #e5e7eb;
-        }
-
-        body {
-            margin: 0;
-            font-family: system-ui, Arial, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* ===== NAVBAR ===== */
-        header {
-            background: var(--blue);
-            color: #fff;
-            padding: 12px 20px;
-        }
-
-        nav {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        /* Logo links vóór alle menu-items */
-        .nav-logo-link {
-            display: flex;
-            align-items: center;
-            margin-right: 10px;
-        }
-
-        .nav-logo {
-            height: 32px;
-            width: auto;
-            display: block;
-        }
-
-        nav a {
-            color: #fff;
-            text-decoration: none;
-            font-weight: 500;
-            padding: 6px 10px;
-            border-radius: 6px;
-            transition: background 0.2s;
-        }
-
-        nav a:hover {
-            background: rgba(255, 255, 255, 0.15);
-        }
-
-        /* Buttons */
-        .btn {
-            background: #fff;
-            color: var(--blue);
-            border: none;
-            padding: 7px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 500;
-            text-decoration: none;
-            transition: background 0.2s;
-        }
-
-        .btn:hover {
-            background: #e5e7eb;
-        }
-
-        /* RIGHT SIDE */
-        .nav-right {
-            margin-left: auto;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        /* MAIN CONTENT */
-        main {
-            max-width: 900px;
-            margin: 24px auto;
-            padding: 0 16px;
-            flex-grow: 1;
-        }
-
-        .flash {
-            background: #dbeafe;
-            border-left: 4px solid var(--blue);
-            padding: 12px 14px;
-            border-radius: 6px;
-            margin-bottom: 16px;
-        }
-
-        .flash-warning {
-            background: #fffbeb !important;
-            border-left: 4px solid #d92d06 !important;
-            color: #9f3c0a !important;
-            font-weight: 500;
-        }
-
-        .footer {
-            background-color: #f8f9fa;
-            border-top: 1px solid #e9ecef;
-            text-align: center;
-            padding: 20px 16px;
-            color: #6b7280;
-            margin-top: 40px;
-        }
-
-        .footer a {
-            color: #6b7280;
-            text-decoration: none;
-        }
-
-        .footer a:hover {
-            text-decoration: underline;
-            color: var(--blue);
-        }
-
-        .admin-container {
-            max-width: 1200px; /* genoeg ruimte voor 3 kaarten */
-            margin: 0 auto;
-        }
-
-        .admin-grid {
-            display: flex;
-            flex-wrap: nowrap; /* GEEN nieuwe rij */
-            justify-content: center;
-            gap: 20px;
-        }
-
-        .admin-grid .card {
-            width: 280px;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-        }
-        .status {
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-weight: 600;
-            display: inline-block;
-        }
-
-        .status.available {
-            background: #d1fae5;   /* lichtgroen */
-            color: #065f46;        /* donker groen */
-        }
-
-        .status.unavailable {
-            background: #fee2e2;   /* lichtrood */
-            color: #b91c1c;        /* donker rood */
-        }
-        .admin-table th,
-        .admin-table td {
-            padding: 14px 30px; /* meer horizontale ruimte */
-        }
-        .admin-table {
-            width: 100%;
-            table-layout: fixed;
-            border-collapse: collapse;
-        }
-
-        .admin-table th,
-        .admin-table td {
-            white-space: nowrap;
-        }
-
-        /* Kolombreedtes */
-        .admin-table th:nth-child(1),
-        .admin-table td:nth-child(1) {
-            width: 18%;
-        }
-        .admin-table th:nth-child(2),
-        .admin-table td:nth-child(2) {
-            width: 20%;
-        }
-        .admin-table th:nth-child(3),
-        .admin-table td:nth-child(3) {
-            width: 25%;
-        }
-        .admin-table th:nth-child(4),
-        .admin-table td:nth-child(4) {
-            width: 12%;
-        }
-        .admin-table th:nth-child(5),
-        .admin-table td:nth-child(5) {
-            width: 25%;
-        }
-        .blurred-photo {
-            filter: blur(12px);
-            pointer-events: none;
-        }
-       
-
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 600px) {
-
-            nav {
-                flex-wrap: wrap;
-                gap: 8px;
-            }
-
-            .nav-right {
-                width: 100%;
-                justify-content: flex-end;
-                margin-left: 0;
-            }
-
-            .nav-logo {
-                height: 26px;
-            }
-        }
-
-    </style>
+    <!-- Link naar externe CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
-<body>
+<body class="{% block body_class %}{% endblock %}">
 
+    {% set now = now() %}
+
+    <!-- NAVBAR -->
     <header>
         <nav>
-
-            <!-- LOGO (links, klikbaar) -->
+            <!-- LOGO -->
             <a href="{{ url_for('main.index') }}" class="nav-logo-link">
                 <img src="{{ url_for('static', filename='logo.png') }}" class="nav-logo" alt="IConsult">
             </a>
@@ -260,9 +38,8 @@
                 <a href="{{ url_for('main.admin_dashboard') }}">Admin</a>
             {% endif %}
 
-            <!-- RIGHT SIDE: LOGIN / LOGOUT -->
+            <!-- LOGIN / LOGOUT -->
             <div class="nav-right">
-
                 {% if session.get('user_id') %}
                     <form action="{{ url_for('main.logout') }}" method="post">
                         <button class="btn" type="submit">Logout</button>
@@ -270,41 +47,37 @@
                 {% else %}
                     <a class="btn" href="{{ url_for('main.login') }}">Login</a>
                 {% endif %}
-
             </div>
-
         </nav>
     </header>
 
-<main>
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, m in messages %}
-                    {# 1. Bepaal de doel-URL op basis van de categorie #}
+    <!-- MAIN CONTENT -->
+    <main>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, m in messages %}
                     {% set target_url = '' %}
                     {% if 'warning-link-profile' in category %}
                         {% set target_url = url_for('main.edit_consultant_profile') if session.get('role') == 'consultant' else url_for('main.edit_company_profile') %}
                     {% elif 'warning-link-skills' in category %}
                         {% set target_url = url_for('main.edit_consultant_skills') %}
                     {% endif %}
-                    
-                    {# 2. Toon de link als het een waarschuwing is, anders de standaard div #}
+
                     {% if target_url %}
-                        <a href="{{ target_url }}" class="flash flash-warning" 
-                           style="cursor: pointer; text-decoration: none; display: block;">
-                            <strong style="color: #b90606;">Profile Incomplete:</strong> {{ m }} 
-                            (Click here to update)
+                        <a href="{{ target_url }}" class="flash flash-warning">
+                            <strong style="color: #b90606;">Profile Incomplete:</strong> {{ m }} (Click here)
                         </a>
                     {% else %}
-                        <div class="flash {{ category }}">{{ m }}</div>
+                        <div class="flash {{ category }}">{{ m }}</div>
                     {% endif %}
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
 
         {% block content %}{% endblock %}
     </main>
 
+    <!-- FOOTER -->
     <footer class="footer">
         <div class="container text-center">
             <span class="text-muted">

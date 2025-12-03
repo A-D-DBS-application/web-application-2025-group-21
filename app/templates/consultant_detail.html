@@ -1,21 +1,21 @@
 {% extends "base.html" %}
 {% block title %}Consultant detail{% endblock %}
+
 {% block content %}
   <h1>{{ profile.display_name_masked }}</h1>
+
   {# --------- Profielfoto --------- #}
   {% if profile.profile_image %}
     <img
         src="{{ profile.profile_image }}"
         alt="Profile picture"
-        class="{% if not is_unlocked and not is_owner %}blurred-photo{% endif %}"
-        style="max-width:140px; width:100%; height:auto; border-radius:50%; object-fit:cover; margin-bottom:15px;"
+        class="consultant-photo {% if not is_unlocked and not is_owner %}blurred-photo{% endif %}"
     >
   {% else %}
     <img
         src="{{ url_for('static', filename='img/default-avatar.png') }}"
         alt="No profile picture"
-        class="{% if not is_unlocked and not is_owner %}blurred-photo{% endif %}"
-        style="max-width:140px; width:100%; height:auto; border-radius:50%; object-fit:cover; margin-bottom:12px;"
+        class="consultant-photo {% if not is_unlocked and not is_owner %}blurred-photo{% endif %}"
     >
   {% endif %}
 
@@ -41,17 +41,18 @@
       {{ profile.country }}
     </small>
   </p>
-<div class="card">
+
+  <div class="card">
     <h2>Contact details</h2>
-   
-    {# 1. Controleert: Is de bezoeker een Bedrijf? #}
+
+    {# 1. Bezoeker is een Company #}
     {% if user and user.role == UserRole.company %}
-       
-        {# Toon contactgegevens indien ONTGRENDELD of de EIGENAAR #}
+
+        {# Contactgegevens tonen als unlocked of eigenaar #}
         {% if is_unlocked or is_owner %}
             <p><strong>E-mail:</strong> {{ profile.contact_email or "Not filled in" }}</p>
             <p><strong>Phone:</strong> {{ profile.phone_number or "Not filled in" }}</p>
-           
+
             {% if profile.cv_document %}
                 <p>
                     <strong>CV:</strong>
@@ -66,21 +67,24 @@
             {% if is_unlocked %}
                 <p style="color: green;">✅ These contact details have been released and are permanently visible.</p>
             {% endif %}
-       
-        {# Toon UNLOCK-KNOP indien niet ontgrendeld #}
+
+        {# Nog niet unlocked: toon lock-tekst + knop #}
         {% else %}
-            <p>The contact details of this consultant are **hidden**.</p>
-            <p><strong>CV:</strong> Verborgen</p>
-            <a href="{{ url_for('main.unlock_consultant', profile_id=profile.id) }}" class="btn" onclick="return confirm('Weet u zeker dat u de contactgegevens wilt vrijgeven?')">
+            <p>The contact details of this consultant are hidden.</p>
+            <p><strong>CV:</strong> Hidden</p>
+            <a href="{{ url_for('main.unlock_consultant', profile_id=profile.id) }}"
+               class="btn btn-success"
+               onclick="return confirm('Weet u zeker dat u de contactgegevens wilt vrijgeven?')">
                 🔒 Unlock contact details (MVP Button)
             </a>
             <p><small>By clicking this button, the contact details will become permanently visible to your company.</small></p>
         {% endif %}
-       
-    {# 2. Toon consultant's eigen contactinfo (als ze ingelogd zijn op hun eigen profiel)-> is dit niet overbodig? #}
+
+    {# 2. Consultant bekijkt eigen profiel #}
     {% elif is_owner %}
-        <p><strong>E-mail:</strong> {{ profile.contact_email or "Niet ingevuld" }} (Zichtbaar voor u als eigenaar)</p>
-        <p><strong>Phone:</strong> {{ profile.phone_number or "Niet ingevuld" }} (Zichtbaar voor u als eigenaar)</p>
+        <p><strong>E-mail:</strong> {{ profile.contact_email or "Not filled in" }} (Visible for you as owner)</p>
+        <p><strong>Phone:</strong> {{ profile.phone_number or "Not filled in" }} (Visible for you as owner)</p>
+
         {% if profile.cv_document %}
             <p>
                 <strong>CV:</strong>
@@ -91,17 +95,14 @@
         {% else %}
             <p><strong>CV:</strong> Not filled in</p>
         {% endif %}
-       
-    {# 3. Fallback: Toon de login/rol-vereiste #}
-    {% else %}
-        <p>Log in as a **Company** to view and unlock the contact details.</p>
-    {% endif %}
-</div>
 
-{# 🔹 Collaborate-vraag + groene knop:
-     - alleen als user company is
-     - consultant is unlocked
-     - consultant is nog beschikbaar #}
+    {# 3. Fallback #}
+    {% else %}
+        <p>Log in as a <strong>Company</strong> to view and unlock the contact details.</p>
+    {% endif %}
+  </div>
+
+  {# Collaborate-blok #}
   {% if user and user.role == UserRole.company and is_unlocked and profile.availability %}
     <div class="card collaborate-card" style="margin-top:20px;">
         <h3>Collaborate?</h3>
@@ -116,24 +117,5 @@
         </form>
     </div>
   {% endif %}
-
-  <style>
-    .btn-success {
-        background: #28a745;
-        color: white;
-        padding: 8px 14px;
-        border-radius: 8px;
-        border: none;
-        cursor: pointer;
-        text-decoration: none;
-    }
-
-    .collaborate-card {
-        border: 1px solid #cfe9d5;
-        background: #f3fff5;
-        border-radius: 14px;
-        padding: 18px;
-    }
-  </style>
 
 {% endblock %}

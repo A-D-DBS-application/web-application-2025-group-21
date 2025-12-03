@@ -1,47 +1,55 @@
 {% extends "base.html" %}
+{% block title %}Admin | Collaborations{% endblock %}
 
 {% block content %}
-<h2 style="text-align:center; margin-bottom: 20px;">All Matches (Collaborations)</h2>
+<h2 class="admin-page-title">All Matches (Collaborations)</h2>
 
-<form method="GET" style="text-align:center; margin-bottom:20px;">
-    <input type="text" name="q" placeholder="Search consultant, company, or job..."
-           value="{{ request.args.get('q','') }}"
-           style="padding:8px; width:300px;">
+<form method="GET" class="admin-search-form">
+    <input
+        type="text"
+        name="q"
+        class="admin-search-input"
+        placeholder="Search consultant, company, or job..."
+        value="{{ request.args.get('q','') }}"
+    >
     <button type="submit" class="btn">Search</button>
 </form>
 
 <div class="admin-table-card">
-    <table class="admin-table">
-        <thead>
-            <tr>
-                <th>Consultant</th>
-                <th>Company</th>
-                <th>Job Post</th>
-                <th>Status</th>
-                <th>Started at</th>
-            </tr>
-        </thead>
+    <div class="admin-table-wrapper">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Consultant</th>
+                    <th>Company</th>
+                    <th>Job Post</th>
+                    <th>Status</th>
+                    <th>Started at</th>
+                </tr>
+            </thead>
 
-        <tbody>
-        {% for link in collaborations %}
-            <tr>
-                <td>{{ link.consultant.display_name_masked }}</td>
-                <td>{{ link.company.company_name_masked }}</td>
-                <td>{{ link.job_post.title if link.job_post else "General Collaboration" }}</td>
+            <tbody>
+            {% for link in collaborations %}
+                <tr>
+                    <td>{{ link.consultant.display_name_masked }}</td>
+                    <td>{{ link.company.company_name_masked }}</td>
+                    <td>{{ link.job_post.title if link.job_post else "General Collaboration" }}</td>
 
-                <td>
-                    {% if link.status.value == "active" %}
-                        <span class="status available">Active</span>
-                    {% else %}
-                        <span class="status unavailable">Ended</span>
-                    {% endif %}
-                </td>
+                    <td>
+                        {% if link.status.value == "active" %}
+                            <span class="status available">Active</span>
+                        {% else %}
+                            <span class="status unavailable">Ended</span>
+                        {% endif %}
+                    </td>
 
-                <td>{{ link.started_at }}</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+                    <td>{{ link.started_at }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
+
 
 {% endblock %}

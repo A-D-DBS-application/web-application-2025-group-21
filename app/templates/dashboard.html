@@ -2,61 +2,6 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-<style>
-    /* Styling voor de Profile/Contact Grids (ongewijzigd) */
-    .profile-header-grid {
-        display: flex;
-        gap: 30px;
-        align-items: flex-start;
-        margin-bottom: 20px;
-        flex-direction: row-reverse; 
-    }
-
-    .profile-media {
-        flex-shrink: 0;
-        width: 200px; 
-        padding-top: 10px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-    
-    .profile-media img {
-        max-width: 180px !important; 
-        width: 100% !important;
-        height: auto !important;
-        object-fit: cover;
-    }
-
-    .profile-details {
-        flex-grow: 1;
-        min-width: 250px;
-    }
-
-    .contact-details-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 10px 30px;
-        margin-top: 15px;
-    }
-    
-    .profile-details h3 {
-        margin-top: 0;
-    }
-
-    /* Responsiviteit */
-    @media (max-width: 600px) {
-        .profile-header-grid {
-            flex-direction: column; 
-            gap: 20px;
-        }
-        .profile-media {
-            width: 100%;
-            align-items: flex-start; 
-            padding-top: 0;
-        }
-    }
-</style>
 
 <h1>Dashboard</h1>
 
@@ -67,42 +12,33 @@
     <p><strong>Role:</strong> {{ user.role.value }}</p>
 
     {% if user.role == UserRole.consultant %}
-        
         <hr>
 
-        {# CONSULTANT SECTION: Basis Details, Media #}
+        <!-- HEADER LAYOUT -->
         <div class="profile-header-grid">
-            
-            {# PROFIELFOTO (Rechts op desktop) #}
+
             <div class="profile-media">
                 {% if profile.profile_image %}
-                    <img
-                        src="{{ profile.profile_image }}"
-                        alt="Profile Picture"
-                        style="border-radius:50%; margin-bottom:12px;"
-                    >
+                    <img src="{{ profile.profile_image }}" class="profile-image" alt="Profile Picture">
                 {% else %}
-                    <img
-                        src="{{ url_for('static', filename='img/default-avatar.png') }}"
-                        alt="No profile picture"
-                        style="border-radius:50%; margin-bottom:12px;"
-                    >
+                    <img src="{{ url_for('static', filename='img/default-avatar.png') }}"
+                         class="profile-image" alt="No profile picture">
                 {% endif %}
             </div>
 
-            {# BASIS DETAILS (Links op desktop) #}
             <div class="profile-details">
                 <h3>Consultant Details</h3>
+
                 <p><strong>Name:</strong> {{ profile.display_name_masked }}</p>
-                
+
                 {% if profile.years_experience is not none %}
                     <p><strong>Experience:</strong> {{ profile.years_experience }} year{% if profile.years_experience != 1 %}s{% endif %}</p>
                 {% endif %}
-                
+
                 <p><strong>Location:</strong> {{ profile.location_city }} , {{ profile.country }}</p>
                 <p><strong>Headline:</strong> {{ profile.headline or "No headline" }}</p>
-                
-                <p style="margin-bottom: 20px;">
+
+                <p class="profile-skills">
                     <strong>Skills:</strong>
                     {% if profile.skills %}
                         {{ profile.skills | map(attribute='name') | join(', ') }}
@@ -111,94 +47,80 @@
                     {% endif %}
                 </p>
             </div>
-        </div> 
-        
+        </div>
+
         <hr>
-        
-        {# CV DOCUMENT #}
-        <h3 style="margin-top: 20px;">Documents</h3>
+
+        <h3>Documents</h3>
         {% if profile.cv_document %}
-            <p>
-                <strong>CV:</strong>
-                <a href="{{ profile.cv_document }}" target="_blank">
-                    View / download CV
-                </a>
-            </p>
+            <p><strong>CV:</strong> <a href="{{ profile.cv_document }}" target="_blank">View / Download</a></p>
         {% else %}
             <p><strong>CV:</strong> Not yet added</p>
         {% endif %}
-        
+
         <hr>
-        
-        {# CONTACT & BESCHIKBAARHEID #}
-        <h3 style="margin-top: 20px;">Contact & Availability</h3>
+
+        <h3>Contact & Availability</h3>
         <div class="contact-details-grid">
+
             <div>
-                <p><strong>Email address:</strong> {{ profile.contact_email or "Not filled in" }}</p>
+                <p><strong>Email:</strong> {{ profile.contact_email or "Not filled in" }}</p>
             </div>
+
             <div>
-                <p><strong>Phone number:</strong> {{ profile.phone_number or "Not filled in" }}</p>
+                <p><strong>Phone:</strong> {{ profile.phone_number or "Not filled in" }}</p>
             </div>
+
             <div>
-                <p>
-                    <strong>Availability:</strong>
+                <p><strong>Availability:</strong>  
                     {% if profile.availability %}
-                        <span style="color: #28a745;">Available for new jobs</span>
+                        <span class="status available">Available</span>
                     {% else %}
-                        <span style="color: #e24b4b;">Unavailable</span>
+                        <span class="status unavailable">Unavailable</span>
                     {% endif %}
                 </p>
             </div>
         </div>
 
-        {# COLLABORATIONS #}
-        {% if consultant_active_collaborations is defined and consultant_active_collaborations %}
+        {% if consultant_active_collaborations %}
             <hr>
-            <h3 style="margin-top: 20px;">Active Collaborations</h3>
+            <h3>Active Collaborations</h3>
             <p>
-                <strong>Collaborating with:</strong>
                 {% for collab in consultant_active_collaborations %}
                     {{ collab.company.company_name_masked }}{% if not loop.last %}, {% endif %}
                 {% endfor %}
             </p>
         {% endif %}
 
-        {# EDIT KOPPELINGEN #}
-        <div style="margin-top: 20px;">
+        <div class="dashboard-actions">
             <a class="btn" href="{{ url_for('main.edit_consultant_profile') }}">Edit Profile</a>
             <a class="btn" href="{{ url_for('main.edit_consultant_skills') }}">Edit Skills</a>
         </div>
-        
     {% endif %}
 
-
     {% if user.role == UserRole.company %}
-        
-        {# COMPANY DETAILS #}
         <hr>
-        <h3 style="margin-top: 20px;">Company Details</h3>
-        
+        <h3>Company Details</h3>
+
         <p><strong>Company name:</strong> {{ company.company_name_masked }}</p>
         <p><strong>Sector:</strong> {{ company.industry or "Not filled in" }}</p>
 
-        {# CONTACT INFORMATION (NU BINNEN EEN DUIDELIJKE SECTIE) #}
         <hr>
-        <h3 style="margin-top: 20px;">Contact Information</h3>
+        <h3>Contact Information</h3>
+
         <div class="contact-details-grid">
             <div>
-                <p><strong>Email address:</strong> {{ company.contact_email or "Not filled in" }}</p>
+                <p><strong>Email:</strong> {{ company.contact_email or "Not filled in" }}</p>
             </div>
             <div>
-                <p><strong>Phone number:</strong> {{ company.phone_number or "Not filled in" }}</p>
+                <p><strong>Phone:</strong> {{ company.phone_number or "Not filled in" }}</p>
             </div>
         </div>
 
-        {# Active collaborations #}
-        {% if company_active_collaborations is defined and company_active_collaborations %}
+        {% if company_active_collaborations %}
             <hr>
-            <h3 style="margin-top: 20px;">Active Collaborations</h3>
+            <h3>Active Collaborations</h3>
             <p>
-                <strong>Collaborating with:</strong>
                 {% for collab in company_active_collaborations %}
                     <a href="{{ url_for('main.consultant_detail', profile_id=collab.consultant.id) }}">
                         {{ collab.consultant.display_name_masked }}
@@ -207,11 +129,12 @@
             </p>
         {% endif %}
 
-        <div style="margin-top: 20px;">
+        <div class="dashboard-actions">
             <a class="btn" href="{{ url_for('main.edit_company_profile') }}">Edit Profile</a>
             <a class="btn" href="{{ url_for('main.job_new') }}">New Job Post</a>
-            <a href="{{ url_for('main.company_jobs_list') }}" class="btn">My Job Posts</a>
+            <a class="btn" href="{{ url_for('main.company_jobs_list') }}">My Job Posts</a>
         </div>
     {% endif %}
 </div>
+
 {% endblock %}

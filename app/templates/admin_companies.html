@@ -1,17 +1,21 @@
 {% extends "base.html" %}
-
 {% block content %}
-<h2>All Companies & Job Posts</h2>
 
-<form method="GET" style="text-align:center; margin-bottom:20px;">
-    <input type="text" name="q" placeholder="Search company..."
-           value="{{ request.args.get('q','') }}"
-           style="padding:8px; width:250px;">
+<h2 class="admin-page-title">All Companies & Job Posts</h2>
+
+<form method="GET" class="admin-search-form">
+    <input
+        type="text"
+        name="q"
+        class="admin-search-input"
+        placeholder="Search company..."
+        value="{{ request.args.get('q','') }}"
+    >
     <button type="submit" class="btn">Search</button>
 </form>
 
 {% for comp in companies %}
-<div class="card" style="margin-bottom:20px; padding:20px;">
+<div class="card admin-company-card">
 
     <h3>{{ comp.company_name_masked }}</h3>
 
@@ -42,3 +46,4 @@
 {% endfor %}
 
 {% endblock %}
+

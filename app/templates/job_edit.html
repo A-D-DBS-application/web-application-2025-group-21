@@ -6,7 +6,7 @@
 <h1 class="page-title">Edit Job</h1>
 
 <div class="form-card">
-    <form method="POST">
+    <form method="POST" class="job-edit-form">
        
         <label>Titel</label>
         <input type="text" name="title" value="{{ job.title }}" required>
@@ -42,73 +42,5 @@
         <a href="{{ url_for('main.job_detail', job_id=job.id) }}" class="btn-secondary">Cancel</a>
     </form>
 </div>
-
-<style>
-    .page-title {
-        margin-bottom: 22px;
-    }
-
-    .form-card {
-        background: #ffffff;
-        border: 1px solid #dce6f5;
-        border-radius: 14px;
-        padding: 22px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-        max-width: 650px;
-    }
-
-    form {
-        display: flex;
-        flex-direction: column;
-        gap: 14px;
-    }
-
-    input, textarea, select {
-        width: 100%;
-        padding: 8px 10px;
-        border-radius: 6px;
-        border: 1px solid #bfcde8;
-    }
-
-    .skills-box {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        padding: 10px;
-        border-radius: 10px;
-        border: 1px solid #dce6f5;
-        background: #f7f9ff;
-    }
-
-    .skill-checkbox {
-        background: #ffffff;
-        border: 1px solid #cddaf3;
-        padding: 6px 10px;
-        border-radius: 8px;
-        font-size: 0.9rem;
-    }
-
-    .btn-primary {
-        background: #2b63c6;
-        color: white;
-        padding: 10px 16px;
-        border-radius: 8px;
-        border: none;
-        cursor: pointer;
-        text-align: center;
-        text-decoration: none;
-        margin-top: 10px;
-    }
-
-    .btn-secondary {
-        background: #e9f0ff;
-        border: 1px solid #c5d6f5;
-        color: #2b63c6;
-        padding: 10px 16px;
-        border-radius: 8px;
-        text-decoration: none;
-        text-align: center;
-    }
-</style>
 
 {% endblock %}

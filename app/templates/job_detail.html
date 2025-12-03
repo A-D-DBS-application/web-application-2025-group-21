@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{{ job.title }}{% endblock %}
+
 {% block content %}
 
 <h1 class="page-title">{{ job.title }}</h1>
@@ -7,10 +8,8 @@
 <div class="card">
     <h2>Company contact details</h2>
    
-    {# 1. Controleert: Is de bezoeker een Consultant? #}
     {% if user and user.role == UserRole.consultant %}
        
-        {# Toon contactgegevens indien ONTGRENDELD of de EIGENAAR #}
         {% if is_unlocked or is_owner %}
             <p><strong>Comppany:</strong> {{ job.company.company_name_masked }}</p>
             <p><strong>E-mail:</strong> {{ job.company.contact_email or "Niet ingevuld" }}</p>
@@ -18,8 +17,7 @@
             {% if is_unlocked %}
                 <p style="color: green;">✅ These contact details have been unlocked and are permanently visible.</p>
             {% endif %}
-           
-        {# Toon UNLOCK-KNOP indien niet ontgrendeld #}
+       
         {% else %}
             <p>The contact details of this company are hidden.</p>
             <a href="{{ url_for('main.unlock_job', job_id=job.id) }}" class="btn" onclick="return confirm('Weet u zeker dat u de contactgegevens wilt vrijgeven?')">
@@ -28,13 +26,11 @@
             <p><small>By clicking this button, the contact details will become permanently visible on your profile.</small></p>
         {% endif %}
        
-    {# 2. Toon bedrijf's eigen contactinfo (als ze de job gepost hebben) #}
     {% elif is_owner %}
         <p><strong>Company:</strong> {{ job.company.company_name_masked }}</p>
         <p><strong>E-mail:</strong> {{ job.company.contact_email or "Niet ingevuld" }} (Zichtbaar voor u als eigenaar)</p>
         <p><strong>Phone number:</strong> {{ job.company.phone_number or "Niet ingevuld" }} (Zichtbaar voor u als eigenaar)</p>
        
-    {# 3. Fallback: Toon de login/rol-vereiste #}
     {% else %}
         <p>Log in as a Consultant to view and unlock the contact details.</p>
     {% endif %}
@@ -88,7 +84,6 @@
     {% endif %}
 </div>
 
-{# 🔹 Collaborate-vraag + groene knop: alleen consultant, unlocked en job actief #}
 {% if user and user.role == UserRole.consultant and is_unlocked and job.is_active %}
     <div class="card collaborate-card">
         <h3>Collaborate?</h3>
@@ -103,81 +98,5 @@
         </form>
     </div>
 {% endif %}
-
-
-<style>
-    .job-detail-card {
-        background: #ffffff;
-        border: 1px solid #dce6f5;
-        border-radius: 14px;
-        padding: 24px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-    }
-
-    .job-section h3 {
-        margin-bottom: 6px;
-        color: #2b63c6;
-    }
-
-    .skill-list {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-    }
-
-    .skill-tag {
-        background: #e9f0ff;
-        border: 1px solid #c5d6f5;
-        padding: 4px 10px;
-        border-radius: 8px;
-        font-size: 0.9rem;
-        color: #2b63c6;
-    }
-
-    .job-actions {
-        margin-top: 12px;
-        display: flex;
-        gap: 10px;
-    }
-
-    .btn-primary {
-        background: #2b63c6;
-        color: white;
-        padding: 8px 14px;
-        border-radius: 8px;
-        text-decoration: none;
-        border: none;
-        cursor: pointer;
-    }
-
-    .btn-danger {
-        background: #e24b4b;
-        color: white;
-        padding: 8px 14px;
-        border-radius: 8px;
-        border: none;
-        cursor: pointer;
-    }
-    .btn-success {
-        background: #28a745;
-        color: white;
-        padding: 8px 14px;
-        border-radius: 8px;
-        border: none;
-        cursor: pointer;
-    }
-
-    .collaborate-card {
-        margin-top: 20px;
-        border: 1px solid #cfe9d5;
-        background: #f3fff5;
-        border-radius: 14px;
-        padding: 18px;
-    }
-</style>
-
 
 {% endblock %}

@@ -1,11 +1,12 @@
 {% extends "base.html" %}
 {% block title %}Skills aanpassen{% endblock %}
+
 {% block content %}
   <h1>Choose your skills</h1>
 
   <form method="post">
     {% for skill in skills %}
-      <label style="display:block;">
+      <label class="skills-checkbox-label">
         <input
           type="checkbox"
           name="skills"

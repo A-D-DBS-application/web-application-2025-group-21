@@ -70,8 +70,7 @@
     {% if profile.profile_image %}
         <div class="current-file">
             <strong>Current profile picture:</strong><br>
-            <img src="{{ profile.profile_image }}" alt="Profile picture"
-                 style="max-width: 120px; border-radius: 4px; border: 1px solid #ccc;">
+            <img src="{{ profile.profile_image }}" alt="Profile picture" class="current-profile-image">
         </div>
     {% endif %}
 
@@ -161,59 +160,6 @@
         Click a field to get instructions.
     </div>
 </div>
-
-<style>
-.profile-form { max-width: 600px; }
-
-.field-label {
-    display: block;
-    margin-bottom: 16px;
-    font-weight: 600;
-}
-
-.field-label input,
-.field-label select {
-    margin-top: 6px;
-    padding: 10px;
-    border-radius: 6px;
-    border: 1px solid #d1d5db;
-    width: 100%;
-}
-
-/* Better visible helper box */
-.field-helper {
-    position: fixed;
-    right: 20px;
-    bottom: 20px;
-    max-width: 350px;
-    background: #ffffff;
-    color: #1f2937;
-    border-radius: 12px;
-    padding: 14px 16px;
-    box-shadow: 0 12px 30px rgba(0,0,0,0.25);
-    border: 2px solid #2563eb;
-    animation: fadeIn 0.3s ease-out;
-    z-index: 2000;
-}
-
-.field-helper-title {
-    font-weight: 800;
-    color: #2563eb;
-    margin-bottom: 6px;
-    font-size: 1rem;
-}
-
-.field-helper-text {
-    font-size: 0.9rem;
-    line-height: 1.5;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
-
-</style>
 
 <script>
 (function () {
