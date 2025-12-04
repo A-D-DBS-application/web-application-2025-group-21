@@ -11,7 +11,7 @@
     {% if user and user.role == UserRole.consultant %}
        
         {% if is_unlocked or is_owner %}
-            <p><strong>Comppany:</strong> {{ job.company.company_name_masked }}</p>
+            <p><strong>Company:</strong> {{ job.company.company_name_masked }}</p>
             <p><strong>E-mail:</strong> {{ job.company.contact_email or "Niet ingevuld" }}</p>
             <p><strong>Phone number:</strong> {{ job.company.phone_number or "Niet ingevuld" }}</p>
             {% if is_unlocked %}
