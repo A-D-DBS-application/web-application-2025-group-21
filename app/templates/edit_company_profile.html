@@ -40,6 +40,29 @@
         >
     </label>
 
+    <!-- INDUSTRIES -->
+    <label class="field-label">
+        Industries:
+
+        {% set selected = (company.industries or "").split(", ") %}
+
+        <div class="industry-options">
+            {% for option in ["Technology", "Healthcare", "Finance", "Logistics", "Consulting"] %}
+                <label class="industry-item">
+                    <input
+                        type="checkbox"
+                        name="industries"
+                        value="{{ option }}"
+                       {% if option in selected %}checked{% endif %}
+                    >
+                    {{ option }}
+            </label>
+            {% endfor %}
+        </div>
+    </label>
+
+
+
     <hr>
 
     <h3>Contact information (shown when unlocked)</h3>

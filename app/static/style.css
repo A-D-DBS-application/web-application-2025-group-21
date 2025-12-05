@@ -1445,6 +1445,27 @@ nav a:hover {
     flex: 1 1 240px;
 }
 
+/* Industries block */
+.industry-options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(150px, 1fr));
+    gap: 8px 20px;
+    margin-top: 8px;
+}
+
+.industry-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+}
+
+.industry-item input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+}
+
+
 /* ===== LOGIN PAGE ===== */
 
 .login-form { 

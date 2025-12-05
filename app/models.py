@@ -103,7 +103,7 @@ class Company(Base):
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
 
     company_name_masked = Column(String(160), nullable=False)
-    industry = Column(Enum(IndustryEnum, name="industry_enum"), nullable=True)
+    industries = Column(String(255), nullable=True)
     location_city = Column(String(120))
     country = Column(String(120))
     created_at = Column(TIMESTAMP, nullable=False, server_default=func.now())

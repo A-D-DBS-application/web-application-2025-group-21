@@ -932,6 +932,11 @@ def edit_company_profile():
             company.latitude = lat
             company.longitude = lon
 
+            # industries opslaan
+            selected = request.form.getlist("industries")
+            company.industries = ", ".join(selected)
+            db.add(company)
+
             db.commit()
 
             flash(_("Company profile updated"))
