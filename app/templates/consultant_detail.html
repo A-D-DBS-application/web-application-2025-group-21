@@ -2,7 +2,13 @@
 {% block title %}Consultant detail{% endblock %}
 
 {% block content %}
-  <h1>{{ profile.display_name_masked }}</h1>
+  <h1>
+    {% if is_unlocked or is_owner %}
+        {{ profile.display_name_masked }}
+    {% else %}
+        {{ profile.initials }}
+    {% endif %}
+  </h1>
 
   {# --------- Profielfoto --------- #}
   {% if profile.profile_image %}
