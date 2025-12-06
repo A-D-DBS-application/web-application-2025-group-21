@@ -1,316 +1,631 @@
 {% extends "base.html" %}
+
 {% block title %}Consultants | List{% endblock %}
+
+
 
 {% block content %}
 
+
+
 {% set page_title = page_title if page_title is defined else "" %}
+
 {% set current_sort = sort_by if sort_by is defined else 'relevance' %}
+
+
 
 <h1 class="page-title">{{ page_title }}</h1>
 
+
+
 <div class="mode-selector-container">
+
     <h2 class="h5"></h2>
 
+
+
     <a href="{{ url_for('main.consultants_list', sort_by='relevance') }}"
+
        class="mode-btn {% if current_sort == 'relevance' %}active-mode{% else %}inactive-mode{% endif %}">
+
         🧠 IConsult Match
+
     </a>
+
+
 
     <a href="{{ url_for('main.consultants_list', sort_by='title') }}"
+
        class="mode-btn {% if current_sort != 'relevance' %}active-mode{% else %}inactive-mode{% endif %}">
+
         🔧 Manual filter & sorting
+
     </a>
+
 </div>
+
+
 
 <form method="GET" action="{{ url_for('main.consultants_list') }}" class="filter-form">
+
     <input type="hidden" name="sort_by" value="{{ current_sort }}">
 
+
+
     {# Job-selector voor matching, zonder emoji en zonder extra tekst #}
+
     {% if company_jobs is defined and company_jobs %}
+
         <div class="top-filter-row" style="margin-bottom: 10px;">
+
             <div class="top-filter-left">
+
                 <label class="top-label" for="job_id">
+
                     Match based on job post
+
                 </label>
+
                 <select id="job_id" name="job_id" class="form-control-select">
+
                     {% for job in company_jobs %}
+
                         <option value="{{ job.id }}"
+
                             {% if selected_job_id is defined and selected_job_id == job.id %}selected{% endif %}>
+
                             {{ job.title }}
+
                             {% if job.location_city %} – {{ job.location_city }}{% endif %}
+
                         </option>
+
                     {% endfor %}
+
                 </select>
+
             </div>
+
         </div>
+
     {% endif %}
+
+
 
     {% set current_distance = request.args.get('max_distance_km', '') %}
+
     {% if current_distance == '' %}
+
         {% set current_distance = 0 %}
+
     {% endif %}
+
+
 
     <div class="top-filter-row">
+
         <div class="top-filter-left">
+
             <label class="top-label" for="q">Search</label>
+
             <input type="text" id="q" name="q"
+
                    placeholder="Search by name, headline, location..."
+
                    value="{{ request.args.get('q', '') }}">
+
         </div>
+
+
 
         <div class="top-filter-middle">
+
             <label class="top-label" for="min_experience">Min. years of experience</label>
+
             <input type="number"
+
                    id="min_experience"
+
                    name="min_experience"
+
                    min="0"
+
                    class="form-control-select"
+
                    value="{{ request.args.get('min_experience', '') }}">
+
         </div>
+
+
 
         <div class="top-filter-right">
+
             <label class="top-label" for="max_distance_km">
+
                 Maximum distance
+
             </label>
+
             <input type="range"
+
                    id="max_distance_km"
+
                    name="max_distance_km"
+
                    min="0" max="400" step="10"
+
                    value="{{ current_distance }}">
+
             <span id="distance-display" class="distance-display">
+
                 {% if current_distance|int == 0 %}
+
                     No distance filter
+
                 {% else %}
+
                     {{ current_distance }} km
+
                 {% endif %}
+
             </span>
 
+
+
             <div class="location-checkboxes">
+
                 <label class="checkbox-inline">
+
                     <input type="checkbox" name="same_country_only" value="1"
+
                            {% if request.args.get('same_country_only') == '1' %}checked{% endif %}>
+
                     Same country only
+
                 </label>
+
             </div>
+
         </div>
+
     </div>
 
+
+
     {% if current_sort != 'relevance' %}
+
         <p class="form-instruction">
+
             Use the fields below to filter manually.
+
             Results are sorted alphabetically by consultant.
+
         </p>
 
+
+
         <div class="input-grid manual-filter-grid">
+
             <input type="text" name="city" placeholder="City"
+
                    value="{{ request.args.get('city', '') }}">
+
             <input type="text" name="country" placeholder="Country"
+
                    value="{{ request.args.get('country', '') }}">
+
             <div></div>
+
         </div>
+
+
 
         <div class="skills-filter">
+
             <label class="skills-label">
+
                 Skills (filter – check required skills):
+
             </label>
+
             <div class="skills-checkboxes">
+
                 {% for skill in skills %}
+
                     <label class="skill-label">
+
                         <input type="checkbox" name="skills" value="{{ skill.id }}"
+
                             {% if request.args.getlist('skills') and
+
                                   (skill.id|string in request.args.getlist('skills')) %}checked{% endif %}>
+
                         {{ skill.name }}
+
                     </label>
+
                 {% endfor %}
+
             </div>
+
         </div>
+
+
 
         <button type="submit" class="btn btn-primary apply-btn">Apply filters</button>
+
         <a href="{{ url_for('main.consultants_list', sort_by='title') }}"
+
            class="btn btn-secondary reset-btn">Reset filters</a>
 
+
+
     {% else %}
+
         <div class="center-button-row">
+
             <button type="submit" class="btn btn-primary center-isc-score-btn">
+
                 🔍 Calculate IConsult score
+
             </button>
+
         </div>
+
     {% endif %}
+
 </form>
 
+
+
 <div class="consultant-grid">
+
     {% for c in consultants %}
+
         {% if current_sort == 'relevance' and c.score is defined %}
+
             {% set match_score_perc = (c.score * 100) | round(1) %}
+
             {% set match_class = 'match-high' %}
+
             {% if match_score_perc < 20 %}
+
                 {% set match_class = 'match-low' %}
+
             {% elif match_score_perc >= 20 and match_score_perc <= 40 %}
+
                 {% set match_class = 'match-medium' %}
+
             {% endif %}
+
         {% endif %}
 
+
+
         <div class="consultant-card {% if c.is_unlocked_for_me %}unlocked-card{% endif %}">
+
             <div class="consultant-meta-top">
+
                 <span class="consultant-name">
+
                     <a href="{{ url_for('main.consultant_detail', profile_id=c.id) }}">
+
                         {% if c.is_unlocked_for_me %}
+
                             {{ c.display_name_masked or c.user.username }}
+
                         {% else %}
+
                             {{ c.initials }}
+
                         {% endif %}
+
                     </a>
+
                 </span>
+
+
 
                 {% if c.location_city or c.country %}
+
                     <span class="consultant-location">
+
                         <i class="fas fa-map-marker-alt"></i>
+
                         {{ c.location_city }}{% if c.location_city and c.country %}, {% endif %}{{ c.country }}
+
                     </span>
+
                 {% endif %}
+
             </div>
+
+
 
             {% if c.headline %}
+
                 <p class="consultant-headline">
+
                     {{ c.headline }}
+
                 </p>
+
             {% endif %}
+
+
 
             <div class="consultant-meta-second">
+
                 <span class="experience-tag">
+
                     <i class="fas fa-briefcase"></i>
+
                     {% if c.years_experience is not none %}
+
                         {{ c.years_experience }} year{% if c.years_experience != 1 %}s{% endif %} experience
+
                     {% else %}
+
                         Experience not specified
+
                     {% endif %}
+
                 </span>
 
+
+
                 {% if c.is_unlocked_for_me %}
+
                     <span class="unlock-badge unlock-yes">
+
                         <i class="fas fa-unlock"></i> Contact unlocked
+
                     </span>
+
                 {% endif %}
+
             </div>
+
+
 
             <div class="skills-summary">
+
                 <label class="skills-label-small">
+
                     <i class="fas fa-tools"></i> Skills:
+
                 </label>
+
                 <div class="skill-tags-wrapper">
+
                     {% for skill in c.skills[:5] %}
+
                         <span class="required-skill-tag">{{ skill.name }}</span>
+
                     {% endfor %}
+
                     {% if c.skills|length > 5 %}
+
                         <span class="required-skill-tag more-skills">
+
                             <i class="fas fa-plus-circle"></i>
+
                             {{ c.skills|length - 5 }} more
+
                         </span>
+
                     {% endif %}
+
                 </div>
+
             </div>
 
+
+
             {% if current_sort == 'relevance' and c.score is defined %}
+
                 <div class="score-summary">
+
                     <span class="relevance-badge {{ match_class }}">
+
                         <i class="fas fa-check-circle"></i>
+
                         Match: {{ match_score_perc }}%
+
                     </span>
 
+
+
                     <details class="breakdown-details">
+
                         <summary>
+
                             <i class="fas fa-chart-bar"></i> Score breakdown
+
                         </summary>
+
                         <div class="score-breakdown">
+
                             {% set total_score_perc = (c.score * 100) %}
 
+
+
                             <div class="bar-item">
+
                                 {% set skill_pct = (c.score_breakdown.skill_factor * 100) %}
+
                                 <span class="bar-label">
+
                                     <i class="fas fa-star"></i> Skills
+
                                     <span class="bar-value">{{ skill_pct | round(1) }}%</span>
+
                                 </span>
+
                                 <div class="progress-bar-container">
+
                                     <div class="progress-bar skill-bar"
+
                                          style="width: {{ skill_pct | round(0) }}%;"></div>
+
                                 </div>
+
                             </div>
 
+
+
                             <div class="bar-item">
+
                                 {% set text_pct = (c.score_breakdown.text_factor * 100) %}
+
                                 <span class="bar-label">
+
                                     <i class="fas fa-search"></i> Search term
+
                                     <span class="bar-value">{{ text_pct | round(1) }}%</span>
+
                                 </span>
+
                                 <div class="progress-bar-container">
+
                                     <div class="progress-bar text-bar"
+
                                          style="width: {{ text_pct | round(0) }}%;"></div>
+
                                 </div>
+
                             </div>
 
+
+
                             <div class="bar-item">
+
                                 {% set recency_pct = (c.score_breakdown.recency_factor * 100) %}
+
                                 <span class="bar-label">
+
                                     <i class="fas fa-clock"></i> Recency
+
                                     <span class="bar-value">{{ recency_pct | round(1) }}%</span>
+
                                 </span>
+
                                 <div class="progress-bar-container">
+
                                     <div class="progress-bar recency-bar"
+
                                          style="width: {{ recency_pct | round(0) }}%;"></div>
+
                                 </div>
+
                             </div>
 
+
+
                             <div class="bar-item">
+
                                 {% set popularity_pct = (c.score_breakdown.popularity_factor * 100) %}
+
                                 <span class="bar-label">
+
                                     <i class="fas fa-fire"></i> Popularity
+
                                     <span class="bar-value">{{ popularity_pct | round(1) }}%</span>
+
                                 </span>
+
                                 <div class="progress-bar-container">
+
                                     <div class="progress-bar popularity-bar"
+
                                          style="width: {{ popularity_pct | round(0) }}%;"></div>
+
                                 </div>
+
                             </div>
+
+
 
                             <p class="score-total">
+
                                 Total: {{ total_score_perc | round(1) }}%
+
                             </p>
+
                         </div>
+
                     </details>
+
                 </div>
+
             {% endif %}
 
+
+
             <a class="btn btn-primary-card"
+
                href="{{ url_for('main.consultant_detail', profile_id=c.id) }}">
+
                 View consultant
+
             </a>
+
         </div>
+
     {% endfor %}
+
 </div>
 
+
+
 {% if not consultants %}
+
     <p class="alert alert-warning">
+
         No consultants found matching your filters.
+
     </p>
+
 {% endif %}
 
+
+
 <script>
+
 (function() {
+
     var slider = document.getElementById('max_distance_km');
+
     var display = document.getElementById('distance-display');
+
     if (slider && display) {
+
         var updateText = function() {
+
             var v = parseInt(slider.value || '0', 10);
+
             if (v === 0) {
+
                 display.textContent = 'No distance filter';
+
             } else {
+
                 display.textContent = v + ' km';
+
             }
+
         };
+
         slider.addEventListener('input', updateText);
+
         updateText();
+
     }
+
 })();
+
 </script>
+
+
 
 {% endblock %}

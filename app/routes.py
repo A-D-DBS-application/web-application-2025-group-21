@@ -45,7 +45,7 @@ def haversine_km(lat1, lon1, lat2, lon2):
 
     R = 6371.0  # straal aarde in km
     dlat = radians(lat2 - lat1)
-    dlon = radians(lat2 - lon1)
+    dlon = radians(lon2 - lon1)
 
     a = sin(dlat / 2) ** 2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon / 2) ** 2
     c = 2 * atan2(sqrt(a), sqrt(1 - a))
@@ -688,7 +688,7 @@ def consultants_list():
         # 🔹 Nieuwe: expliciet gekozen job voor matching
         selected_job_id = request.args.get("job_id", type=int)
 
-        # 3. Company-profiel (voor locatie & jobs)
+        # 3. Company-profiel (voor jobs & land)
         company_profile = db.query(Company).filter_by(user_id=user.id).first()
 
         required_job = None
@@ -726,26 +726,29 @@ def consultants_list():
                 )
             )
 
-        # Country rechtstreeks van company
+        # Land voor "same country only" - op basis van company-profiel
         company_country = (
             (company_profile.country or "").strip().lower()
             if company_profile and company_profile.country
             else None
         )
 
-        # Company-coördinaten dynamisch geocoden als er een distance-filter is
-        company_lat = None
-        company_lon = None
-        if (
-            company_profile
-            and company_profile.location_city
-            and company_profile.country
-            and max_distance_km is not None  # alleen als slider > 0
-        ):
-            company_lat, company_lon = geocode_with_mapbox(
-                company_profile.location_city,
-                company_profile.country,
-            )
+        # 🔹 Origin-coördinaten voor afstand:
+        #    → altijd job-locatie als er een job is geselecteerd
+        origin_lat = None
+        origin_lon = None
+
+        if max_distance_km is not None and required_job:
+            origin_lat = required_job.latitude
+            origin_lon = required_job.longitude
+
+            # Als job nog geen coords heeft maar wel city/country → geocode & opslaan
+            if (origin_lat is None or origin_lon is None) and required_job.location_city and required_job.country:
+                lat, lon = geocode_with_mapbox(required_job.location_city, required_job.country)
+                origin_lat, origin_lon = lat, lon
+                required_job.latitude = lat
+                required_job.longitude = lon
+                db.commit()
 
         # 4. Basisquery en Filters Toepassen (zonder afstand)
         query = (
@@ -773,7 +776,7 @@ def consultants_list():
 
         consultants = query.all()
 
-        # 🔹 LOCATIE-FILTER toepassen (afstand + zelfde land)
+        # 5. LOCATIE-FILTER toepassen (afstand + zelfde land)
         filtered_consultants = []
         for profile in consultants:
             # Zelfde land (indien aangevinkt én company country gekend)
@@ -782,19 +785,22 @@ def consultants_list():
                 if prof_country and prof_country != company_country:
                     continue  # ander land → skip
 
-            # Afstand
+            # Afstand t.o.v. job-locatie
             if (
                 max_distance_km is not None
-                and company_lat is not None
-                and company_lon is not None
+                and origin_lat is not None
+                and origin_lon is not None
             ):
                 prof_lat = getattr(profile, "latitude", None)
                 prof_lon = getattr(profile, "longitude", None)
 
+                # consultant zonder coords → valt buiten de afstandsfilter
                 if prof_lat is None or prof_lon is None:
                     continue
 
-                distance = haversine_km(company_lat, company_lon, prof_lat, prof_lon)
+                distance = haversine_km(origin_lat, origin_lon, prof_lat, prof_lon)
+                profile.distance_km = distance  # optioneel voor template/debug
+
                 if distance is None or distance > max_distance_km:
                     continue
 
@@ -802,7 +808,7 @@ def consultants_list():
 
         consultants = filtered_consultants
 
-        # 5. UNLOCK STATUS OPHALEN
+        # 6. UNLOCK STATUS OPHALEN
         unlocked_profile_ids = set()
         if user and user.role == UserRole.company:
             unlocked_profiles_rows = (
@@ -818,7 +824,7 @@ def consultants_list():
         for consultant in consultants:
             consultant.is_unlocked_for_me = consultant.id in unlocked_profile_ids
 
-        # 6. Sortering & Relevantie Berekening (LOCATIE NIET MEER IN SCORE)
+        # 7. Sortering & Relevantie Berekening (LOCATIE NIET IN SCORE)
         if sort_by == "relevance":
             now = datetime.now(timezone.utc)
 
@@ -929,7 +935,7 @@ def consultants_list():
                 else c.user.username,
             )
 
-        # 7. Template Renderen  ✅ altijd een return
+        # 8. Template Renderen
         all_skills = db.query(Skill).order_by(Skill.name).all()
 
         return render_template(
@@ -942,8 +948,6 @@ def consultants_list():
             selected_job_id=selected_job_id,
             UserRole=UserRole,
         )
-
-
 
 # ------------------ COMPANY PROFILE ------------------
 
@@ -1452,7 +1456,6 @@ def jobs_list():
             show_mode_selector=True,
             UserRole=UserRole,
         )
-
 
 
 @main.route("/jobs/<int:job_id>", methods=["GET"])
