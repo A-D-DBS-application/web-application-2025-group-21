@@ -597,9 +597,39 @@ def consultant_detail(profile_id):
         is_unlocked_status = False
 
         if user:
+            # 1) normale unlock-check
             is_unlocked_status = is_unlocked(
                 db, user.id, UnlockTarget.consultant, profile_id
             )
+
+            # 2) NIEUW: als company & er is (of was) een samenwerking
+            if not is_unlocked_status and user.role == UserRole.company:
+                company = db.query(Company).filter_by(user_id=user.id).first()
+
+                if company:
+                    collab_exists = (
+                        db.query(Collaboration)
+                        .filter(
+                            Collaboration.company_id == company.id,
+                            Collaboration.consultant_id == profile.id,
+                        )
+                        .first()
+                        is not None
+                    )
+
+                    if collab_exists:
+                        # vanaf nu mag deze company altijd de gegevens zien
+                        is_unlocked_status = True
+
+                        # optioneel: maak meteen een Unlock-record dus op alle paginas hrdr unlocked
+                        new_unlock = Unlock(
+                            user_id=user.id,
+                            target_type=UnlockTarget.consultant,
+                            target_id=profile.id,
+                        )
+                        db.add(new_unlock)
+                        db.commit()
+
 
         return render_template(
             "consultant_detail.html",
@@ -1124,6 +1154,23 @@ def collaborate_on_job(job_id):
 
         profile.availability = False
         profile.current_company_id = job.company_id
+
+        # 🔹 NIEUW: automatisch consultant voor deze company unlocken
+        company_user_id = job.company.user_id if job.company else None
+        if company_user_id:
+            already_unlocked = is_unlocked(
+                db,
+                company_user_id,
+                UnlockTarget.consultant,
+                profile.id,
+            )
+            if not already_unlocked:
+                auto_unlock = Unlock(
+                    user_id=company_user_id,
+                    target_type=UnlockTarget.consultant,
+                    target_id=profile.id,
+                )
+                db.add(auto_unlock)
 
         db.commit()
 
