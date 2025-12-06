@@ -1,6 +1,6 @@
 from sqlalchemy import (
     Column, Integer, String, Text, DECIMAL, Boolean,
-    ForeignKey, Enum, TIMESTAMP, Index, func, Float   # ⬅️ Float toegevoegd
+    ForeignKey, Enum, TIMESTAMP, Index, func, Float
 )
 from sqlalchemy.orm import declarative_base, relationship
 import enum
@@ -14,6 +14,7 @@ class UserRole(enum.Enum):
     company = "company"
     admin = "admin"
 
+
 class IndustryEnum(enum.Enum):
     Technology = "Technology"
     Finance = "Finance"
@@ -26,12 +27,11 @@ class IndustryEnum(enum.Enum):
 class UnlockTarget(enum.Enum):
     consultant = "consultant"
     job = "job"
-    
-#samenwerking tssn 2
+
+
 class CollaborationStatus(enum.Enum):
     active = "active"
     ended = "ended"
-
 
 
 # ---- TABLES ----
@@ -43,15 +43,27 @@ class User(Base):
     role = Column(Enum(UserRole), nullable=False)
     created_at = Column(TIMESTAMP, nullable=False, server_default=func.now())
 
-    consultant_profile = relationship("ConsultantProfile", back_populates="user", uselist=False)
-    company = relationship("Company", back_populates="user", uselist=False)
+    consultant_profile = relationship(
+        "ConsultantProfile",
+        back_populates="user",
+        uselist=False
+    )
+    company = relationship(
+        "Company",
+        back_populates="user",
+        uselist=False
+    )
 
 
 class ConsultantProfile(Base):
     __tablename__ = "consultant_profiles"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(
+        Integer,
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False
+    )
 
     display_name_masked = Column(String(120), nullable=False)
     headline = Column(String(160))
@@ -67,21 +79,28 @@ class ConsultantProfile(Base):
     contact_email = Column(String(255), nullable=True)
     phone_number = Column(String(50), nullable=True)
 
-    #link met company kan Null zijn
+    # link met current company (kan NULL zijn)
     current_company_id = Column(
         Integer,
         ForeignKey("companies.id", ondelete="SET NULL"),
         nullable=True
     )
-    # ✅ alle samenwerkingen (archief)
-    collaborations = relationship("Collaboration", back_populates="consultant")
 
-    # 🌍 NIEUW: coördinaten voor locatie-matching
+    # 🌍 coördinaten voor locatie-matching
     latitude = Column(Float, nullable=True)
     longitude = Column(Float, nullable=True)
 
+    # relaties
     user = relationship("User", back_populates="consultant_profile")
-    skills = relationship("Skill", secondary="profile_skills", back_populates="profiles")
+    skills = relationship(
+        "Skill",
+        secondary="profile_skills",
+        back_populates="profiles"
+    )
+    collaborations = relationship(
+        "Collaboration",
+        back_populates="consultant"
+    )
 
     @property
     def initials(self):
@@ -100,26 +119,25 @@ class Company(Base):
     __tablename__ = "companies"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(
+        Integer,
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False
+    )
 
     company_name_masked = Column(String(160), nullable=False)
     industries = Column(String(255), nullable=True)
     location_city = Column(String(120))
     country = Column(String(120))
     created_at = Column(TIMESTAMP, nullable=False, server_default=func.now())
-    
+
     contact_email = Column(String(255), nullable=True)
     phone_number = Column(String(50), nullable=True)
 
-    # ✅ alle samenwerkingen (archief)
-    collaborations = relationship("Collaboration", back_populates="company")
-
-    # 🌍 NIEUW: coördinaten voor locatie-matching
-    latitude = Column(Float, nullable=True)
-    longitude = Column(Float, nullable=True)
-
+    # relaties
     user = relationship("User", back_populates="company")
     jobs = relationship("JobPost", back_populates="company")
+    collaborations = relationship("Collaboration", back_populates="company")
 
     @property
     def initials(self):
@@ -137,7 +155,11 @@ class JobPost(Base):
     __tablename__ = "job_posts"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    company_id = Column(Integer, ForeignKey("companies.id", ondelete="CASCADE"), nullable=False)
+    company_id = Column(
+        Integer,
+        ForeignKey("companies.id", ondelete="CASCADE"),
+        nullable=False
+    )
 
     title = Column(String(200), nullable=False)
     description = Column(Text)
@@ -147,25 +169,31 @@ class JobPost(Base):
     anonymize = Column(Boolean, nullable=False, server_default="1")
     created_at = Column(TIMESTAMP, nullable=False, server_default=func.now())
 
-    # ✅ nieuwe kolommen
-    is_active = Column(Boolean, nullable=False, server_default="1")  # TRUE standaard
+    # ✅ actieve/inactieve status
+    is_active = Column(Boolean, nullable=False, server_default="1")
     hired_consultant_id = Column(
         Integer,
         ForeignKey("consultant_profiles.id", ondelete="SET NULL"),
         nullable=True
     )
 
-    company = relationship("Company", back_populates="jobs")
-    skills = relationship("Skill", secondary="job_skills", back_populates="jobs")
+    # 🌍 coördinaten van de job-locatie (voor distance filter)
+    latitude = Column(Float, nullable=True)
+    longitude = Column(Float, nullable=True)
 
-    # ✅ consultant die uiteindelijk is aangenomen
+    # relaties
+    company = relationship("Company", back_populates="jobs")
+    skills = relationship(
+        "Skill",
+        secondary="job_skills",
+        back_populates="jobs"
+    )
     hired_consultant = relationship(
         "ConsultantProfile",
         foreign_keys=[hired_consultant_id]
     )
-
-    # ✅ alle samenwerkingen gekoppeld aan deze job
     collaborations = relationship("Collaboration", back_populates="job_post")
+
 
 Index("idx_job_posts_company_id", JobPost.company_id)
 
@@ -174,7 +202,11 @@ class Unlock(Base):
     __tablename__ = "unlocks"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(
+        Integer,
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False
+    )
 
     target_type = Column(Enum(UnlockTarget), nullable=False)
     target_id = Column(Integer, nullable=False)
@@ -191,15 +223,31 @@ class Skill(Base):
     name = Column(String(120), unique=True, nullable=False)
     created_at = Column(TIMESTAMP, nullable=False, server_default=func.now())
 
-    profiles = relationship("ConsultantProfile", secondary="profile_skills", back_populates="skills")
-    jobs = relationship("JobPost", secondary="job_skills", back_populates="skills")
+    profiles = relationship(
+        "ConsultantProfile",
+        secondary="profile_skills",
+        back_populates="skills"
+    )
+    jobs = relationship(
+        "JobPost",
+        secondary="job_skills",
+        back_populates="skills"
+    )
 
 
 class ProfileSkill(Base):
     __tablename__ = "profile_skills"
 
-    profile_id = Column(Integer, ForeignKey("consultant_profiles.id", ondelete="CASCADE"), primary_key=True)
-    skill_id = Column(Integer, ForeignKey("skills.id", ondelete="RESTRICT"), primary_key=True)
+    profile_id = Column(
+        Integer,
+        ForeignKey("consultant_profiles.id", ondelete="CASCADE"),
+        primary_key=True
+    )
+    skill_id = Column(
+        Integer,
+        ForeignKey("skills.id", ondelete="RESTRICT"),
+        primary_key=True
+    )
     created_at = Column(TIMESTAMP, nullable=False, server_default=func.now())
 
 
@@ -210,21 +258,42 @@ Index("idx_profile_skills_skill_id", ProfileSkill.skill_id)
 class JobSkill(Base):
     __tablename__ = "job_skills"
 
-    job_id = Column(Integer, ForeignKey("job_posts.id", ondelete="CASCADE"), primary_key=True)
-    skill_id = Column(Integer, ForeignKey("skills.id", ondelete="RESTRICT"), primary_key=True)
+    job_id = Column(
+        Integer,
+        ForeignKey("job_posts.id", ondelete="CASCADE"),
+        primary_key=True
+    )
+    skill_id = Column(
+        Integer,
+        ForeignKey("skills.id", ondelete="RESTRICT"),
+        primary_key=True
+    )
     created_at = Column(TIMESTAMP, nullable=False, server_default=func.now())
 
 
 Index("idx_job_skills_job_id", JobSkill.job_id)
 Index("idx_job_skills_skill_id", JobSkill.skill_id)
 
+
 class Collaboration(Base):
     __tablename__ = "collaborations"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    company_id = Column(Integer, ForeignKey("companies.id", ondelete="CASCADE"), nullable=False)
-    consultant_id = Column(Integer, ForeignKey("consultant_profiles.id", ondelete="CASCADE"), nullable=False)
-    job_post_id = Column(Integer, ForeignKey("job_posts.id", ondelete="SET NULL"), nullable=True)
+    company_id = Column(
+        Integer,
+        ForeignKey("companies.id", ondelete="CASCADE"),
+        nullable=False
+    )
+    consultant_id = Column(
+        Integer,
+        ForeignKey("consultant_profiles.id", ondelete="CASCADE"),
+        nullable=False
+    )
+    job_post_id = Column(
+        Integer,
+        ForeignKey("job_posts.id", ondelete="SET NULL"),
+        nullable=True
+    )
 
     status = Column(
         Enum(CollaborationStatus, name="collaboration_status"),
@@ -237,4 +306,3 @@ class Collaboration(Base):
     company = relationship("Company", back_populates="collaborations")
     consultant = relationship("ConsultantProfile", back_populates="collaborations")
     job_post = relationship("JobPost", back_populates="collaborations")
-

@@ -45,7 +45,7 @@ def haversine_km(lat1, lon1, lat2, lon2):
 
     R = 6371.0  # straal aarde in km
     dlat = radians(lat2 - lat1)
-    dlon = radians(lon2 - lon1)
+    dlon = radians(lat2 - lon1)
 
     a = sin(dlat / 2) ** 2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon / 2) ** 2
     c = 2 * atan2(sqrt(a), sqrt(1 - a))
@@ -122,6 +122,7 @@ def is_unlocked(db, unlocking_user_id, target_type, target_id):
         is not None
     )
 
+
 # ------------------ NIEUWE GECORRIGEERDE HELPERFUNCTIE ------------------
 def check_profile_completion(user, profile, company):
     """
@@ -129,7 +130,7 @@ def check_profile_completion(user, profile, company):
     inclusief een hint naar de benodigde edit-URL.
     """
     missing_fields = []
-    edit_target = 'profile' # Default target: Edit Profile
+    edit_target = 'profile'  # Default target: Edit Profile
 
     if user.role == UserRole.consultant:
         if not profile:
@@ -148,7 +149,7 @@ def check_profile_completion(user, profile, company):
         # 2. Skills (vereist aparte edit pagina)
         if not profile.skills:
              missing_fields.append("Skills")
-             edit_target = 'skills' # Als skills ontbreken, stuur naar de skills editor
+             edit_target = 'skills'  # Als skills ontbreken, stuur naar de skills editor
 
         # 3. Profielkwaliteit (niet strikt essentieel voor matching, maar wel voor unlock)
         if not profile.profile_image:
@@ -160,12 +161,9 @@ def check_profile_completion(user, profile, company):
         if profile.display_name_masked == user.username:
              missing_fields.append("Full Name")
 
-
         if missing_fields:
             fields_str = ", ".join(missing_fields)
             
-            # De flash melding krijgt nu de edit_target mee in de categorie, 
-            # zodat base.html weet naar welke pagina te linken.
             flash(
                 (f"Your profile is incomplete! Please update the following details for better matching: {fields_str}."),
                 f"warning-link-{edit_target}"
@@ -185,7 +183,6 @@ def check_profile_completion(user, profile, company):
 
         if missing_fields:
             fields_str = ", ".join(missing_fields)
-            # Bedrijven linken altijd naar de algemene edit_company_profile
             flash(
                 f"Your company profile is incomplete! Please update the following details: {fields_str}.",
                 "warning-link-profile" 
@@ -414,7 +411,7 @@ def dashboard():
                     .all()
                 )
 
-        # 🟢 NIEUW: Roep de check functie aan
+        # 🟢 Roep de check functie aan
         check_profile_completion(user, profile, company)
 
         return render_template(
@@ -656,7 +653,6 @@ def consultants_list():
             except ValueError:
                 max_distance_km = None
 
-        ignore_distance = request.args.get("ignore_distance") == "1"
         same_country_only = request.args.get("same_country_only") == "1"
 
         # 🔹 Nieuwe: expliciet gekozen job voor matching
@@ -700,13 +696,26 @@ def consultants_list():
                 )
             )
 
-        company_lat = getattr(company_profile, "latitude", None) if company_profile else None
-        company_lon = getattr(company_profile, "longitude", None) if company_profile else None
+        # Country rechtstreeks van company
         company_country = (
             (company_profile.country or "").strip().lower()
             if company_profile and company_profile.country
             else None
         )
+
+        # Company-coördinaten dynamisch geocoden als er een distance-filter is
+        company_lat = None
+        company_lon = None
+        if (
+            company_profile
+            and company_profile.location_city
+            and company_profile.country
+            and max_distance_km is not None  # alleen als slider > 0
+        ):
+            company_lat, company_lon = geocode_with_mapbox(
+                company_profile.location_city,
+                company_profile.country,
+            )
 
         # 4. Basisquery en Filters Toepassen (zonder afstand)
         query = (
@@ -745,8 +754,7 @@ def consultants_list():
 
             # Afstand
             if (
-                not ignore_distance
-                and max_distance_km is not None
+                max_distance_km is not None
                 and company_lat is not None
                 and company_lon is not None
             ):
@@ -926,11 +934,6 @@ def edit_company_profile():
             company.country = request.form.get("country")
             company.contact_email = request.form.get("contact_email")
             company.phone_number = request.form.get("phone_number")
-
-            # Geocode locatie
-            lat, lon = geocode_with_mapbox(company.location_city, company.country)
-            company.latitude = lat
-            company.longitude = lon
 
             # industries opslaan
             selected = request.form.getlist("industries")
@@ -1233,21 +1236,21 @@ def jobs_list():
                 if job_country and job_country != consultant_country:
                     continue
 
-            # Afstand
+            # Afstand op basis van JOB-coördinaten
             if (
                 not ignore_distance
                 and max_distance_km is not None
                 and consultant_lat is not None
                 and consultant_lon is not None
             ):
-                comp_lat = getattr(company, "latitude", None) if company else None
-                comp_lon = getattr(company, "longitude", None) if company else None
+                job_lat = getattr(job, "latitude", None)
+                job_lon = getattr(job, "longitude", None)
 
-                if comp_lat is None or comp_lon is None:
+                if job_lat is None or job_lon is None:
                     continue
 
                 distance = haversine_km(
-                    consultant_lat, consultant_lon, comp_lat, comp_lon
+                    consultant_lat, consultant_lon, job_lat, job_lon
                 )
                 if distance is None or distance > max_distance_km:
                     continue
@@ -1464,6 +1467,9 @@ def job_new():
                 flash(_("Title is required"))
                 return redirect(url_for("main.job_new"))
 
+            # Geocode job-locatie
+            lat, lon = geocode_with_mapbox(city, country)
+
             job = JobPost(
                 company_id=company.id,
                 title=title,
@@ -1471,6 +1477,8 @@ def job_new():
                 location_city=city,
                 country=country,
                 contract_type=contract_type,
+                latitude=lat,
+                longitude=lon,
             )
 
             if selected_skill_ids:
@@ -1510,9 +1518,16 @@ def job_edit(job_id):
         if request.method == "POST":
             job.title = request.form.get("title")
             job.description = request.form.get("description")
-            job.location_city = request.form.get("location_city")
-            job.country = request.form.get("country")
+            city = request.form.get("location_city")
+            country = request.form.get("country")
+            job.location_city = city
+            job.country = country
             job.contract_type = request.form.get("contract_type")
+
+            # Geocode job-locatie
+            lat, lon = geocode_with_mapbox(city, country)
+            job.latitude = lat
+            job.longitude = lon
 
             selected_skill_ids = [int(x) for x in request.form.getlist("skills")]
             job.skills = (
@@ -1660,8 +1675,6 @@ def admin_collaborations():
         )
 
 
-
-
 # ------------------ ADMIN DASHBOARD ------------------
 
 @main.route("/admin")
@@ -1669,4 +1682,3 @@ def admin_collaborations():
 @admin_required
 def admin_dashboard():
     return render_template("admin_dashboard.html")
-
