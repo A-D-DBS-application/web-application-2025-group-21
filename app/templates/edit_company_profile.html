@@ -4,137 +4,213 @@
 {% block content %}
 <h1>Edit company profile</h1>
 
-<form method="post" class="company-form">
+<div class="edit-company-page">
 
-    <!-- COMPANY NAME -->
-    <label class="field-label">
-        Company name:
-        <input
-            type="text"
-            id="company_name"
-            name="company_name"
-            value="{{ company.company_name_masked or '' }}"
-            required
-        >
-    </label>
+    <form method="post" class="company-form">
 
-    <!-- CITY -->
-    <label class="field-label">
-        City:
-        <input
-            type="text"
-            id="location_city"
-            name="location_city"
-            value="{{ company.location_city or '' }}"
-        >
-    </label>
+        <!-- COMPANY NAME -->
+        <label class="field-label">
+            Company name:
+            <input
+                type="text"
+                id="company_name"
+                name="company_name"
+                value="{{ company.company_name_masked or '' }}"
+                required
+            >
+        </label>
 
-    <!-- COUNTRY -->
-    <label class="field-label">
-        Country:
-        <input
-            type="text"
-            id="country"
-            name="country"
-            value="{{ company.country or '' }}"
-        >
-    </label>
+        <!-- CITY -->
+        <label class="field-label">
+            City:
+            <input
+                type="text"
+                id="location_city"
+                name="location_city"
+                value="{{ company.location_city or '' }}"
+            >
+        </label>
 
-    <!-- INDUSTRIES -->
-    <label class="field-label">
-        Industries:
+        <!-- COUNTRY -->
+        <label class="field-label">
+            Country:
+            <input
+                type="text"
+                id="country"
+                name="country"
+                value="{{ company.country or '' }}"
+            >
+        </label>
 
-        {% set selected = (company.industries or "").split(", ") %}
+        <!-- INDUSTRIES -->
+        <label class="field-label">
+            Industries:
 
-        <div class="industry-options">
-            {% for option in ["Technology", "Healthcare", "Finance", "Logistics", "Consulting"] %}
-                <label class="industry-item">
-                    <input
-                        type="checkbox"
-                        name="industries"
-                        value="{{ option }}"
-                       {% if option in selected %}checked{% endif %}
-                    >
-                    {{ option }}
-            </label>
-            {% endfor %}
+            {% set selected = (company.industries or "").split(", ") %}
+
+            <div class="industry-options">
+                {% for option in ["Technology", "Healthcare", "Finance", "Logistics", "Consulting"] %}
+                    <label class="industry-item">
+                        <input
+                            type="checkbox"
+                            name="industries"
+                            value="{{ option }}"
+                            {% if option in selected %}checked{% endif %}
+                        >
+                        {{ option }}
+                    </label>
+                {% endfor %}
+            </div>
+        </label>
+
+        <hr>
+
+        <h3>Contact information (shown when unlocked)</h3>
+
+        <!-- EMAIL -->
+        <label class="field-label">
+            Email address:
+            <input
+                type="email"
+                id="contact_email"
+                name="contact_email"
+                value="{{ company.contact_email or '' }}"
+            >
+        </label>
+
+        <!-- PHONE -->
+        <label class="field-label">
+            Phone number:
+            <input
+                type="tel"
+                id="phone_number"
+                name="phone_number"
+                value="{{ company.phone_number or '' }}"
+            >
+        </label>
+
+        <hr>
+
+        <button class="btn" type="submit">Save changes</button>
+    </form>
+
+    <!-- BLUE FIELD HELPER POPUP (zonder JS) -->
+    <div id="field-helper" class="field-helper">
+        <div class="field-helper-title">
+            <span>Field guide</span>
         </div>
-    </label>
-
-
-
-    <hr>
-
-    <h3>Contact information (shown when unlocked)</h3>
-
-    <!-- EMAIL -->
-    <label class="field-label">
-        Email address:
-        <input
-            type="email"
-            id="contact_email"
-            name="contact_email"
-            value="{{ company.contact_email or '' }}"
-        >
-    </label>
-
-    <!-- PHONE -->
-    <label class="field-label">
-        Phone number:
-        <input
-            type="tel"
-            id="phone_number"
-            name="phone_number"
-            value="{{ company.phone_number or '' }}"
-        >
-    </label>
-
-    <hr>
-
-    <button class="btn" type="submit">Save changes</button>
-</form>
-
-<!-- FIELD HELPER POPUP -->
-<div id="field-helper" class="field-helper">
-    <div class="field-helper-title">
-        <span id="field-helper-label">Field guide</span>
+        <div class="field-helper-text">
+            <p class="help help-default">
+                Click a field to get instructions.
+            </p>
+            <p class="help help-company_name">
+                Use your official company or brand name. This is shown to consultants once they unlock your jobs.
+            </p>
+            <p class="help help-location_city">
+                Enter the city where your main office or hiring location is.
+            </p>
+            <p class="help help-country">
+                Enter the country in which this office or hiring location is based. This helps consultants filter and match.
+            </p>
+            <p class="help help-contact_email">
+                This email is shared with consultants after they unlock your job posts. Use an inbox that is actively monitored.
+            </p>
+            <p class="help help-phone_number">
+                A direct phone number can increase trust and response speed once you start collaborating, and will be made available once you are unlocked by a consultant.
+            </p>
+        </div>
     </div>
-    <div id="field-helper-text" class="field-helper-text">
-        Click a field to get instructions.
-    </div>
+
 </div>
 
-<script>
-(function () {
-    const helperText = document.getElementById("field-helper-text");
-    const helperLabel = document.getElementById("field-helper-label");
+<style>
+/* wrapper zodat :has kan werken */
+.edit-company-page {
+    position: relative;
+}
 
-    function guide(label, text) {
-        helperLabel.textContent = label;
-        helperText.textContent = text;
-    }
+/* Form labels */
+.field-label {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 0.75rem;
+}
+.field-label input {
+    margin-top: 4px;
+}
 
-    function bind(fieldId, label, text) {
-        const field = document.getElementById(fieldId);
-        if (!field) return;
-        field.addEventListener("focus", () => guide(label, text));
-    }
+/* Blauwe popup rechtsonder */
+.field-helper {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    max-width: 320px;
+    background: #0d6efd;          /* blauw */
+    color: #fff;
+    padding: 12px 16px;
+    border-radius: 8px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.2);
+    font-size: 0.9rem;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(10px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
 
-    bind("company_name", "Company name",
-        "Use your official company or brand name. This is shown to consultants once they unlock your jobs.");
+/* Header in popup */
+.field-helper-title {
+    font-weight: 600;
+    margin-bottom: 4px;
+}
 
-    bind("location_city", "City",
-        "Enter the city where your main office or hiring location is.");
+/* Alle teksten verbergen, behalve default */
+.field-helper .help {
+    display: none;
+}
+.field-helper .help-default {
+    display: block;
+}
 
-    bind("country", "Country",
-        "Enter the country in which this office or hiring location is based. This helps consultants filter and match.");
+/* Popup pas tonen zodra een relevant veld focus heeft */
+.edit-company-page:has(
+    #company_name:focus,
+    #location_city:focus,
+    #country:focus,
+    #contact_email:focus,
+    #phone_number:focus
+) .field-helper {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
 
-    bind("contact_email", "Email address",
-        "This email is shared with consultants after they unlock your job posts. Use an inbox that is actively monitored.");
+/* Default-text verbergen zodra één van de velden focus heeft */
+.edit-company-page:has(
+    #company_name:focus,
+    #location_city:focus,
+    #country:focus,
+    #contact_email:focus,
+    #phone_number:focus
+) .field-helper .help-default {
+    display: none;
+}
 
-    bind("phone_number", "Phone number",
-        "A direct phone number can increase trust and response speed once you start collaborating, will be made available once you are unlocked by a consultant");
-})();
-</script>
+/* Per veld de juiste tekst tonen */
+.edit-company-page:has(#company_name:focus) .field-helper .help-company_name {
+    display: block;
+}
+.edit-company-page:has(#location_city:focus) .field-helper .help-location_city {
+    display: block;
+}
+.edit-company-page:has(#country:focus) .field-helper .help-country {
+    display: block;
+}
+.edit-company-page:has(#contact_email:focus) .field-helper .help-contact_email {
+    display: block;
+}
+.edit-company-page:has(#phone_number:focus) .field-helper .help-phone_number {
+    display: block;
+}
+</style>
 
 {% endblock %}

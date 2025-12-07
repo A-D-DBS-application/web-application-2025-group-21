@@ -4,209 +4,296 @@
 {% block content %}
 <h1>Edit consultant profile</h1>
 
-<form method="post" enctype="multipart/form-data" class="profile-form">
+<div class="edit-consultant-page">
 
-    <!-- NAME -->
-    <label class="field-label">
-        Full name:
-        <input
-            type="text"
-            id="display_name"
-            name="display_name"
-            value="{{ profile.display_name_masked or '' }}"
-            required
-        >
-    </label>
+    <form method="post" enctype="multipart/form-data" class="profile-form">
 
-    <!-- CITY -->
-    <label class="field-label">
-        City:
-        <input
-            type="text"
-            id="location_city"
-            name="location_city"
-            value="{{ profile.location_city or '' }}"
-        >
-    </label>
+        <!-- NAME -->
+        <label class="field-label">
+            Full name:
+            <input
+                type="text"
+                id="display_name"
+                name="display_name"
+                value="{{ profile.display_name_masked or '' }}"
+                required
+            >
+        </label>
 
-    <!-- COUNTRY -->
-    <label class="field-label">
-        Country:
-        <input
-            type="text"
-            id="country"
-            name="country"
-            value="{{ profile.country or '' }}"
-        >
-    </label>
+        <!-- CITY -->
+        <label class="field-label">
+            City:
+            <input
+                type="text"
+                id="location_city"
+                name="location_city"
+                value="{{ profile.location_city or '' }}"
+            >
+        </label>
 
-    <!-- HEADLINE -->
-    <label class="field-label">
-        Headline:
-        <input
-            type="text"
-            id="headline"
-            name="headline"
-            value="{{ profile.headline or '' }}"
-        >
-    </label>
+        <!-- COUNTRY -->
+        <label class="field-label">
+            Country:
+            <input
+                type="text"
+                id="country"
+                name="country"
+                value="{{ profile.country or '' }}"
+            >
+        </label>
 
-    <!-- YEARS OF EXPERIENCE -->
-    <label class="field-label">
-        Years of experience:
-        <input
-            type="number"
-            id="years_experience"
-            name="years_experience"
-            min="0"
-            value="{{ profile.years_experience if profile.years_experience is not none else '' }}"
-        >
-    </label>
+        <!-- HEADLINE -->
+        <label class="field-label">
+            Headline:
+            <input
+                type="text"
+                id="headline"
+                name="headline"
+                value="{{ profile.headline or '' }}"
+            >
+        </label>
 
-    <hr>
+        <!-- YEARS OF EXPERIENCE -->
+        <label class="field-label">
+            Years of experience:
+            <input
+                type="number"
+                id="years_experience"
+                name="years_experience"
+                min="0"
+                value="{{ profile.years_experience if profile.years_experience is not none else '' }}"
+            >
+        </label>
 
-    <h3>Documents</h3>
+        <hr>
 
-    {% if profile.profile_image %}
-        <div class="current-file">
-            <strong>Current profile picture:</strong><br>
-            <img src="{{ profile.profile_image }}" alt="Profile picture" class="current-profile-image">
+        <h3>Documents</h3>
+
+        {% if profile.profile_image %}
+            <div class="current-file">
+                <strong>Current profile picture:</strong><br>
+                <img src="{{ profile.profile_image }}" alt="Profile picture" class="current-profile-image">
+            </div>
+        {% endif %}
+
+        <!-- PROFILE PICTURE -->
+        <label class="field-label">
+            Profile picture:
+            <input
+                type="file"
+                id="profile_image"
+                name="profile_image"
+                accept="image/*"
+            >
+        </label>
+
+        {% if profile.cv_document %}
+            <div class="current-file">
+                <strong>Current CV:</strong>
+                <a href="{{ profile.cv_document }}" target="_blank">Open current CV</a>
+            </div>
+        {% endif %}
+
+        <!-- CV DOCUMENT -->
+        <label class="field-label">
+            CV document:
+            <input
+                type="file"
+                id="cv_document"
+                name="cv_document"
+                accept=".pdf,.doc,.docx"
+            >
+        </label>
+
+        <hr>
+
+        <h3>Contact information</h3>
+
+        <!-- EMAIL -->
+        <label class="field-label">
+            Email address:
+            <input
+                type="email"
+                id="contact_email"
+                name="contact_email"
+                value="{{ profile.contact_email or '' }}"
+            >
+        </label>
+
+        <!-- PHONE -->
+        <label class="field-label">
+            Phone number:
+            <input
+                type="tel"
+                id="phone_number"
+                name="phone_number"
+                value="{{ profile.phone_number or '' }}"
+            >
+        </label>
+
+        <hr>
+
+        <h3>Availability</h3>
+
+        <!-- AVAILABILITY -->
+        <label class="field-label">
+            Status:
+            <select id="availability_status" name="availability_status">
+                <option value="available" {% if profile.availability %}selected{% endif %}>
+                    Available for new jobs
+                </option>
+                <option value="unavailable" {% if not profile.availability %}selected{% endif %}>
+                    Unavailable (not searching right now)
+                </option>
+            </select>
+        </label>
+
+        <hr>
+
+        <button class="btn" type="submit">Save changes</button>
+    </form>
+
+    <!-- BLAUWE FIELD HELPER POPUP (zelfde look als company) -->
+    <div id="field-helper" class="field-helper">
+        <div class="field-helper-title">
+            <span>Field guide</span>
         </div>
-    {% endif %}
-
-    <!-- PROFILE PICTURE -->
-    <label class="field-label">
-        Profile picture:
-        <input
-            type="file"
-            id="profile_image"
-            name="profile_image"
-            accept="image/*"
-        >
-    </label>
-
-    {% if profile.cv_document %}
-        <div class="current-file">
-            <strong>Current CV:</strong>
-            <a href="{{ profile.cv_document }}" target="_blank">Open current CV</a>
+        <div class="field-helper-text">
+            <p class="help help-default">
+                Click a field to get instructions.
+            </p>
+            <p class="help help-display_name">
+                Write your full professional name. This name is shown once a company unlocks your profile.
+            </p>
+            <p class="help help-location_city">
+                Your city helps us calculate distance-based relevance.
+            </p>
+            <p class="help help-country">
+                Enter the country you are based in. This influences visibility and matching accuracy.
+            </p>
+            <p class="help help-headline">
+                Short summary of your role. Example: “Senior Cloud Engineer” or “Data Analyst Consultant”.
+            </p>
+            <p class="help help-years_experience">
+                Your years of experience impact your relevance matching. Enter only whole numbers.
+            </p>
+            <p class="help help-profile_image">
+                Upload a professional photo. This is visible only after you are unlocked.
+            </p>
+            <p class="help help-cv_document">
+                Upload a CV with your skills and experience. Your CV will be made available after you have been unlocked.
+            </p>
+            <p class="help help-contact_email">
+                Companies will contact you via this email once unlocked.
+            </p>
+            <p class="help help-phone_number">
+                Companies may call you on this number once your profile is unlocked.
+            </p>
+            <p class="help help-availability_status">
+                Indicate whether you are open for new opportunities now.
+            </p>
         </div>
-    {% endif %}
-
-    <!-- CV DOCUMENT -->
-    <label class="field-label">
-        CV document:
-        <input
-            type="file"
-            id="cv_document"
-            name="cv_document"
-            accept=".pdf,.doc,.docx"
-        >
-    </label>
-
-    <hr>
-
-    <h3>Contact information</h3>
-
-    <!-- EMAIL -->
-    <label class="field-label">
-        Email address:
-        <input
-            type="email"
-            id="contact_email"
-            name="contact_email"
-            value="{{ profile.contact_email or '' }}"
-        >
-    </label>
-
-    <!-- PHONE -->
-    <label class="field-label">
-        Phone number:
-        <input
-            type="tel"
-            id="phone_number"
-            name="phone_number"
-            value="{{ profile.phone_number or '' }}"
-        >
-    </label>
-
-    <hr>
-
-    <h3>Availability</h3>
-
-    <!-- AVAILABILITY -->
-    <label class="field-label">
-        Status:
-        <select id="availability_status" name="availability_status">
-            <option value="available" {% if profile.availability %}selected{% endif %}>
-                Available for new jobs
-            </option>
-            <option value="unavailable" {% if not profile.availability %}selected{% endif %}>
-                Unavailable (not searching right now)
-            </option>
-        </select>
-    </label>
-
-    <hr>
-
-    <button class="btn" type="submit">Save changes</button>
-</form>
-
-<!-- FIELD HELPER POPUP -->
-<div id="field-helper" class="field-helper">
-    <div class="field-helper-title">
-        <span id="field-helper-label">Field guide</span>
     </div>
-    <div id="field-helper-text" class="field-helper-text">
-        Click a field to get instructions.
-    </div>
+
 </div>
 
-<script>
-(function () {
-    const helperText = document.getElementById("field-helper-text");
-    const helperLabel = document.getElementById("field-helper-label");
+<style>
+.edit-consultant-page {
+    position: relative;
+}
 
-    function guide(label, text) {
-        helperLabel.textContent = label;
-        helperText.textContent = text;
-    }
+/* Zelfde form-styling als company */
+.field-label {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 0.75rem;
+}
+.field-label input,
+.field-label select {
+    margin-top: 4px;
+}
 
-    function bind(fieldId, label, text) {
-        const field = document.getElementById(fieldId);
-        if (!field) return;
-        field.addEventListener("focus", () => guide(label, text));
-    }
+/* Blauwe popup rechtsonder, met witte tekst */
+.field-helper {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    max-width: 320px;
 
-    bind("display_name", "Full Name",
-        "Write your full professional name. This name is shown once a company unlocks your profile.");
+    background: #0d6efd;
+    color: #ffffff;
 
-    bind("location_city", "City",
-        "Your city helps us calculate distance-based relevance.");
+    padding: 12px 16px;
+    border-radius: 8px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.2);
+    font-size: 0.9rem;
 
-    bind("country", "Country",
-        "Enter the country you are based in. This influences visibility and matching accuracy.");
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(10px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
 
-    bind("headline", "Headline",
-        "Short summary of your role. Example: “Senior Cloud Engineer” or “Data Analyst Consultant”.");
+.field-helper-title {
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: #ffffff;
+}
 
-    bind("years_experience", "Experience",
-        "Your years of experience impact your relevance matching. Enter only whole numbers.");
+.field-helper .help {
+    display: none;
+    color: #ffffff;
+}
+.field-helper .help-default {
+    display: block;
+    color: #ffffff;
+}
 
-    bind("profile_image", "Profile Picture",
-        "Upload a professional photo. This is visible only after you are unlocked.");
+/* Popup tonen zodra één van de relevante velden focus heeft */
+.edit-consultant-page:has(
+    #display_name:focus,
+    #location_city:focus,
+    #country:focus,
+    #headline:focus,
+    #years_experience:focus,
+    #profile_image:focus,
+    #cv_document:focus,
+    #contact_email:focus,
+    #phone_number:focus,
+    #availability_status:focus
+) .field-helper {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
 
-    bind("cv_document", "CV Upload",
-        "Upload a CV with your skills and experience. Your CV will be made available after you have been unlocked.");
+/* Default-tekst verbergen bij focus */
+.edit-consultant-page:has(
+    #display_name:focus,
+    #location_city:focus,
+    #country:focus,
+    #headline:focus,
+    #years_experience:focus,
+    #profile_image:focus,
+    #cv_document:focus,
+    #contact_email:focus,
+    #phone_number:focus,
+    #availability_status:focus
+) .field-helper .help-default {
+    display: none;
+}
 
-    bind("contact_email", "Email",
-        "Companies will contact you via this email once unlocked.");
-
-    bind("phone_number", "Phone Number",
-        "Companies will contact you via this email once unlocked.");
-
-    bind("availability_status", "Availability",
-        "Indicate whether you are open for new opportunities now.");
-})();
-</script>
+/* Per veld de juiste tekst tonen */
+.edit-consultant-page:has(#display_name:focus) .field-helper .help-display_name { display: block; }
+.edit-consultant-page:has(#location_city:focus) .field-helper .help-location_city { display: block; }
+.edit-consultant-page:has(#country:focus) .field-helper .help-country { display: block; }
+.edit-consultant-page:has(#headline:focus) .field-helper .help-headline { display: block; }
+.edit-consultant-page:has(#years_experience:focus) .field-helper .help-years_experience { display: block; }
+.edit-consultant-page:has(#profile_image:focus) .field-helper .help-profile_image { display: block; }
+.edit-consultant-page:has(#cv_document:focus) .field-helper .help-cv_document { display: block; }
+.edit-consultant-page:has(#contact_email:focus) .field-helper .help-contact_email { display: block; }
+.edit-consultant-page:has(#phone_number:focus) .field-helper .help-phone_number { display: block; }
+.edit-consultant-page:has(#availability_status:focus) .field-helper .help-availability_status { display: block; }
+</style>
 
 {% endblock %}
