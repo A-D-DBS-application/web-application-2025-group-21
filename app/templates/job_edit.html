@@ -20,8 +20,16 @@
         <label>Location — country</label>
         <input type="text" name="country" value="{{ job.country }}">
 
+        <!-- ✅ Dropdown instead of text input -->
         <label>Contracttype</label>
-        <input type="text" name="contract_type" value="{{ job.contract_type }}">
+        <select name="contract_type" class="form-select" required>
+            <option value="">Select contract type</option>
+            {% for value, label in possible_contract_types %}
+                <option value="{{ value }}" {% if job.contract_type == value %}selected{% endif %}>
+                    {{ label }}
+                </option>
+            {% endfor %}
+        </select>
 
         <label>Skills</label>
         <div class="skills-box">

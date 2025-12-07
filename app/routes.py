@@ -164,51 +164,50 @@ def check_profile_completion(user, profile, company):
 
     if user.role == UserRole.consultant:
         if not profile:
-            return 
+            return
         
         # 1. Essentiële Matching Velden
-        if not profile.headline or profile.headline == "":
+        if not profile.headline or profile.headline.strip() == "":
             missing_fields.append("Headline")
         if profile.years_experience is None:
             missing_fields.append("Years of experience")
-        if not profile.location_city or profile.location_city == "":
+        if not profile.location_city or profile.location_city.strip() == "":
             missing_fields.append("City")
-        if not profile.country or profile.country == "":
+        if not profile.country or profile.country.strip() == "":
             missing_fields.append("Country")
         
-        # 2. Skills (vereist aparte edit pagina)
+        # 2. Skills
         if not profile.skills:
-             missing_fields.append("Skills")
-             edit_target = 'skills'  # Als skills ontbreken, stuur naar de skills editor
+            missing_fields.append("Skills")
+            edit_target = 'skills'
 
-        # 3. Profielkwaliteit (niet strikt essentieel voor matching, maar wel voor unlock)
+        # 3. Profielkwaliteit
         if not profile.profile_image:
-             missing_fields.append("Profile Picture")
+            missing_fields.append("Profile Picture")
         if not profile.cv_document:
-             missing_fields.append("CV Document")
-        
-        # Controleer of de display_name de default username is
-        if profile.display_name_masked == user.username:
-             missing_fields.append("Full Name")
+            missing_fields.append("CV Document")
+
+        # Full name niet meer gelijk aan username
+        if not profile.display_name_masked or profile.display_name_masked.strip() == "":
+            missing_fields.append("Full Name")
 
         if missing_fields:
             fields_str = ", ".join(missing_fields)
-            
             flash(
-                (f"Your profile is incomplete! Please update the following details for better matching: {fields_str}."),
+                f"Your profile is incomplete! Please update the following details for better matching: {fields_str}.",
                 f"warning-link-{edit_target}"
             )
 
     elif user.role == UserRole.company:
         if not company:
-            return 
+            return
         
-        # Velden die we als essentieel beschouwen voor bedrijven
-        if company.company_name_masked == user.username:
+        # ✅ Alleen checken op leegte, niet meer vergelijken met username
+        if not company.company_name_masked or company.company_name_masked.strip() == "":
             missing_fields.append("Company Name")
-        if not company.location_city or company.location_city == "":
+        if not company.location_city or company.location_city.strip() == "":
             missing_fields.append("City")
-        if not company.country or company.country == "":
+        if not company.country or company.country.strip() == "":
             missing_fields.append("Country")
 
         if missing_fields:
@@ -217,6 +216,7 @@ def check_profile_completion(user, profile, company):
                 f"Your company profile is incomplete! Please update the following details: {fields_str}.",
                 "warning-link-profile" 
             )
+
 
 # EINDE GECORRIGEERDE HELPERFUNCTIE
 # ------------------ HOME ------------------
@@ -1570,6 +1570,14 @@ def job_edit(job_id):
 
         all_skills = db.query(Skill).order_by(Skill.name).all()
 
+        # ✅ lijst met mogelijke contracttypes (zelfde als in jobs_list)
+        possible_contract_types = [
+            ("Freelance", _("Freelance")),
+            ("Full-time", _("Full-time")),
+            ("Part-time", _("Part-time")),
+            ("Project-based", _("Project-based")),
+        ]
+
         if request.method == "POST":
             job.title = request.form.get("title")
             job.description = request.form.get("description")
@@ -1595,7 +1603,13 @@ def job_edit(job_id):
             flash(_("Job updated!"))
             return redirect(url_for("main.job_detail", job_id=job.id))
 
-        return render_template("job_edit.html", job=job, skills=all_skills)
+        return render_template(
+            "job_edit.html",
+            job=job,
+            skills=all_skills,
+            possible_contract_types=possible_contract_types,  # ✅ doorgeven aan template
+        )
+
 
 
 @main.route("/jobs/<int:job_id>/delete", methods=["POST"])
