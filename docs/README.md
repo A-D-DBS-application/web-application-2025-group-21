@@ -13,3 +13,80 @@ Link to video recordings:
 
 Link to Supabase: 
     https://supabase.com/dashboard/project/yezkgrihchdjhiypfykc
+Installment:
+# Installation & Running the App (Local)
+
+### Prerequisites
+- Python 3.x  
+- pip  
+- PostgreSQL or Supabase Postgres  
+- .env file with:
+  DATABASE_URL
+  SUPABASE_URL
+  SUPABASE_KEY
+  SUPABASE_BUCKET_NAME
+  MAPBOX_TOKEN
+
+---
+
+## Installation Steps (All in One)
+
+```bash
+# 1. Clone the repository
+git clone <your-repo-url>
+cd <your-repo-folder>
+
+# 2. Create & activate virtual environment
+python -m venv venv
+# macOS/Linux:
+source venv/bin/activate
+# Windows:
+venv\Scripts\activate
+
+# 3. Install dependencies
+pip install -r requirements.txt
+
+# 4. Create .env file (manually in the root folder)--> ask our group members the correct passwords and url's
+# Content example:
+# DATABASE_URL=your_database_url
+# SUPABASE_URL=your_supabase_url
+# SUPABASE_KEY=your_supabase_key
+# SUPABASE_BUCKET_NAME=iconsult-assets
+# MAPBOX_TOKEN=your_mapbox_token
+
+# 5. Initialize the database
+python create_tables.py
+
+# 6. Run the application
+flask run
+# or:
+python app.py
+
+# 7. Open the application in your browser
+# http://localhost:5000
+
+Basic Usage
+
+Consultants
+
+Register / log in as consultant
+
+Complete your profile (headline, location, experience, skills)
+
+Upload your CV and profile picture
+
+Browse job posts
+
+Unlock job contact details to start a collaboration
+
+Companies
+
+Register / log in as company
+
+Complete your company profile (name, location, industries)
+
+Create job posts with required skills and contract type
+
+Browse available consultants
+
+Unlock consultant contact details and start collaborations
