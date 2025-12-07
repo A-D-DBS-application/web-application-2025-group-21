@@ -5,6 +5,4 @@ python-dotenv
 psycopg2-binary
 Flask-Babel
 requests
-
-
-
+supabase

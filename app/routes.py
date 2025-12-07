@@ -4,7 +4,10 @@ from functools import wraps
 from sqlalchemy import or_, func
 from sqlalchemy.orm import joinedload
 from flask_babel import gettext as _
-from .supabase_client import get_session
+import os
+import mimetypes
+import time
+from .supabase_client import get_session, supabase 
 from .models import (
     User,
     ConsultantProfile,
@@ -17,7 +20,6 @@ from .models import (
     Collaboration,
     CollaborationStatus,
 )
-import os
 from werkzeug.utils import secure_filename
 
 import requests
@@ -83,6 +85,39 @@ def geocode_with_mapbox(city, country):
     lon, lat = data["features"][0]["center"]
     return lat, lon
 
+# ------------------ SUPABASE STORAGE HELPER ------------------
+
+def upload_file_to_bucket(file_obj, bucket_name, folder="uploads"):
+    """
+    Uploads a file to Supabase Storage and returns the public URL.
+    Returns None if upload fails.
+    """
+    try:
+        # Create a unique filename: timestamp_original_filename
+        filename = f"{int(time.time())}_{file_obj.filename.replace(' ', '_')}"
+        file_path = f"{folder}/{filename}"
+        
+        # Determine content type (e.g., image/jpeg, application/pdf)
+        content_type = mimetypes.guess_type(file_obj.filename)[0] or "application/octet-stream"
+        
+        # Read file data
+        file_data = file_obj.read()
+        
+        # Upload to Supabase
+        res = supabase.storage.from_(bucket_name).upload(
+            file_path, 
+            file_data, 
+            {"content-type": content_type}
+        )
+        
+        # Get Public URL
+        public_url_response = supabase.storage.from_(bucket_name).get_public_url(file_path)
+        
+        return public_url_response
+        
+    except Exception as e:
+        print(f"Upload error: {e}")
+        return None
 
 # ------------------ BLUEPRINT & HELPERS ------------------
 
@@ -123,12 +158,7 @@ def is_unlocked(db, unlocking_user_id, target_type, target_id):
     )
 
 
-# ------------------ NIEUWE GECORRIGEERDE HELPERFUNCTIE ------------------
 def check_profile_completion(user, profile, company):
-    """
-    Controleert of essentiële velden zijn ingevuld en stuurt een Engelse melding, 
-    inclusief een hint naar de benodigde edit-URL.
-    """
     missing_fields = []
     edit_target = 'profile'  # Default target: Edit Profile
 
@@ -489,49 +519,24 @@ def edit_consultant_profile():
             profile.latitude = lat
             profile.longitude = lon
 
-            # Profielfoto
+            bucket_name = os.getenv("SUPABASE_BUCKET_NAME", "iconsult-assets")
+            # --- PROFILE IMAGE UPLOAD (Supabase) ---
             file = request.files.get("profile_image")
             if file and file.filename != "":
-                upload_folder = os.path.join(
-                    current_app.root_path, "static", "uploads"
-                )
-                os.makedirs(upload_folder, exist_ok=True)
+                public_url = upload_file_to_bucket(file, bucket_name, folder="profile_images")
+                if public_url:
+                    profile.profile_image = public_url
+                else:
+                    flash(_("Failed to upload profile image."), "error")
 
-                orig_name = secure_filename(file.filename)
-                _, ext = os.path.splitext(orig_name)
-                ext = ext.lower()
-                if ext not in {".png", ".jpg", ".jpeg", ".gif"}:
-                    flash(
-                        _("Invalid image type. Allowed: png/jpg/jpeg/gif."), "error"
-                    )
-                    return redirect(url_for("main.edit_consultant_profile"))
-
-                filename = f"user_{user.id}{ext}"
-                save_path = os.path.join(upload_folder, filename)
-                file.save(save_path)
-                profile.profile_image = f"/static/uploads/{filename}"
-
-            # CV
+            # --- CV UPLOAD (Supabase) ---
             cv_file = request.files.get("cv_document")
             if cv_file and cv_file.filename != "":
-                upload_folder = os.path.join(
-                    current_app.root_path, "static", "uploads"
-                )
-                os.makedirs(upload_folder, exist_ok=True)
-
-                orig_name = secure_filename(cv_file.filename)
-                _, ext = os.path.splitext(orig_name)
-                ext = ext.lower()
-
-                allowed_exts = {".pdf", ".doc", ".docx"}
-                if ext not in allowed_exts:
-                    flash(_("Invalid file type. Only upload pdf/doc/docx."))
-                    return redirect(url_for("main.edit_consultant_profile"))
-
-                cv_filename = f"cv_user_{user.id}{ext}"
-                cv_save_path = os.path.join(upload_folder, cv_filename)
-                cv_file.save(cv_save_path)
-                profile.cv_document = f"/static/uploads/{cv_filename}"
+                public_url = upload_file_to_bucket(cv_file, bucket_name, folder="cv_documents")
+                if public_url:
+                    profile.cv_document = public_url
+                else:
+                    flash(_("Failed to upload CV."), "error")
 
             db.commit()
             flash("Profile updated successfully")
