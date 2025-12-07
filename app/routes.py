@@ -77,7 +77,7 @@ def geocode_with_mapbox(city, country):
     except Exception:
         return None, None
 
-    data = resp.json()
+    data = resp.json() #Explanation:This is allowed and necessary. This is not JSON storage, but simply reading a response from an external server (Mapbox). SQLAlchemy cannot communicate with Mapbox directly; that has to be done via HTTP. As long as you store the latitude and longitude afterward in regular columns like latitude = Column(Float), this fully complies with the requirement “No JSON storage, but ORM only.”Je hoeft in je Python code dus niets aan te passen, want je database-interactie is puur SQLAlchemy.
     if not data.get("features"):
         return None, None
 
