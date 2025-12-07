@@ -2293,3 +2293,8 @@ nav a:hover {
     transform: translateY(-1px);
     box-shadow: 0 5px 12px rgba(37, 99, 235, 0.45);
 }
+.btn-large {
+    padding: 10px 22px;
+    font-size: 15px;
+    border-radius: 8px;
+}

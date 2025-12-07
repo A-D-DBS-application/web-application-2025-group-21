@@ -21,7 +21,7 @@
         <input type="text" name="country" value="{{ job.country }}">
 
         <!-- ✅ Dropdown instead of text input -->
-        <label>Contracttype</label>
+        <label>Contract type</label>
         <select name="contract_type" class="form-select" required>
             <option value="">Select contract type</option>
             {% for value, label in possible_contract_types %}
