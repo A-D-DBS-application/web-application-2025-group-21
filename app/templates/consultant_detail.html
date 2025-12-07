@@ -1,7 +1,15 @@
 {% extends "base.html" %}
 {% block title %}Consultant detail{% endblock %}
+<!-- ✅ Go Back Button -->
+
 
 {% block content %}
+  <!-- ✅ Go Back Button -->
+  <a href="{{ request.referrer or url_for('main.consultants_list') }}"
+     class="btn btn-secondary btn-large"
+     style="margin-bottom: 15px; display:inline-block;">
+      ← Go Back
+  </a>
   <h1>
     {% if is_unlocked or is_owner %}
         {{ profile.display_name_masked }}
@@ -9,6 +17,8 @@
         {{ profile.initials }}
     {% endif %}
   </h1>
+    <!-- ✅ Go Back Button -->
+
 
   {# --------- Profielfoto --------- #}
   {% if profile.profile_image %}

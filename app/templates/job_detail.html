@@ -3,7 +3,12 @@
 
 {% block content %}
 
+<a href="{{ request.referrer or url_for('main.jobs_list') }}" class="btn btn-secondary btn-large" style="margin-bottom: 15px; display:inline-block;">
+    ← Go Back
+</a>
+
 <h1 class="page-title">{{ job.title }}</h1>
+
 
 <div class="card">
     <h2>Company contact details</h2>
