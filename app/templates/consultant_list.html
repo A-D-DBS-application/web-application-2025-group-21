@@ -314,7 +314,7 @@
     </p>
 {% endif %}
 
-<script>
+<script> <!--This behavior — “show ‘No distance filter’ when the slider is at 0, otherwise show <value> km and update it live while dragging” — requires JavaScript. HTML and CSS alone cannot: read the current slider value, react to input events, or change the text content based on that value.-->
 (function() {
     var slider = document.getElementById('max_distance_km');
     var display = document.getElementById('distance-display');
