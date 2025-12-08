@@ -2,43 +2,51 @@
 {% block title %}Login{% endblock %}
 {% block content %}
 
-<div class="login-form">
-    <h1>Login</h1>
+<div class="login-page">
 
-    <form method="post">
+    <div class="login-form">
+        <h1>Login</h1>
 
-        <div class="user-section">
-            <label class="field-label">
-                Username
-                <input name="username" required>
-            </label>
+        <form method="post">
 
-            <label class="field-label">
-                Role
-                <select name="role">
-                    <option value="consultant">Consultant</option>
-                    <option value="company">Company</option>
-                    <option value="admin">Admin</option>
-                </select>
-            </label>
-        </div>
-        
-        <div class="admin-section">
-            <h3>Admin Access Only</h3>
-            
-            <div class="admin-input-group">
+            <div class="user-section">
                 <label class="field-label">
-                    Admin Code
-                    <input type="password" name="admin_code">
+                    Username
+                    <input name="username" required>
                 </label>
-                <p class="admin-help-text">
-                    (Required only if Role 'Admin' is selected)
-                </p>
-            </div>
-        </div>
 
-        <button class="btn btn-login" type="submit">Log in</button>
-    </form>
+                <label class="field-label">
+                    Role
+                    <select name="role" id="role-select">
+                        <option value="consultant">Consultant</option>
+                        <option value="company">Company</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </label>
+            </div>
+
+            <!-- ADMIN SECTION (hidden by default) -->
+            <div class="admin-section">
+                <p class="admin-label">Admin Access Only</p>
+
+                <div class="admin-input-group">
+                    <label class="field-label">
+                        Admin Code
+                        <input type="password" name="admin_code">
+                    </label>
+
+                    <p class="admin-help-text">
+                        (Required only when Role 'Admin' is selected)
+                    </p>
+                </div>
+            </div>
+
+            <button class="btn btn-login" type="submit">Log in</button>
+
+        </form>
+    </div>
+
 </div>
 
 {% endblock %}
+

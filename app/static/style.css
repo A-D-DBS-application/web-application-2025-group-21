@@ -2298,3 +2298,377 @@ nav a:hover {
     font-size: 15px;
     border-radius: 8px;
 }
+/* Hide admin section by default */
+.login-page .admin-section {
+    display: none;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px dashed #e5e7eb;
+}
+
+/* Label styling */
+.admin-label {
+    text-align: center;
+    font-size: 1rem;
+    color: #d92d20;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+/* When role dropdown has Admin selected → show admin section */
+.login-page:has(#role-select option[value="admin"]:checked) .admin-section {
+    display: block;
+}
+/* ========================= */
+/* BASE STYLES (ASSUMING)    */
+/* ========================= */
+/* Assuming a clean, modern sans-serif font is set globally */
+body {
+    color: #1f2937; /* Darker text */
+}
+
+/* ========================= */
+/* VISION PAGE MAIN LAYOUT   */
+/* ========================= */
+
+.vision-page {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 40px 20px 80px 20px;
+}
+
+
+/* ---------- HERO ---------- */
+
+.vision-hero {
+    text-align: center;
+    margin-bottom: 70px;
+}
+
+.vision-hero h1 {
+    font-size: 3.8rem; /* Bigger title */
+    font-weight: 900;
+    color: #0c4a6e; /* Deep Teal Blue */
+    margin-bottom: 15px;
+    letter-spacing: -1.5px;
+}
+
+.vision-hero .hero-subtext {
+    font-size: 1.25rem; /* Larger subtext */
+    color: #4b5563;
+    max-width: 750px;
+    margin: 0 auto;
+    line-height: 1.7;
+    font-weight: 500;
+}
+
+
+
+/* ---------- PROBLEM SECTION ---------- */
+
+.problem-section {
+    background: #f0f7ff; /* Lighter blue background */
+    border-top: 5px solid #3b82f6; /* Accent border on top */
+    padding: 40px;
+    border-radius: 20px;
+    margin-bottom: 70px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08); /* Stronger, softer shadow */
+}
+
+.problem-section h2 {
+    color: #1e40af; /* Deeper blue for headings */
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.problem-intro,
+.problem-outro {
+    font-size: 1.15rem;
+    color: #374151;
+    margin-bottom: 30px;
+    line-height: 1.7;
+    text-align: center;
+}
+
+.problem-stats {
+    display: flex;
+    justify-content: space-around;
+    gap: 30px;
+    margin: 40px 0;
+    flex-wrap: wrap;
+}
+
+.problem-stat-item {
+    background: white;
+    border-radius: 16px;
+    padding: 30px 20px;
+    flex: 1;
+    min-width: 280px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-bottom: 4px solid transparent; /* Prepare for hover/emphasis */
+}
+
+.problem-stat-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+/* Stat-specific accent borders */
+.stat-delay { border-bottom-color: #f59e0b; }
+.stat-mismatch { border-bottom-color: #ef4444; }
+.stat-inefficiency { border-bottom-color: #3b82f6; }
+
+
+.stat-number {
+    font-size: 3.5rem; /* Bigger number */
+    font-weight: 900;
+    color: #10b981; /* Fresh accent color - Green */
+    margin-bottom: 8px;
+    line-height: 1;
+}
+
+/* Specific colors for numbers */
+.stat-delay .stat-number { color: #f59e0b; }
+.stat-mismatch .stat-number { color: #ef4444; }
+.stat-inefficiency .stat-number { color: #3b82f6; }
+
+
+.stat-number span {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #4b5563;
+    margin-left: 4px;
+    display: inline-block; /* Helps align units */
+}
+
+.problem-stat-item p {
+    font-size: 1rem;
+    color: #4b5563;
+    margin: 0;
+    font-weight: 500;
+}
+
+
+
+/* ============================= */
+/*     PURE-CSS ANIMATED GRAPHIC  */
+/* ============================= */
+
+.vision-graphic-section {
+    margin-top: 80px;
+    text-align: center;
+}
+
+.vision-graphic-section h2 {
+    font-size: 2rem;
+    color: #1e40af;
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+
+.graphic-intro,
+.graphic-outro {
+    font-size: 1.1rem;
+    color: #374151;
+    max-width: 800px;
+    margin: 0 auto 30px auto;
+    line-height: 1.7;
+}
+
+/* CONTAINER */
+.graphic-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 40px; /* Increased gap */
+    margin: 50px auto;
+    max-width: 900px;
+}
+
+
+/* LEFT / RIGHT BLOCKS */
+
+.graphic-block {
+    padding: 45px 25px;
+    border-radius: 18px;
+    font-weight: 700;
+    font-size: 1.3rem;
+    line-height: 1.4;
+    color: white;
+    flex-basis: 35%; /* Gives more defined width */
+    min-width: 200px;
+}
+
+.block-chaos {
+    background: linear-gradient(145deg, #ef4444, #b91c1c); /* Red/Danger gradient */
+    box-shadow: 0 10px 25px rgba(185,28,28,0.4);
+    transform: rotate(-2deg); /* Subtle tilt for "chaos" */
+    border: 3px dashed rgba(255, 255, 255, 0.4);
+}
+
+.block-clarity {
+    background: linear-gradient(145deg, #3b82f6, #1e40af); /* Blue/Solution gradient */
+    box-shadow: 0 10px 25px rgba(30,64,175,0.4);
+    transform: rotate(2deg); /* Subtle tilt for "clarity" */
+    border: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+
+/* ANIMATED FLOW PIPE */
+
+.graphic-flow {
+    width: 160px; /* Wider pipe */
+    height: 20px;
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+
+    background: #e5e7eb;
+    border: 2px solid #9ca3af;
+    box-shadow: inset 0 0 8px rgba(0,0,0,0.2);
+    flex-grow: 0;
+    flex-shrink: 0;
+}
+
+/* moving gradient inside the pipe */
+.graphic-flow::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+
+    background: linear-gradient(
+        90deg,
+        rgba(37,99,235,0) 0%,
+        rgba(37,99,235,0.7) 50%, /* Stronger color */
+        rgba(37,99,235,0) 100%
+    );
+
+    width: 250%; /* Longer gradient for better visual flow */
+    animation: flowmove 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; /* Slower, smoother animation */
+}
+
+@keyframes flowmove {
+    0% { transform: translateX(-50%); }
+    100% { transform: translateX(50%); }
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 850px) {
+    .graphic-container {
+        flex-direction: column;
+        gap: 20px;
+    }
+    .graphic-block {
+        transform: none; /* Remove tilt on mobile */
+    }
+    .graphic-flow {
+        width: 20px; /* Vertical pipe on mobile */
+        height: 100px;
+    }
+    /* Adjust flow animation for vertical pipe */
+    .graphic-flow::before {
+        background: linear-gradient(
+            0deg, /* Change to vertical gradient */
+            rgba(37,99,235,0) 0%,
+            rgba(37,99,235,0.7) 50%,
+            rgba(37,99,235,0) 100%
+        );
+        height: 250%;
+        width: 100%;
+        animation: flowmove-vertical 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    @keyframes flowmove-vertical {
+        0% { transform: translateY(-50%); }
+        100% { transform: translateY(50%); }
+    }
+}
+
+@media (max-width: 650px) {
+    .vision-hero h1 { font-size: 3rem; }
+    .problem-section { padding: 30px 15px; }
+    .problem-stats { gap: 15px; }
+    .problem-stat-item { min-width: 100%; }
+}
+
+/* ================================ */
+/* HOME: PROBLEM + GRAPHIC SECTION  */
+/* ================================ */
+
+.problem-section-home {
+    background: #f0f5ff;
+    border-radius: 18px;
+    padding: 30px 24px 36px;
+    border: 1px solid #d0ddff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.problem-intro-home,
+.problem-outro-home {
+    font-size: 1.05rem;
+    color: #374151;
+    line-height: 1.6;
+    margin-bottom: 22px;
+}
+
+.problem-stats-home {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin: 26px 0 18px;
+}
+
+.problem-stat-card {
+    background: #ffffff;
+    border-radius: 14px;
+    border: 1px solid #dce6f5;
+    flex: 1 1 220px;
+    padding: 18px 16px;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+}
+
+.problem-stat-number {
+    font-size: 2.4rem;
+    font-weight: 800;
+    color: #2563eb;
+    line-height: 1;
+    margin-bottom: 6px;
+}
+
+.problem-stat-number span {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #4b5563;
+    margin-left: 4px;
+}
+
+.problem-stat-card p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #4b5563;
+    line-height: 1.4;
+}
+
+
+
+
+/* RESPONSIVE TWEAKS */
+
+@media (max-width: 768px) {
+    .problem-graphic {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .problem-graphic-flow {
+        width: 100%;
+        max-width: 260px;
+        margin: 0 auto;
+    }
+}

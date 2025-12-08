@@ -1751,3 +1751,7 @@ def admin_collaborations():
 @admin_required
 def admin_dashboard():
     return render_template("admin_dashboard.html")
+
+@main.route("/vision")
+def vision_page():
+    return render_template("vision.html")

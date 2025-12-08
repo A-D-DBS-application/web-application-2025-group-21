@@ -5,12 +5,10 @@
 
 {% block content %}
 
-<!-- ========================= HERO SECTION ========================= -->
 <section class="hero-section">
     <div class="hero-hero">
         <div class="hero-overlay"></div>
 
-        <!-- LEFT SIDE CONTENT -->
         <div class="hero-inner">
             <img src="{{ url_for('static', filename='logo.png') }}" class="hero-logo" alt="IConsult logo">
 
@@ -38,14 +36,10 @@
             {% endif %}
         </div>
 
-        <!-- RIGHT-SIDE LIVE STATUS PANEL -->
         <div class="hero-stats-panel">
-
             <p class="hero-stats-label">🟢 Live platform status</p>
 
             <div class="hero-stats-grid">
-
-                <!-- Consultants available -->
                 <article class="isc-card isc-stat-card hero-stat-card">
                     <h3>👩‍💻 Consultants available</h3>
                     <div class="isc-stat-number">
@@ -56,7 +50,6 @@
                     </p>
                 </article>
 
-                <!-- Open job posts -->
                 <article class="isc-card isc-stat-card hero-stat-card">
                     <h3>🏢 Open job posts</h3>
                     <div class="isc-stat-number">
@@ -66,7 +59,6 @@
                         active job posts from companies.
                     </p>
                 </article>
-
             </div>
         </div>
 
@@ -79,7 +71,7 @@
 
 
 
-<!-- ========================= MATCH SCORE SECTION ========================= -->
+
 <section class="isc-section" id="isc-match-score">
     <div class="isc-container">
         <h2 class="isc-title">How the IConsult Match score works</h2>
@@ -125,7 +117,6 @@
 
 
 
-<!-- ========================= UNLOCKING SECTION ========================= -->
 <section class="isc-section" id="isc-unlocking">
     <div class="isc-container">
         <h2 class="isc-title">The IConsult unlocking principle</h2>

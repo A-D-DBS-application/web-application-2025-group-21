@@ -23,6 +23,8 @@
 
             <!-- MENU LINKS -->
             <a href="{{ url_for('main.index') }}">Home</a>
+            <a href="{{ url_for('main.vision_page') }}">Vision</a>
+
 
             {% if session.get('role') == 'company' %}
                 <a href="{{ url_for('main.consultants_list') }}">Consultants</a>
@@ -31,6 +33,7 @@
             {% if session.get('role') == 'consultant' %}
                 <a href="{{ url_for('main.jobs_list') }}">Jobs</a>
             {% endif %}
+            
 
             {% if session.get("role") == "admin" %}
                 <a href="{{ url_for('main.admin_dashboard') }}">Admin</a>

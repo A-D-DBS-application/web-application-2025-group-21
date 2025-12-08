@@ -1,137 +1,134 @@
 {% extends "base.html" %}
 {% block title %}Consultant detail{% endblock %}
-<!-- ✅ Go Back Button -->
-
 
 {% block content %}
-  <!-- ✅ Go Back Button -->
-  <a href="{{ request.referrer or url_for('main.consultants_list') }}"
-     class="btn btn-secondary btn-large"
-     style="margin-bottom: 15px; display:inline-block;">
-      ← Go Back
-  </a>
-  <h1>
-    {% if is_unlocked or is_owner %}
-        {{ profile.display_name_masked }}
-    {% else %}
-        {{ profile.initials }}
-    {% endif %}
-  </h1>
-    <!-- ✅ Go Back Button -->
 
+<a href="{{ request.referrer or url_for('main.consultants_list') }}"
+   class="btn btn-secondary btn-large"
+   style="margin-bottom: 15px; display:inline-block;">
+    ← Go Back
+</a>
 
-  {# --------- Profielfoto --------- #}
-  {% if profile.profile_image %}
-    <img
-        src="{{ profile.profile_image }}"
-        alt="Profile picture"
-        class="consultant-photo {% if not is_unlocked and not is_owner %}blurred-photo{% endif %}"
-    >
+<h1 class="page-title">
+  {% if is_unlocked or is_owner %}
+      {{ profile.display_name_masked }}
   {% else %}
-    <img
-        src="{{ url_for('static', filename='img/default-avatar.png') }}"
-        alt="No profile picture"
-        class="consultant-photo {% if not is_unlocked and not is_owner %}blurred-photo{% endif %}"
-    >
+      {{ profile.initials }}
   {% endif %}
+</h1>
 
-  {% if profile.headline %}
-    <p><i>{{ profile.headline }}</i></p>
-  {% endif %}
+<div class="job-detail-card">
 
-  <h3>Skills</h3>
-  {% if profile.skills and profile.skills|length > 0 %}
-    <ul>
-      {% for skill in profile.skills %}
-        <li>{{ skill.name }}</li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p><i>No skills specified.</i></p>
-  {% endif %}
+    <div class="job-section">
+        <h3>Consultant profile</h3>
 
-  <p>
-    <small>
-      {{ profile.location_city }}
-      {% if profile.location_city and profile.country %}, {% endif %}
-      {{ profile.country }}
-    </small>
-  </p>
-
-  <div class="card">
-    <h2>Contact details</h2>
-
-    {# 1. Bezoeker is een Company #}
-    {% if user and user.role == UserRole.company %}
-
-        {# Contactgegevens tonen als unlocked of eigenaar #}
-        {% if is_unlocked or is_owner %}
-            <p><strong>E-mail:</strong> {{ profile.contact_email or "Not filled in" }}</p>
-            <p><strong>Phone:</strong> {{ profile.phone_number or "Not filled in" }}</p>
-
-            {% if profile.cv_document %}
-                <p>
-                    <strong>CV:</strong>
-                    <a href="{{ profile.cv_document }}" target="_blank">
-                        View / download CV
-                    </a>
-                </p>
-            {% else %}
-                <p><strong>CV:</strong> Not filled in</p>
-            {% endif %}
-
-            {% if is_unlocked %}
-                <p style="color: green;">✅ These contact details have been released and are permanently visible.</p>
-            {% endif %}
-
-        {# Nog niet unlocked: toon lock-tekst + knop #}
+        {% if profile.profile_image %}
+          <img
+              src="{{ profile.profile_image }}"
+              alt="Profile picture"
+              class="consultant-photo {% if not is_unlocked and not is_owner %}blurred-photo{% endif %}">
         {% else %}
-            <p>The contact details of this consultant are hidden.</p>
-            <p><strong>CV:</strong> Hidden</p>
-            <a href="{{ url_for('main.unlock_consultant', profile_id=profile.id) }}"
-               class="btn btn-success"
-               onclick="return confirm('Weet u zeker dat u de contactgegevens wilt vrijgeven?')">
-                🔒 Unlock contact details (MVP Button)
-            </a>
-            <p><small>By clicking this button, the contact details will become permanently visible to your company.</small></p>
+          <img
+              src="{{ url_for('static', filename='img/default-avatar.png') }}"
+              alt="No profile picture"
+              class="consultant-photo {% if not is_unlocked and not is_owner %}blurred-photo{% endif %}">
         {% endif %}
 
-    {# 2. Consultant bekijkt eigen profiel #}
-    {% elif is_owner %}
-        <p><strong>E-mail:</strong> {{ profile.contact_email or "Not filled in" }} (Visible for you as owner)</p>
-        <p><strong>Phone:</strong> {{ profile.phone_number or "Not filled in" }} (Visible for you as owner)</p>
-
-        {% if profile.cv_document %}
-            <p>
-                <strong>CV:</strong>
-                <a href="{{ profile.cv_document }}" target="_blank">
-                    View / download CV
-                </a>
-            </p>
-        {% else %}
-            <p><strong>CV:</strong> Not filled in</p>
+        {% if profile.headline %}
+          <p><i>{{ profile.headline }}</i></p>
         {% endif %}
 
-    {# 3. Fallback #}
-    {% else %}
-        <p>Log in as a <strong>Company</strong> to view and unlock the contact details.</p>
-    {% endif %}
-  </div>
-
-  {# Collaborate-blok #}
-  {% if user and user.role == UserRole.company and is_unlocked and profile.availability %}
-    <div class="card collaborate-card" style="margin-top:20px;">
-        <h3>Collaborate?</h3>
         <p>
-            You have unlocked this consultant's contact details.<br>
-            Do you want to start a collaboration with this consultant?
+          <small>
+            {{ profile.location_city }}
+            {% if profile.location_city and profile.country %}, {% endif %}
+            {{ profile.country }}
+          </small>
         </p>
-        <form method="post" action="{{ url_for('main.collaborate_with_consultant', profile_id=profile.id) }}">
-            <button type="submit" class="btn btn-success">
-                Yes, collaborate
-            </button>
-        </form>
     </div>
+
+    <div class="job-section">
+        <h3>Skills</h3>
+        {% if profile.skills and profile.skills|length > 0 %}
+          <div class="skill-list">
+            {% for skill in profile.skills %}
+              <span class="skill-tag">{{ skill.name }}</span>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p><i>No skills specified.</i></p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card" style="margin-top: 20px;">
+  <h2>Contact details</h2>
+
+  {% if user and user.role == UserRole.company %}
+
+      {% if is_unlocked or is_owner %}
+          <p><strong>E-mail:</strong> {{ profile.contact_email or "Not filled in" }}</p>
+          <p><strong>Phone:</strong> {{ profile.phone_number or "Not filled in" }}</p>
+
+          {% if profile.cv_document %}
+              <p>
+                  <strong>CV:</strong>
+                  <a href="{{ profile.cv_document }}" target="_blank">
+                      View / download CV
+                  </a>
+              </p>
+          {% else %}
+              <p><strong>CV:</strong> Not filled in</p>
+          {% endif %}
+
+          {% if is_unlocked %}
+              <p style="color: green;">✅ These contact details have been released and are permanently visible.</p>
+          {% endif %}
+
+      {% else %}
+          <p>The contact details of this consultant are hidden.</p>
+          <p><strong>CV:</strong> Hidden</p>
+          <a href="{{ url_for('main.unlock_consultant', profile_id=profile.id) }}"
+             class="btn btn-success"
+             onclick="return confirm('Weet u zeker dat u de contactgegevens wilt vrijgeven?')">
+              🔒 Unlock contact details (MVP Button)
+          </a>
+          <p><small>By clicking this button, the contact details will become permanently visible to your company.</small></p>
+      {% endif %}
+
+  {% elif is_owner %}
+      <p><strong>E-mail:</strong> {{ profile.contact_email or "Not filled in" }} (Visible for you as owner)</p>
+      <p><strong>Phone:</strong> {{ profile.phone_number or "Not filled in" }} (Visible for you as owner)</p>
+
+      {% if profile.cv_document %}
+          <p>
+              <strong>CV:</strong>
+              <a href="{{ profile.cv_document }}" target="_blank">
+                  View / download CV
+              </a>
+          </p>
+      {% else %}
+          <p><strong>CV:</strong> Not filled in</p>
+      {% endif %}
+
+  {% else %}
+      <p>Log in as a <strong>Company</strong> to view and unlock the contact details.</p>
   {% endif %}
+</div>
+
+{% if user and user.role == UserRole.company and is_unlocked and profile.availability %}
+  <div class="card collaborate-card" style="margin-top:20px;">
+      <h3>Collaborate?</h3>
+      <p>
+          You have unlocked this consultant's contact details.<br>
+          Do you want to start a collaboration with this consultant?
+      </p>
+      <form method="post" action="{{ url_for('main.collaborate_with_consultant', profile_id=profile.id) }}">
+          <button type="submit" class="btn btn-success">
+              Yes, collaborate
+          </button>
+      </form>
+  </div>
+{% endif %}
 
 {% endblock %}
