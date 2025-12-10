@@ -3,7 +3,14 @@
 
 {% block content %}
 
-<a href="{{ request.referrer or url_for('main.consultants_list') }}"
+<a
+   href="{% if user and user.role == UserRole.company %}
+             {{ url_for('main.consultants_list') }}
+         {% elif is_owner %}
+             {{ url_for('main.dashboard') }}
+         {% else %}
+             {{ url_for('main.dashboard') }}
+         {% endif %}"
    class="btn btn-secondary btn-large"
    style="margin-bottom: 15px; display:inline-block;">
     ← Go Back
