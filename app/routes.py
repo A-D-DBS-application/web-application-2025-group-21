@@ -1,4 +1,18 @@
-from flask import Blueprint, render_template, request, redirect, url_for, session, flash, current_app
+"""
+main.py - Hoofd-blueprint van de applicatie.
+
+Bevat:
+- Authenticatie (simple username + role login)
+- Dashboards voor consultant / company / admin
+- Matching-logica:
+    * Companies zoeken consultants
+    * Consultants zoeken jobs
+- Unlock-mechanisme voor contactgegevens
+- Collaborations (samenwerkingen) tussen consultants & companies
+- Admin-overzichten
+"""
+
+from flask import Blueprint, render_template, request, redirect, url_for, session, flash
 from datetime import datetime, timezone
 from functools import wraps
 from sqlalchemy import or_, func
@@ -7,7 +21,7 @@ from flask_babel import gettext as _
 import os
 import mimetypes
 import time
-from .supabase_client import get_session, supabase 
+from .supabase_client import get_session, supabase
 from .models import (
     User,
     ConsultantProfile,
@@ -20,23 +34,38 @@ from .models import (
     Collaboration,
     CollaborationStatus,
 )
-from werkzeug.utils import secure_filename
 
 import requests
 from math import radians, sin, cos, sqrt, atan2
 
 
-# ------------------ MAPBOX CONFIG & HELPERS ------------------
+# ------------------ CONFIG & CONSTANTS ------------------
 
 MAPBOX_TOKEN = os.getenv("MAPBOX_TOKEN")
 
+# Weights voor de relevance-score van consultants (vanuit company-perspectief)
+CONSULTANT_SKILL_WEIGHT = 0.50
+CONSULTANT_TEXT_WEIGHT = 0.20
+CONSULTANT_RECENCY_WEIGHT = 0.20
+CONSULTANT_POPULARITY_WEIGHT = 0.10
+CONSULTANT_MAX_UNLOCKS = 50  # voor normalisatie van popularity
 
-def allowed_file(filename):
-    return "." in filename and filename.rsplit(".", 1)[1].lower() in {"png", "jpg", "jpeg", "gif"}
+# Weights voor de relevance-score van jobs (vanuit consultant-perspectief)
+JOB_SKILL_WEIGHT = 0.50
+JOB_TEXT_WEIGHT = 0.20
+JOB_RECENCY_WEIGHT = 0.20
+JOB_POPULARITY_WEIGHT = 0.10
+JOB_MAX_UNLOCKS = 50  # voor normalisatie van popularity
 
+
+# ------------------ MAPBOX HELPERS ------------------
 
 def haversine_km(lat1, lon1, lat2, lon2):
-    """Bereken afstand in km tussen twee (lat, lon) punten."""
+    """
+    Bereken afstand in km tussen twee (lat, lon) punten met de Haversine-formule.
+
+    Wordt gebruikt om consultants en jobs binnen een bepaalde radius te filteren.
+    """
     try:
         lat1 = float(lat1)
         lon1 = float(lon1)
@@ -56,7 +85,13 @@ def haversine_km(lat1, lon1, lat2, lon2):
 
 
 def geocode_with_mapbox(city, country):
-    """Geocode 'stad, land' naar (lat, lon) met Mapbox."""
+    """
+    Geocode 'stad, land' naar (lat, lon) met Mapbox.
+
+    - Geeft (None, None) terug als geocoding faalt.
+    - Resultaat wordt opgeslagen in de database (latitude / longitude kolommen)
+      zodat we later afstandsberekeningen kunnen doen.
+    """
     if not MAPBOX_TOKEN:
         return None, None
 
@@ -77,7 +112,7 @@ def geocode_with_mapbox(city, country):
     except Exception:
         return None, None
 
-    data = resp.json() #Explanation:This is allowed and necessary. This is not JSON storage, but simply reading a response from an external server (Mapbox). SQLAlchemy cannot communicate with Mapbox directly; that has to be done via HTTP. As long as you store the latitude and longitude afterward in regular columns like latitude = Column(Float), this fully complies with the requirement “No JSON storage, but ORM only.”Je hoeft in je Python code dus niets aan te passen, want je database-interactie is puur SQLAlchemy.
+    data = resp.json()
     if not data.get("features"):
         return None, None
 
@@ -85,46 +120,60 @@ def geocode_with_mapbox(city, country):
     lon, lat = data["features"][0]["center"]
     return lat, lon
 
+
 # ------------------ SUPABASE STORAGE HELPER ------------------
 
 def upload_file_to_bucket(file_obj, bucket_name, folder="uploads"):
     """
-    Uploads a file to Supabase Storage and returns the public URL.
-    Returns None if upload fails.
+    Uploads een file naar Supabase Storage en geeft de public URL terug.
+    - Leest de file uit request.files
+    - Bepaalt het content-type
+    - Gebruikt een unieke bestandsnaam met timestamp
+
+    Retourneert:
+        - public URL (string) als upload slaagt
+        - None bij fouten
     """
     try:
-        # Create a unique filename: timestamp_original_filename
+        # Unieke filename: timestamp_original_filename
         filename = f"{int(time.time())}_{file_obj.filename.replace(' ', '_')}"
         file_path = f"{folder}/{filename}"
-        
-        # Determine content type (e.g., image/jpeg, application/pdf)
+
+        # Bepaal content type (image/jpeg, application/pdf, ...)
         content_type = mimetypes.guess_type(file_obj.filename)[0] or "application/octet-stream"
-        
-        # Read file data
+
+        # File bytes lezen
         file_data = file_obj.read()
-        
-        # Upload to Supabase
-        res = supabase.storage.from_(bucket_name).upload(
-            file_path, 
-            file_data, 
+
+        # Upload naar Supabase
+        supabase.storage.from_(bucket_name).upload(
+            file_path,
+            file_data,
             {"content-type": content_type}
         )
-        
-        # Get Public URL
+
+        # Public URL ophalen
         public_url_response = supabase.storage.from_(bucket_name).get_public_url(file_path)
-        
+
         return public_url_response
-        
+
     except Exception as e:
         print(f"Upload error: {e}")
         return None
 
-# ------------------ BLUEPRINT & HELPERS ------------------
+
+# ------------------ BLUEPRINT & GENERIC HELPERS ------------------
 
 main = Blueprint("main", __name__)
 
 
 def get_current_user(db):
+    """
+    Haal de ingelogde gebruiker op uit de database m.b.v. de session['user_id'].
+
+    Retourneert:
+        - User instance of None als niemand is ingelogd.
+    """
     user_id = session.get("user_id")
     if not user_id:
         return None
@@ -132,7 +181,10 @@ def get_current_user(db):
 
 
 def login_required(f):
-    """Controleert of de gebruiker is ingelogd via de sessie."""
+    """
+    Decorator die checkt of er een gebruiker is ingelogd.
+    - Als niemand ingelogd is: redirect naar login pagina.
+    """
 
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -145,7 +197,13 @@ def login_required(f):
 
 
 def is_unlocked(db, unlocking_user_id, target_type, target_id):
-    """Controleert of een gebruiker al de contactgegevens van een target heeft unlocked."""
+    """
+    Check of een user de contactgegevens van een bepaald target al heeft 'unlocked'.
+
+    target_type:
+        - UnlockTarget.consultant
+        - UnlockTarget.job
+    """
     return (
         db.query(Unlock)
         .filter(
@@ -159,13 +217,19 @@ def is_unlocked(db, unlocking_user_id, target_type, target_id):
 
 
 def check_profile_completion(user, profile, company):
+    """
+    Toont waarschuwingen (flash) als een profiel onvolledig is.
+
+    - Voor consultants: headline, years_experience, locatie, skills, foto, CV, naam.
+    - Voor companies: company name, locatie.
+    """
     missing_fields = []
     edit_target = 'profile'  # Default target: Edit Profile
 
     if user.role == UserRole.consultant:
         if not profile:
             return
-        
+
         # 1. Essentiële Matching Velden
         if not profile.headline or profile.headline.strip() == "":
             missing_fields.append("Headline")
@@ -175,7 +239,7 @@ def check_profile_completion(user, profile, company):
             missing_fields.append("City")
         if not profile.country or profile.country.strip() == "":
             missing_fields.append("Country")
-        
+
         # 2. Skills
         if not profile.skills:
             missing_fields.append("Skills")
@@ -187,7 +251,7 @@ def check_profile_completion(user, profile, company):
         if not profile.cv_document:
             missing_fields.append("CV Document")
 
-        # Full name niet meer gelijk aan username
+        # 4. Volledige naam
         if not profile.display_name_masked or profile.display_name_masked.strip() == "":
             missing_fields.append("Full Name")
 
@@ -201,8 +265,7 @@ def check_profile_completion(user, profile, company):
     elif user.role == UserRole.company:
         if not company:
             return
-        
-        # ✅ Alleen checken op leegte, niet meer vergelijken met username
+
         if not company.company_name_masked or company.company_name_masked.strip() == "":
             missing_fields.append("Company Name")
         if not company.location_city or company.location_city.strip() == "":
@@ -214,18 +277,194 @@ def check_profile_completion(user, profile, company):
             fields_str = ", ".join(missing_fields)
             flash(
                 f"Your company profile is incomplete! Please update the following details: {fields_str}.",
-                "warning-link-profile" 
+                "warning-link-profile"
             )
 
 
-# EINDE GECORRIGEERDE HELPERFUNCTIE
+# ------------------ RELEVANCE SCORE HELPERS ------------------
+# Deze helpers maken de matching beter uitbreidbaar/scalable:
+# als je later de scoring wilt aanpassen, kan dat centraal hier.
+
+def compute_consultant_relevance(
+    profile,
+    required_job,
+    required_skill_ids,
+    text_query,
+    unlock_counts,
+    now,
+):
+    """
+    Bereken relevance-score voor een consultant vanuit een geselecteerde JobPost.
+
+    Let op: deze functie verandert NIETS aan het gedrag t.o.v. de oude inline code,
+    alleen gestructureerd in een helper voor schaalbaarheid.
+    """
+    if not required_job:
+        # Geen job → geen relevance mogelijk
+        return {
+            "total": 0.0,
+            "skill": 0.0,
+            "text": 0.0,
+            "recency": 0.0,
+            "popularity": 0.0,
+            "skill_factor": 0.0,
+            "text_factor": 0.0,
+            "recency_factor": 0.0,
+            "popularity_factor": 0.0,
+            "unlock_count": 0,
+        }
+
+    # A. Skills
+    consultant_skill_ids = {s.id for s in profile.skills}
+    matched = len(consultant_skill_ids & required_skill_ids)
+    max_skills = max(len(required_skill_ids), 1)
+    skill_similarity = matched / max_skills
+    skill_weighted_score = skill_similarity * CONSULTANT_SKILL_WEIGHT
+
+    # B. Text match (eenvoudig: substring zoekterm in combinatie van velden)
+    text_match = 0
+    if text_query:
+        text_fields = " ".join(
+            filter(
+                None,
+                [
+                    profile.display_name_masked,
+                    profile.headline,
+                    profile.location_city,
+                    profile.country,
+                ],
+            )
+        )
+        if text_query.lower() in text_fields.lower():
+            text_match = 1
+    text_weighted_score = text_match * CONSULTANT_TEXT_WEIGHT
+
+    # C. Recency (nieuwere profielen scoren hoger)
+    days_old = (now - profile.created_at).days
+    recency_factor = max(0, 1 - days_old / 30)  # binnen 30 dagen → tot 1.0
+    recency_weighted_score = recency_factor * CONSULTANT_RECENCY_WEIGHT
+
+    # D. Populariteit (aantal unlocks, genormaliseerd met CONSULTANT_MAX_UNLOCKS)
+    unlock_count = unlock_counts.get(profile.id, 0)
+    popularity_factor = min(unlock_count / CONSULTANT_MAX_UNLOCKS, 1.0)
+    popularity_weighted_score = popularity_factor * CONSULTANT_POPULARITY_WEIGHT
+
+    final_score = (
+        skill_weighted_score
+        + text_weighted_score
+        + recency_weighted_score
+        + popularity_weighted_score
+    )
+
+    return {
+        "total": final_score,
+        "skill": skill_weighted_score,
+        "text": text_weighted_score,
+        "recency": recency_weighted_score,
+        "popularity": popularity_weighted_score,
+        "skill_factor": skill_similarity,
+        "text_factor": text_match,
+        "recency_factor": recency_factor,
+        "popularity_factor": popularity_factor,
+        "unlock_count": unlock_count,
+    }
+
+
+def compute_job_relevance(
+    job,
+    consultant_profile,
+    consultant_skill_ids,
+    text_query,
+    unlock_counts,
+    now,
+):
+    """
+    Bereken relevance-score voor een JobPost vanuit een consultant-profiel.
+
+    Houdt rekening met:
+    - Skill overlap
+    - Tekst-match
+    - Recency
+    - Populariteit (unlocks)
+    """
+    if not consultant_profile:
+        return {
+            "total": 0.0,
+            "skill": 0.0,
+            "text": 0.0,
+            "recency": 0.0,
+            "popularity": 0.0,
+            "skill_factor": 0.0,
+            "text_factor": 0.0,
+            "recency_factor": 0.0,
+            "popularity_factor": 0.0,
+            "unlock_count": 0,
+        }
+
+    # A. Skills
+    job_skill_ids = {s.id for s in job.skills}
+    matched = len(job_skill_ids & consultant_skill_ids)
+    max_skills = max(len(consultant_skill_ids), 1)
+    skill_similarity = matched / max_skills
+    skill_weighted_score = skill_similarity * JOB_SKILL_WEIGHT
+
+    # B. Text match
+    text_match = 0
+    if text_query:
+        text_fields = " ".join(
+            filter(
+                None,
+                [
+                    job.title,
+                    job.description,
+                    job.location_city,
+                    job.country,
+                    job.contract_type,
+                ],
+            )
+        )
+        if text_query.lower() in text_fields.lower():
+            text_match = 1
+    text_weighted_score = text_match * JOB_TEXT_WEIGHT
+
+    # C. Recency
+    days_old = (now - job.created_at).days
+    recency_factor = max(0, 1 - days_old / 30)
+    recency_weighted_score = recency_factor * JOB_RECENCY_WEIGHT
+
+    # D. Populariteit (unlocks)
+    unlock_count = unlock_counts.get(job.id, 0)
+    popularity_factor = min(unlock_count / JOB_MAX_UNLOCKS, 1.0)
+    popularity_weighted_score = popularity_factor * JOB_POPULARITY_WEIGHT
+
+    total = (
+        skill_weighted_score
+        + text_weighted_score
+        + recency_weighted_score
+        + popularity_weighted_score
+    )
+
+    return {
+        "total": total,
+        "skill": skill_weighted_score,
+        "text": text_weighted_score,
+        "recency": recency_weighted_score,
+        "popularity": popularity_weighted_score,
+        "skill_factor": skill_similarity,
+        "text_factor": text_match,
+        "recency_factor": recency_factor,
+        "popularity_factor": popularity_factor,
+        "unlock_count": unlock_count,
+    }
+
+
 # ------------------ HOME ------------------
 
 @main.route("/company/jobs", methods=["GET"])
 def company_jobs_list():
     """
-    Toont alle Job Posts die door het ingelogde bedrijf zijn aangemaakt.
-    Gebruik dezelfde job_list template maar met:
+    Toon alle JobPosts die door het ingelogde bedrijf aangemaakt zijn.
+    Gebruikt dezelfde template als de algemene jobslijst, maar:
     - sort_by='none'
     - show_mode_selector=False
     - simple_search=True
@@ -247,6 +486,7 @@ def company_jobs_list():
 
         query = db.query(JobPost).filter(JobPost.company_id == company.id)
 
+        # Eenvoudige text search op title/description
         if q:
             query = query.filter(
                 or_(
@@ -276,15 +516,17 @@ def company_jobs_list():
 
 @main.route("/", methods=["GET"])
 def index():
+    """
+    Landingpagina:
+    - Laat tellers zien: aantal open consultants en actieve jobs.
+    """
     with get_session() as db:
-        # aantal consultants die beschikbaar staan
         open_consultants_count = (
             db.query(func.count(ConsultantProfile.id))
             .filter(ConsultantProfile.availability == True)
             .scalar()
         )
 
-        # aantal actieve jobs
         active_jobs_count = (
             db.query(func.count(JobPost.id))
             .filter(JobPost.is_active == True)
@@ -302,6 +544,11 @@ def index():
 
 @main.route("/login", methods=["GET", "POST"])
 def login():
+    """
+    Eenvoudige login op basis van username + role.
+    - Als username nog niet bestaat → nieuwe user + profiel (consultant/company).
+    - Admin-login vereist ADMIN_CODE uit env.
+    """
     if request.method == "POST":
         username = request.form.get("username", "").strip().lower()
         role_str = request.form.get("role", "consultant")
@@ -313,7 +560,7 @@ def login():
             flash(_("Username is required."))
             return redirect(url_for("main.login"))
 
-        # ADMIN BEVEILIGING
+        # Admin beveiliging
         if requested_role == UserRole.admin:
             if admin_code_input != os.getenv("ADMIN_CODE"):
                 flash(_("Invalid admin code."))
@@ -323,7 +570,7 @@ def login():
             user = db.query(User).filter(User.username == username).first()
 
             if user:
-                # Bestaande gebruiker
+                # Bestaande gebruiker: role moet matchen
                 if user.role == requested_role:
                     session["user_id"] = user.id
                     session["role"] = user.role.value
@@ -333,10 +580,10 @@ def login():
                     flash(_("This username already exists and is linked to another role."))
                     return redirect(url_for("main.login"))
             else:
-                # Nieuwe gebruiker
+                # Nieuwe gebruiker + bijhorende profieltype
                 user = User(username=username, role=requested_role)
                 db.add(user)
-                db.flush()
+                db.flush()  # zodat user.id beschikbaar is
 
                 if requested_role == UserRole.consultant:
                     prof = ConsultantProfile(
@@ -373,6 +620,7 @@ def login():
 
 @main.route("/logout", methods=["POST"])
 def logout():
+    """Log de gebruiker uit door de session te clearen."""
     session.clear()
     return redirect(url_for("main.index"))
 
@@ -381,6 +629,11 @@ def logout():
 
 @main.route("/dashboard", methods=["GET"])
 def dashboard():
+    """
+    Toon dashboard afhankelijk van role:
+    - Consultant: eigen profiel + actieve collaborations
+    - Company: eigen company + jobposts + actieve collaborations
+    """
     with get_session() as db:
         user = get_current_user(db)
 
@@ -398,7 +651,6 @@ def dashboard():
             profile = db.query(ConsultantProfile).filter_by(user_id=user.id).first()
 
             if profile:
-                # 🔹 Actieve samenwerkingen voor deze consultant
                 consultant_active_collaborations = (
                     db.query(Collaboration)
                     .options(
@@ -417,7 +669,6 @@ def dashboard():
             company = db.query(Company).filter_by(user_id=user.id).first()
 
             if company:
-                # 🔹 Alle jobposts van dit bedrijf (zowel active als closed)
                 company_jobs = (
                     db.query(JobPost)
                     .options(joinedload(JobPost.hired_consultant))
@@ -426,7 +677,6 @@ def dashboard():
                     .all()
                 )
 
-                # 🔹 Actieve samenwerkingen voor deze company
                 company_active_collaborations = (
                     db.query(Collaboration)
                     .options(
@@ -441,7 +691,7 @@ def dashboard():
                     .all()
                 )
 
-        # 🟢 Roep de check functie aan
+        # Check of profiel voldoende is ingevuld
         check_profile_completion(user, profile, company)
 
         return render_template(
@@ -454,13 +704,19 @@ def dashboard():
             company_active_collaborations=company_active_collaborations,
             consultant_active_collaborations=consultant_active_collaborations,
         )
-        
 
 
 # ------------------ CONSULTANTS ------------------
 
 @main.route("/consultant/edit", methods=["GET", "POST"])
 def edit_consultant_profile():
+    """
+    Consultant kan zijn eigen profiel bewerken:
+    - Basisinfo
+    - Availability (en bij terug naar available: collaborations sluiten)
+    - Locatie (Mapbox geocoding)
+    - Profielfoto + CV (Supabase upload)
+    """
     with get_session() as db:
         user = get_current_user(db)
 
@@ -482,7 +738,7 @@ def edit_consultant_profile():
             profile.contact_email = request.form.get("contact_email")
             profile.phone_number = request.form.get("phone_number")
 
-            # 🔹 Years of experience
+            # Years of experience
             years_experience_raw = (request.form.get("years_experience") or "").strip()
             try:
                 profile.years_experience = (
@@ -496,7 +752,9 @@ def edit_consultant_profile():
             was_available_before = profile.availability
             profile.availability = availability_value == "available"
 
-            # Als je jezelf weer 'available' maakt, actieve samenwerkingen afsluiten
+            # Wanneer je jezelf weer 'available' maakt:
+            # - lopende collaborations worden beëindigd
+            # - current_company wordt losgekoppeld
             if (not was_available_before) and profile.availability:
                 now = datetime.now(timezone.utc)
                 active_collabs = (
@@ -511,16 +769,16 @@ def edit_consultant_profile():
                     c.status = CollaborationStatus.ended
                     c.ended_at = now
 
-                # consultant loskoppelen van current_company
                 profile.current_company_id = None
 
-            # Geocode locatie
+            # Locatie laten geocoden voor afstandsfilters
             lat, lon = geocode_with_mapbox(profile.location_city, profile.country)
             profile.latitude = lat
             profile.longitude = lon
 
             bucket_name = os.getenv("SUPABASE_BUCKET_NAME", "iconsult-assets")
-            # --- PROFILE IMAGE UPLOAD (Supabase) ---
+
+            # -- Profielfoto upload (Supabase) --
             file = request.files.get("profile_image")
             if file and file.filename != "":
                 public_url = upload_file_to_bucket(file, bucket_name, folder="profile_images")
@@ -529,7 +787,7 @@ def edit_consultant_profile():
                 else:
                     flash(_("Failed to upload profile image."), "error")
 
-            # --- CV UPLOAD (Supabase) ---
+            # -- CV upload (Supabase) --
             cv_file = request.files.get("cv_document")
             if cv_file and cv_file.filename != "":
                 public_url = upload_file_to_bucket(cv_file, bucket_name, folder="cv_documents")
@@ -551,6 +809,9 @@ def edit_consultant_profile():
 
 @main.route("/consultant/skills/edit", methods=["GET", "POST"])
 def edit_consultant_skills():
+    """
+    Pagina waar een consultant zijn skills kan beheren (many-to-many relatie).
+    """
     with get_session() as db:
         user = get_current_user(db)
 
@@ -586,6 +847,12 @@ def edit_consultant_skills():
 
 @main.route("/consultant/<int:profile_id>")
 def consultant_detail(profile_id):
+    """
+    Detailpagina van een consultant:
+    - Bedrijven zien beperkte info tenzij ze 'unlocked' hebben.
+    - Als er ooit een collaboration was tussen company & consultant,
+      wordt automatisch een Unlock aangemaakt (permanent toegang).
+    """
     with get_session() as db:
         profile = (
             db.query(ConsultantProfile)
@@ -602,12 +869,12 @@ def consultant_detail(profile_id):
         is_unlocked_status = False
 
         if user:
-            # 1) normale unlock-check
+            # Normale unlock-check
             is_unlocked_status = is_unlocked(
                 db, user.id, UnlockTarget.consultant, profile_id
             )
 
-            # 2) NIEUW: als company & er is (of was) een samenwerking
+            # Als company ooit met deze consultant samenwerkte → altijd unlocked
             if not is_unlocked_status and user.role == UserRole.company:
                 company = db.query(Company).filter_by(user_id=user.id).first()
 
@@ -623,10 +890,9 @@ def consultant_detail(profile_id):
                     )
 
                     if collab_exists:
-                        # vanaf nu mag deze company altijd de gegevens zien
                         is_unlocked_status = True
 
-                        # optioneel: maak meteen een Unlock-record dus op alle paginas hrdr unlocked
+                        # Optioneel: direct een Unlock-record creëren
                         new_unlock = Unlock(
                             user_id=user.id,
                             target_type=UnlockTarget.consultant,
@@ -634,7 +900,6 @@ def consultant_detail(profile_id):
                         )
                         db.add(new_unlock)
                         db.commit()
-
 
         return render_template(
             "consultant_detail.html",
@@ -648,18 +913,25 @@ def consultant_detail(profile_id):
 
 @main.route("/consultants", methods=["GET"])
 def consultants_list():
+    """
+    Overzicht van consultants voor bedrijven.
+
+    Functionaliteit:
+    - Alleen toegankelijk voor role=company.
+    - Handmatige filters (skills, city, country, min_experience).
+    - Locatiefilter (max_distance_km, same_country_only) o.b.v. job-locatie.
+    - Relevance-sorting o.b.v. geselecteerde job (skills, tekst, recency, popularity).
+    """
     with get_session() as db:
         user = get_current_user(db)
 
-        # 1. Beveiligingscontrole (Moet een Company zijn)
         if not user or user.role != UserRole.company:
             flash(_("Only companies can browse consultant profiles."))
             return redirect(url_for("main.dashboard"))
 
-        # 2. Parameters Ophalen
         sort_by = request.args.get("sort_by", "relevance")
 
-        # Handmatige filters ophalen
+        # Skills-filter (IDs uit query string)
         query_skills = request.args.getlist("skills")
         if query_skills:
             query_skills = list(map(int, query_skills))
@@ -668,7 +940,7 @@ def consultants_list():
         country = request.args.get("country")
         text_query = request.args.get("q", None)
 
-        # 🔹 Min. jaren ervaring
+        # Min. jaren ervaring
         min_experience_raw = (request.args.get("min_experience") or "").strip()
         min_experience = None
         if min_experience_raw:
@@ -677,7 +949,7 @@ def consultants_list():
             except ValueError:
                 min_experience = None
 
-        # 🔹 Locatie-filters uit de query
+        # Locatie-filters
         max_distance_raw = (request.args.get("max_distance_km", "") or "").strip()
         max_distance_km = None
         if max_distance_raw != "":
@@ -690,10 +962,10 @@ def consultants_list():
 
         same_country_only = request.args.get("same_country_only") == "1"
 
-        # 🔹 Nieuwe: expliciet gekozen job voor matching
+        # Expliciet gekozen job voor relevance matching
         selected_job_id = request.args.get("job_id", type=int)
 
-        # 3. Company-profiel (voor jobs & land)
+        # Company-profiel ophalen (o.a. voor jobs & land)
         company_profile = db.query(Company).filter_by(user_id=user.id).first()
 
         required_job = None
@@ -701,7 +973,6 @@ def consultants_list():
         company_jobs = []
 
         if company_profile:
-            # alle jobs van dit bedrijf (nieuwste eerst)
             company_jobs = (
                 db.query(JobPost)
                 .filter(JobPost.company_id == company_profile.id)
@@ -709,21 +980,21 @@ def consultants_list():
                 .all()
             )
 
-            # eerst proberen: job_id uit query
+            # Eerst proberen: job_id uit query
             if selected_job_id:
                 required_job = next(
                     (job for job in company_jobs if job.id == selected_job_id),
                     None,
                 )
 
-            # geen geldige gekozen job → fallback: nieuwste job
+            # Geen geldige gekozen job → fallback naar nieuwste job
             if not required_job and company_jobs:
                 required_job = company_jobs[0]
 
             if required_job:
                 required_skill_ids = {s.id for s in required_job.skills}
 
-        # Als we in relevance-modus zitten maar geen job hebben
+        # In relevance-modus moet er een job zijn
         if not required_job and sort_by == "relevance":
             flash(
                 _(
@@ -731,15 +1002,13 @@ def consultants_list():
                 )
             )
 
-        # Land voor "same country only" - op basis van company-profiel
         company_country = (
             (company_profile.country or "").strip().lower()
             if company_profile and company_profile.country
             else None
         )
 
-        # 🔹 Origin-coördinaten voor afstand:
-        #    → altijd job-locatie als er een job is geselecteerd
+        # Origin-coördinaten voor afstandsfilter: job-locatie
         origin_lat = None
         origin_lon = None
 
@@ -747,7 +1016,7 @@ def consultants_list():
             origin_lat = required_job.latitude
             origin_lon = required_job.longitude
 
-            # Als job nog geen coords heeft maar wel city/country → geocode & opslaan
+            # Als job nog geen coords heeft → nu geocoden en opslaan
             if (origin_lat is None or origin_lon is None) and required_job.location_city and required_job.country:
                 lat, lon = geocode_with_mapbox(required_job.location_city, required_job.country)
                 origin_lat, origin_lon = lat, lon
@@ -755,7 +1024,7 @@ def consultants_list():
                 required_job.longitude = lon
                 db.commit()
 
-        # 4. Basisquery en Filters Toepassen (zonder afstand)
+        # Basisquery: alleen beschikbare consultants
         query = (
             db.query(ConsultantProfile)
             .options(joinedload(ConsultantProfile.user))
@@ -765,14 +1034,13 @@ def consultants_list():
         if min_experience is not None:
             query = query.filter(ConsultantProfile.years_experience >= min_experience)
 
-        # Filters gelden ALLEEN in de 'Handmatige Filter' modus
+        # Handmatige filters gelden alleen als niet 'relevance'
         if sort_by != "relevance":
             if city:
                 query = query.filter(ConsultantProfile.location_city.ilike(f"%{city}%"))
             if country:
                 query = query.filter(ConsultantProfile.country.ilike(f"%{country}%"))
 
-            # Handmatige skill-filter (AND logica)
             if query_skills:
                 for skill_id in query_skills:
                     query = query.filter(
@@ -781,16 +1049,16 @@ def consultants_list():
 
         consultants = query.all()
 
-        # 5. LOCATIE-FILTER toepassen (afstand + zelfde land)
+        # Locatie-filter (zelfde land + afstand tot job)
         filtered_consultants = []
         for profile in consultants:
-            # Zelfde land (indien aangevinkt én company country gekend)
+            # Zelfde land (optioneel)
             if same_country_only and company_country:
                 prof_country = (profile.country or "").strip().lower()
                 if prof_country and prof_country != company_country:
-                    continue  # ander land → skip
+                    continue
 
-            # Afstand t.o.v. job-locatie
+            # Afstand tot job-locatie
             if (
                 max_distance_km is not None
                 and origin_lat is not None
@@ -799,12 +1067,11 @@ def consultants_list():
                 prof_lat = getattr(profile, "latitude", None)
                 prof_lon = getattr(profile, "longitude", None)
 
-                # consultant zonder coords → valt buiten de afstandsfilter
                 if prof_lat is None or prof_lon is None:
                     continue
 
                 distance = haversine_km(origin_lat, origin_lon, prof_lat, prof_lon)
-                profile.distance_km = distance  # optioneel voor template/debug
+                profile.distance_km = distance  # voor eventuele weergave
 
                 if distance is None or distance > max_distance_km:
                     continue
@@ -813,7 +1080,7 @@ def consultants_list():
 
         consultants = filtered_consultants
 
-        # 6. UNLOCK STATUS OPHALEN
+        # Unlock-status ophalen voor huidige company
         unlocked_profile_ids = set()
         if user and user.role == UserRole.company:
             unlocked_profiles_rows = (
@@ -829,7 +1096,7 @@ def consultants_list():
         for consultant in consultants:
             consultant.is_unlocked_for_me = consultant.id in unlocked_profile_ids
 
-        # 7. Sortering & Relevantie Berekening (LOCATIE NIET IN SCORE)
+        # Relevance sorting (via helper)
         if sort_by == "relevance":
             now = datetime.now(timezone.utc)
 
@@ -847,85 +1114,16 @@ def consultants_list():
                 )
                 unlock_counts = {target_id: count for target_id, count in unlock_rows}
 
-            SKILL_WEIGHT = 0.50
-            TEXT_WEIGHT = 0.20
-            RECENCY_WEIGHT = 0.20
-            POPULARITY_WEIGHT = 0.10
-
-            def compute_score(profile):
-                if not required_job:
-                    return {
-                        "total": 0.0,
-                        "skill": 0.0,
-                        "text": 0.0,
-                        "recency": 0.0,
-                        "popularity": 0.0,
-                        "skill_factor": 0.0,
-                        "text_factor": 0.0,
-                        "recency_factor": 0.0,
-                        "popularity_factor": 0.0,
-                        "unlock_count": 0,
-                    }
-
-                # A. Skills
-                consultant_skill_ids = {s.id for s in profile.skills}
-                matched = len(consultant_skill_ids & required_skill_ids)
-                max_skills = max(len(required_skill_ids), 1)
-                skill_similarity = matched / max_skills
-                skill_weighted_score = skill_similarity * SKILL_WEIGHT
-
-                # B. Text
-                text_match = 0
-                if text_query:
-                    text_fields = " ".join(
-                        filter(
-                            None,
-                            [
-                                profile.display_name_masked,
-                                profile.headline,
-                                profile.location_city,
-                                profile.country,
-                            ],
-                        )
-                    )
-                    if text_query.lower() in text_fields.lower():
-                        text_match = 1
-                text_weighted_score = text_match * TEXT_WEIGHT
-
-                # C. Recency
-                days_old = (now - profile.created_at).days
-                recency_factor = max(0, 1 - days_old / 30)
-                recency_weighted_score = recency_factor * RECENCY_WEIGHT
-
-                # D. Populariteit
-                unlock_count = unlock_counts.get(profile.id, 0)
-                max_unlocks = 50
-                popularity_factor = min(unlock_count / max_unlocks, 1.0)
-                popularity_weighted_score = popularity_factor * POPULARITY_WEIGHT
-
-                final_score = (
-                    skill_weighted_score
-                    + text_weighted_score
-                    + recency_weighted_score
-                    + popularity_weighted_score
-                )
-
-                return {
-                    "total": final_score,
-                    "skill": skill_weighted_score,
-                    "text": text_weighted_score,
-                    "recency": recency_weighted_score,
-                    "popularity": popularity_weighted_score,
-                    "skill_factor": skill_similarity,
-                    "text_factor": text_match,
-                    "recency_factor": recency_factor,
-                    "popularity_factor": popularity_factor,
-                    "unlock_count": unlock_count,
-                }
-
             scored_consultants = []
             for consultant in consultants:
-                score_data = compute_score(consultant)
+                score_data = compute_consultant_relevance(
+                    profile=consultant,
+                    required_job=required_job,
+                    required_skill_ids=required_skill_ids,
+                    text_query=text_query,
+                    unlock_counts=unlock_counts,
+                    now=now,
+                )
                 consultant.score = score_data["total"]
                 consultant.score_breakdown = score_data
                 scored_consultants.append(consultant)
@@ -940,7 +1138,6 @@ def consultants_list():
                 else c.user.username,
             )
 
-        # 8. Template Renderen
         all_skills = db.query(Skill).order_by(Skill.name).all()
 
         return render_template(
@@ -954,10 +1151,16 @@ def consultants_list():
             UserRole=UserRole,
         )
 
+
 # ------------------ COMPANY PROFILE ------------------
 
 @main.route("/company/edit", methods=["GET", "POST"])
 def edit_company_profile():
+    """
+    Company kan zijn eigen profiel aanpassen:
+    - Naam, locatie, contactgegevens
+    - Industries (comma-separated string)
+    """
     with get_session() as db:
         user = get_current_user(db)
 
@@ -974,7 +1177,7 @@ def edit_company_profile():
             company.contact_email = request.form.get("contact_email")
             company.phone_number = request.form.get("phone_number")
 
-            # industries opslaan
+            # Industries opslaan als één string
             selected = request.form.getlist("industries")
             company.industries = ", ".join(selected)
             db.add(company)
@@ -992,6 +1195,11 @@ def edit_company_profile():
 @main.route("/unlock/consultant/<int:profile_id>")
 @login_required
 def unlock_consultant(profile_id):
+    """
+    Company 'unlocked' de contactgegevens van een consultant.
+    - Alleen companies kunnen dit
+    - Als al unlocked → info message
+    """
     with get_session() as db:
         user = get_current_user(db)
 
@@ -1024,7 +1232,10 @@ def unlock_consultant(profile_id):
 @login_required
 def collaborate_with_consultant(profile_id):
     """
-    Company klikt op 'Samenwerken' bij een consultant.
+    Company klikt op 'Samenwerken' bij een consultant (zonder specifieke job):
+    - Vereist eerst unlock voor die consultant.
+    - Maakt Collaboration aan (status=active).
+    - Zet consultant op unavailable en koppelt current_company.
     """
     with get_session() as db:
         user = get_current_user(db)
@@ -1049,7 +1260,7 @@ def collaborate_with_consultant(profile_id):
             flash(_("This consultant is currently not available."), "error")
             return redirect(url_for("main.consultant_detail", profile_id=profile_id))
 
-        # eerst unlock checken
+        # Eerst unlock checken
         if not is_unlocked(db, user.id, UnlockTarget.consultant, profile_id):
             flash(
                 _("First unlock this consultant before starting a collaboration."),
@@ -1057,7 +1268,6 @@ def collaborate_with_consultant(profile_id):
             )
             return redirect(url_for("main.consultant_detail", profile_id=profile_id))
 
-        # Collaboration aanmaken zonder specifieke job
         collab = Collaboration(
             company_id=company.id,
             consultant_id=profile.id,
@@ -1066,7 +1276,6 @@ def collaborate_with_consultant(profile_id):
         )
         db.add(collab)
 
-        # Consultant unavailable + link naar current company
         profile.availability = False
         profile.current_company_id = company.id
 
@@ -1084,6 +1293,10 @@ def collaborate_with_consultant(profile_id):
 @main.route("/unlock/job/<int:job_id>")
 @login_required
 def unlock_job(job_id):
+    """
+    Consultant 'unlocked' de contactgegevens van een job/company.
+    - Alleen consultants kunnen dit.
+    """
     with get_session() as db:
         user = get_current_user(db)
 
@@ -1116,7 +1329,11 @@ def unlock_job(job_id):
 @login_required
 def collaborate_on_job(job_id):
     """
-    Consultant klikt op 'Ik wil samenwerken' bij een job.
+    Consultant klikt op 'Ik wil samenwerken' bij een job:
+    - Vereist unlock voor job.
+    - Maakt Collaboration aan met job_post_id.
+    - Sluit job (is_active=False) en markeert consultant als unavailable.
+    - Company krijgt automatisch een Unlock naar deze consultant.
     """
     with get_session() as db:
         user = get_current_user(db)
@@ -1143,12 +1360,11 @@ def collaborate_on_job(job_id):
             flash(_("You are currently marked as unavailable."), "error")
             return redirect(url_for("main.job_detail", job_id=job_id))
 
-        # job moet eerst unlocked zijn
+        # Job moet eerst unlocked zijn
         if not is_unlocked(db, user.id, UnlockTarget.job, job_id):
             flash(_("First unlock this job before starting a collaboration."), "error")
             return redirect(url_for("main.job_detail", job_id=job_id))
 
-        # Collaboration aanmaken (archief)
         collab = Collaboration(
             company_id=job.company_id,
             consultant_id=profile.id,
@@ -1164,7 +1380,7 @@ def collaborate_on_job(job_id):
         profile.availability = False
         profile.current_company_id = job.company_id
 
-        # 🔹 NIEUW: automatisch consultant voor deze company unlocken
+        # Company krijgt automatische unlock op deze consultant
         company_user_id = job.company.user_id if job.company else None
         if company_user_id:
             already_unlocked = is_unlocked(
@@ -1196,15 +1412,22 @@ def collaborate_on_job(job_id):
 
 @main.route("/jobs", methods=["GET"])
 def jobs_list():
+    """
+    Overzicht van jobs voor consultants.
+
+    Functionaliteit:
+    - Alleen toegankelijk voor role=consultant.
+    - Filters: skills, locatie, contract_type, tekst.
+    - Locatie-filters o.b.v. consultant-locatie.
+    - Relevance-sorting via compute_job_relevance.
+    """
     with get_session() as db:
         user = get_current_user(db)
 
-        # 1. Beveiligingscontrole (Moet een Consultant zijn)
         if not user or user.role != UserRole.consultant:
             flash(_("Only consultants can browse job posts."))
             return redirect(url_for("main.dashboard"))
 
-        # 2. Parameters Ophalen
         sort_by = request.args.get("sort_by", "relevance")
 
         query_skills = request.args.getlist("skills")
@@ -1216,7 +1439,7 @@ def jobs_list():
         contract_type = request.args.get("contract_type")
         text_query = request.args.get("q", None)
 
-        # Locatie-filters
+        # Locatie-filters (afstand, zelfde land)
         max_distance_raw = (request.args.get("max_distance_km", "") or "").strip()
         max_distance_km = None
         if max_distance_raw != "":
@@ -1230,7 +1453,7 @@ def jobs_list():
         ignore_distance = request.args.get("ignore_distance") == "1"
         same_country_only = request.args.get("same_country_only") == "1"
 
-        # 3. Consultant profiel & skills / locatie
+        # Consultant-profiel voor skills + locatie
         consultant_profile = (
             db.query(ConsultantProfile)
             .filter(ConsultantProfile.user_id == user.id)
@@ -1254,18 +1477,18 @@ def jobs_list():
             else None
         )
 
-        # 4. Basisquery en filters (nog zonder afstandsfilter)
+        # Basisquery: alleen actieve jobs
         query = (
             db.query(JobPost)
             .options(joinedload(JobPost.company))
             .filter(JobPost.is_active == True)
         )
 
-        # 🔹 Contract type moet ALTIJD filteren (ook in relevance-modus)
+        # Contracttype filter ALTIJD toepassen
         if contract_type:
             query = query.filter(JobPost.contract_type == contract_type)
 
-        # 🔹 Overige manual filters alleen in 'title'/manual mode
+        # Overige manual filters niet in relevance-modus
         if sort_by != "relevance":
             if city:
                 query = query.filter(JobPost.location_city.ilike(f"%{city}%"))
@@ -1277,12 +1500,11 @@ def jobs_list():
 
         jobs = query.all()
 
-        # Locatie-filter (afstand + zelfde land)
+        # Locatie-filter: zelfde land + afstand tot consultant
         filtered_jobs = []
         for job in jobs:
             company = job.company
 
-            # Zelfde land
             if same_country_only and consultant_country:
                 job_country = (
                     job.country
@@ -1292,7 +1514,7 @@ def jobs_list():
                 if job_country and job_country != consultant_country:
                     continue
 
-            # Afstand op basis van JOB-coördinaten
+            # Afstand via job-coördinaten
             if (
                 not ignore_distance
                 and max_distance_km is not None
@@ -1315,7 +1537,7 @@ def jobs_list():
 
         jobs = filtered_jobs
 
-        # 5. UNLOCK STATUS OPHALEN
+        # Unlock status ophalen (welke jobs heeft deze consultant al unlocked?)
         job_ids_unlocked_by_user = set()
         if user and user.role == UserRole.consultant:
             unlocked_jobs = (
@@ -1331,7 +1553,7 @@ def jobs_list():
         for job in jobs:
             job.is_unlocked_for_me = job.id in job_ids_unlocked_by_user
 
-        # 6. Sortering & Relevantie Berekening
+        # Relevance sorting (via helper)
         if sort_by == "relevance":
             now = datetime.now(timezone.utc)
             job_ids = [j.id for j in jobs]
@@ -1349,87 +1571,16 @@ def jobs_list():
                 )
                 unlock_counts = {target_id: count for target_id, count in unlock_rows}
 
-            MAX_UNLOCKS = 50
-
-            SKILL_WEIGHT = 0.50
-            TEXT_WEIGHT = 0.20
-            RECENCY_WEIGHT = 0.20
-            POPULARITY_WEIGHT = 0.10
-
-            def compute_score(job):
-                if not consultant_profile:
-                    return {
-                        "total": 0.0,
-                        "skill": 0.0,
-                        "text": 0.0,
-                        "recency": 0.0,
-                        "popularity": 0.0,
-                        "skill_factor": 0.0,
-                        "text_factor": 0.0,
-                        "recency_factor": 0.0,
-                        "popularity_factor": 0.0,
-                        "unlock_count": 0,
-                    }
-
-                # A. Skills
-                job_skill_ids = {s.id for s in job.skills}
-                matched = len(job_skill_ids & consultant_skill_ids)
-                max_skills = max(len(consultant_skill_ids), 1)
-                skill_similarity = matched / max_skills
-                skill_weighted_score = skill_similarity * SKILL_WEIGHT
-
-                # B. Text Match
-                text_match = 0
-                if text_query:
-                    text_fields = " ".join(
-                        filter(
-                            None,
-                            [
-                                job.title,
-                                job.description,
-                                job.location_city,
-                                job.country,
-                                job.contract_type,
-                            ],
-                        )
-                    )
-                    if text_query.lower() in text_fields.lower():
-                        text_match = 1
-                text_weighted_score = text_match * TEXT_WEIGHT
-
-                # C. Recency
-                days_old = (now - job.created_at).days
-                recency_factor = max(0, 1 - days_old / 30)
-                recency_weighted_score = recency_factor * RECENCY_WEIGHT
-
-                # D. Populariteit (unlocks)
-                unlock_count = unlock_counts.get(job.id, 0)
-                popularity_factor = min(unlock_count / MAX_UNLOCKS, 1.0)
-                popularity_weighted_score = popularity_factor * POPULARITY_WEIGHT
-
-                total = (
-                    skill_weighted_score
-                    + text_weighted_score
-                    + recency_weighted_score
-                    + popularity_weighted_score
-                )
-
-                return {
-                    "total": total,
-                    "skill": skill_weighted_score,
-                    "text": text_weighted_score,
-                    "recency": recency_weighted_score,
-                    "popularity": popularity_weighted_score,
-                    "skill_factor": skill_similarity,
-                    "text_factor": text_match,
-                    "recency_factor": recency_factor,
-                    "popularity_factor": popularity_factor,
-                    "unlock_count": unlock_count,
-                }
-
             scored_jobs = []
             for job in jobs:
-                score_data = compute_score(job)
+                score_data = compute_job_relevance(
+                    job=job,
+                    consultant_profile=consultant_profile,
+                    consultant_skill_ids=consultant_skill_ids,
+                    text_query=text_query,
+                    unlock_counts=unlock_counts,
+                    now=now,
+                )
                 job.score = score_data["total"]
                 job.score_breakdown = score_data
                 scored_jobs.append(job)
@@ -1439,7 +1590,6 @@ def jobs_list():
         elif sort_by == "title":
             jobs = sorted(jobs, key=lambda j: j.title or "")
 
-        # 7. Template Renderen
         all_skills = db.query(Skill).order_by(Skill.name).all()
 
         possible_contract_types = [
@@ -1465,6 +1615,11 @@ def jobs_list():
 
 @main.route("/jobs/<int:job_id>", methods=["GET"])
 def job_detail(job_id):
+    """
+    Detailpagina van één job:
+    - Als job inactief is mag alleen de eigenaar (company) de pagina nog zien.
+    - 'Unlocked' toont meer company-contactdetails aan consultant.
+    """
     with get_session() as db:
         user = get_current_user(db)
 
@@ -1477,7 +1632,7 @@ def job_detail(job_id):
 
         is_owner = user and company_posting and user.id == company_posting.user_id
 
-        # Als job ingevuld/inactief is: alleen eigenaar mag de detailpagina nog zien
+        # Inactieve job → alleen eigenaar mag het detail nog zien
         if not job.is_active and not is_owner:
             flash(_("This job is no longer available."))
             return redirect(url_for("main.jobs_list"))
@@ -1500,6 +1655,11 @@ def job_detail(job_id):
 
 @main.route("/jobs/new", methods=["GET", "POST"])
 def job_new():
+    """
+    Company kan een nieuwe job aanmaken:
+    - Titel, beschrijving, locatie, contract_type, skills.
+    - Locatie wordt gegeocodeerd voor lat/lon (afstandsmatching).
+    """
     with get_session() as db:
         user = get_current_user(db)
         if not user or user.role != UserRole.company:
@@ -1554,6 +1714,11 @@ def job_new():
 
 @main.route("/jobs/<int:job_id>/edit", methods=["GET", "POST"])
 def job_edit(job_id):
+    """
+    Company kan een bestaande job aanpassen.
+    - Zelfde velden als job_new.
+    - Zelfde geocoding-logica.
+    """
     with get_session() as db:
         user = get_current_user(db)
 
@@ -1570,7 +1735,6 @@ def job_edit(job_id):
 
         all_skills = db.query(Skill).order_by(Skill.name).all()
 
-        # ✅ lijst met mogelijke contracttypes (zelfde als in jobs_list)
         possible_contract_types = [
             ("Freelance", _("Freelance")),
             ("Full-time", _("Full-time")),
@@ -1607,13 +1771,15 @@ def job_edit(job_id):
             "job_edit.html",
             job=job,
             skills=all_skills,
-            possible_contract_types=possible_contract_types,  # ✅ doorgeven aan template
+            possible_contract_types=possible_contract_types,
         )
-
 
 
 @main.route("/jobs/<int:job_id>/delete", methods=["POST"])
 def job_delete(job_id):
+    """
+    Company kan een job verwijderen (harde delete).
+    """
     with get_session() as db:
         user = get_current_user(db)
 
@@ -1637,6 +1803,11 @@ def job_delete(job_id):
 # ------------------ ADMIN DECORATOR ------------------
 
 def admin_required(f):
+    """
+    Decorator voor admin-only routes.
+
+    - Checkt of user ingelogd is én role=admin.
+    """
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if session.get("user_id") is None:
@@ -1657,44 +1828,49 @@ def admin_required(f):
 @login_required
 @admin_required
 def admin_consultants():
+    """
+    Admin-overzicht van alle consultants.
+    - Simpele text search op display_name_masked.
+    """
     q = request.args.get("q", "").lower()
 
     with get_session() as db:
         consultants = db.query(ConsultantProfile).all()
 
-    # zoekfilter
     if q:
         consultants = [
             c for c in consultants
-            if q in c.display_name_masked.lower()
+            if q in (c.display_name_masked or "").lower()
         ]
 
     return render_template("admin_consultants.html", consultants=consultants)
 
-    
 
-#------------------- ADMIN JOBPOSTS ---------------------
+#------------------- ADMIN COMPANIES + JOBS ---------------------
 
 @main.route("/admin/companies")
 @login_required
 @admin_required
 def admin_companies():
+    """
+    Admin-overzicht van companies + hun jobs.
+    - Jobs worden gegroepeerd per company_id.
+    - Simpele text search op company_name_masked.
+    """
     q = request.args.get("q", "").lower()
 
     with get_session() as db:
         companies = db.query(Company).all()
         jobs = db.query(JobPost).all()
 
-    # groepeer jobs per company
     jobs_by_company = {}
     for job in jobs:
         jobs_by_company.setdefault(job.company_id, []).append(job)
 
-    # zoekfilter
     if q:
         companies = [
             c for c in companies
-            if q in c.company_name_masked.lower()
+            if q in (c.company_name_masked or "").lower()
         ]
 
     return render_template(
@@ -1710,18 +1886,19 @@ def admin_companies():
 @login_required
 @admin_required
 def admin_collaborations():
+    """
+    Admin-overzicht van alle Collaborations.
+    - Optionele zoekterm q op consultantnaam, companynaam of jobtitel.
+    """
     q = request.args.get("q", "").lower()
 
     with get_session() as db:
-        # BASISQUERY
         query = (
             db.query(Collaboration)
             .order_by(Collaboration.started_at.desc())
         )
 
-        # ALS ER EEN ZOEKTERM IS — FILTEREN
         if q:
-            # JOIN MET CONSULTANT, COMPANY EN JOBPOST
             query = (
                 query.join(Collaboration.consultant)
                      .join(Collaboration.company)
@@ -1750,8 +1927,11 @@ def admin_collaborations():
 @login_required
 @admin_required
 def admin_dashboard():
+    """Startpagina voor admin-sectie."""
     return render_template("admin_dashboard.html")
+
 
 @main.route("/vision")
 def vision_page():
+    """Statische pagina voor 'Vision'."""
     return render_template("vision.html")

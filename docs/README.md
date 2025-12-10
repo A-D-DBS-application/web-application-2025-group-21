@@ -64,6 +64,7 @@ python app.py
 
 # 7. Open the application in your browser
 # http://localhost:5000
+```
 
 Basic Usage
 
