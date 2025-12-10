@@ -646,6 +646,7 @@ def dashboard():
         company_jobs = []
         company_active_collaborations = []
         consultant_active_collaborations = []
+        collabs_by_job_id = {}  # 🔹 standaard lege mapping
 
         if user.role == UserRole.consultant:
             profile = db.query(ConsultantProfile).filter_by(user_id=user.id).first()
@@ -691,6 +692,7 @@ def dashboard():
                     .all()
                 )
 
+
         # Check of profiel voldoende is ingevuld
         check_profile_completion(user, profile, company)
 
@@ -702,9 +704,8 @@ def dashboard():
             UserRole=UserRole,
             company_jobs=company_jobs,
             company_active_collaborations=company_active_collaborations,
-            consultant_active_collaborations=consultant_active_collaborations,
+            consultant_active_collaborations=consultant_active_collaborations,  
         )
-
 
 # ------------------ CONSULTANTS ------------------
 
@@ -1288,6 +1289,8 @@ def collaborate_with_consultant(profile_id):
             "success",
         )
         return redirect(url_for("main.consultant_detail", profile_id=profile_id))
+
+
 
 
 @main.route("/unlock/job/<int:job_id>")
