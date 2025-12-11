@@ -3,7 +3,6 @@ from datetime import datetime, timezone
 from functools import wraps
 from sqlalchemy import or_, func
 from sqlalchemy.orm import joinedload
-from flask_babel import gettext as _
 import os
 import mimetypes
 import time
