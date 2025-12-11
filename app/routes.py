@@ -168,7 +168,7 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if session.get("user_id") is None:
-            flash(_("Gelieve in te loggen om deze actie uit te voeren."))
+            flash(("Gelieve in te loggen om deze actie uit te voeren."))
             return redirect(url_for("main.login"))
         return f(*args, **kwargs)
 
@@ -452,13 +452,13 @@ def company_jobs_list():
         user = get_current_user(db)
 
         if not user or user.role != UserRole.company:
-            flash(_("Only companies can view their own job posts."))
+            flash(("Only companies can view their own job posts."))
             return redirect(url_for("main.dashboard"))
 
         company = db.query(Company).filter_by(user_id=user.id).first()
 
         if not company:
-            flash(_("Company profile not found."))
+            flash(("Company profile not found."))
             return redirect(url_for("main.dashboard"))
 
         q = request.args.get("q", "").strip()
@@ -484,7 +484,7 @@ def company_jobs_list():
             user=user,
             skills=all_skills,
             sort_by="none",
-            page_title=_("My job posts"),
+            page_title=("My job posts"),
             show_mode_selector=False,
             simple_search=True,
             possible_contract_types=[],
@@ -536,13 +536,13 @@ def login():
         admin_code_input = request.form.get("admin_code")
 
         if not username:
-            flash(_("Username is required."))
+            flash(("Username is required."))
             return redirect(url_for("main.login"))
 
         # Admin beveiliging
         if requested_role == UserRole.admin:
             if admin_code_input != os.getenv("ADMIN_CODE"):
-                flash(_("Invalid admin code."))
+                flash(("Invalid admin code."))
                 return redirect(url_for("main.login"))
 
         with get_session() as db:
@@ -553,10 +553,10 @@ def login():
                 if user.role == requested_role:
                     session["user_id"] = user.id
                     session["role"] = user.role.value
-                    flash(_(f"Welcome back, {username}."))
+                    flash((f"Welcome back, {username}."))
                     return redirect(url_for("main.dashboard"))
                 else:
-                    flash(_("This username already exists and is linked to another role."))
+                    flash(("This username already exists and is linked to another role."))
                     return redirect(url_for("main.login"))
             else:
                 # Nieuwe gebruiker + bijhorende profieltype
@@ -585,7 +585,7 @@ def login():
 
                 db.commit()
                 flash(
-                    _(
+                    (
                         f"Welcome, {username}. You are registered and logged in as {role_str}."
                     )
                 )
@@ -617,7 +617,7 @@ def dashboard():
         user = get_current_user(db)
 
         if not user:
-            flash(_("Please log in to view your dashboard."))
+            flash(("Please log in to view your dashboard."))
             return redirect(url_for("main.login"))
 
         profile = None
@@ -765,7 +765,7 @@ def edit_consultant_profile():
                 if public_url:
                     profile.profile_image = public_url
                 else:
-                    flash(_("Failed to upload profile image."), "error")
+                    flash(("Failed to upload profile image."), "error")
 
             # -- CV upload (Supabase) --
             cv_file = request.files.get("cv_document")
@@ -774,7 +774,7 @@ def edit_consultant_profile():
                 if public_url:
                     profile.cv_document = public_url
                 else:
-                    flash(_("Failed to upload CV."), "error")
+                    flash(("Failed to upload CV."), "error")
 
             db.commit()
             flash("Profile updated successfully")
@@ -796,7 +796,7 @@ def edit_consultant_skills():
         user = get_current_user(db)
 
         if not user or user.role != UserRole.consultant:
-            flash(_("Only consultants can update their skills"))
+            flash(("Only consultants can update their skills"))
             return redirect(url_for("main.dashboard"))
 
         profile = (
@@ -814,7 +814,7 @@ def edit_consultant_skills():
             )
             db.commit()
 
-            flash(_("Profile updated"))
+            flash(("Profile updated"))
             return redirect(url_for("main.dashboard"))
 
         all_skills = db.query(Skill).all()
@@ -841,7 +841,7 @@ def consultant_detail(profile_id):
         )
 
         if not profile:
-            flash(_("Consultant not found"))
+            flash(("Consultant not found"))
             return redirect(url_for("main.consultants_list"))
 
         user = get_current_user(db)
@@ -906,7 +906,7 @@ def consultants_list():
         user = get_current_user(db)
 
         if not user or user.role != UserRole.company:
-            flash(_("Only companies can browse consultant profiles."))
+            flash(("Only companies can browse consultant profiles."))
             return redirect(url_for("main.dashboard"))
 
         sort_by = request.args.get("sort_by", "relevance")
@@ -978,7 +978,7 @@ def consultants_list():
         # In relevance-modus moet er een job zijn
         if not required_job and sort_by == "relevance":
             flash(
-                _(
+                (
                     "First, create a Job Post (or select one) to enable the IConsult relevance filter based on your needs."
                 )
             )
@@ -1153,7 +1153,7 @@ def edit_company_profile():
         user = get_current_user(db)
 
         if not user or user.role != UserRole.company:
-            flash(_("Only companies can edit their profile"))
+            flash(("Only companies can edit their profile"))
             return redirect(url_for("main.dashboard"))
 
         company = db.query(Company).filter(Company.user_id == user.id).first()
@@ -1172,7 +1172,7 @@ def edit_company_profile():
 
             db.commit()
 
-            flash(_("Company profile updated"))
+            flash(("Company profile updated"))
             return redirect(url_for("main.dashboard"))
 
         return render_template("edit_company_profile.html", company=company)
@@ -1194,19 +1194,19 @@ def unlock_consultant(profile_id):
         user = get_current_user(db)
 
         if user.role != UserRole.company:
-            flash(_("Only companies can reveal consultants contact details."), "error")
+            flash(("Only companies can reveal consultants contact details."), "error")
             return redirect(url_for("main.consultant_detail", profile_id=profile_id))
 
         consultant_profile = db.query(ConsultantProfile).filter_by(id=profile_id).first()
         if not consultant_profile:
-            flash(_("Consultant profile not found."), "error")
+            flash(("Consultant profile not found."), "error")
             return redirect(url_for("main.dashboard"))
 
         # job_id uit querystring (kan None zijn)
         job_id = request.args.get("job_id", type=int)
 
         if is_unlocked(db, user.id, UnlockTarget.consultant, profile_id):
-            flash(_("Contact details have already been released."), "info")
+            flash(("Contact details have already been released."), "info")
             if job_id:
                 return redirect(
                     url_for("main.consultant_detail", profile_id=profile_id, job_id=job_id)
@@ -1221,7 +1221,7 @@ def unlock_consultant(profile_id):
         db.add(new_unlock)
         db.commit()
 
-        flash(_("Contact details successfully released!"), "success")
+        flash(("Contact details successfully released!"), "success")
 
         if job_id:
             return redirect(
@@ -1238,22 +1238,22 @@ def collaborate_with_consultant(profile_id):
 
         if not user or user.role != UserRole.company:
             flash(
-                _("Only companies can start a collaboration with a consultant."), "error"
+                ("Only companies can start a collaboration with a consultant."), "error"
             )
             return redirect(url_for("main.consultant_detail", profile_id=profile_id))
 
         company = db.query(Company).filter_by(user_id=user.id).first()
         if not company:
-            flash(_("Company profile not found."), "error")
+            flash(("Company profile not found."), "error")
             return redirect(url_for("main.dashboard"))
 
         profile = db.query(ConsultantProfile).filter_by(id=profile_id).first()
         if not profile:
-            flash(_("Consultant profile not found."), "error")
+            flash(("Consultant profile not found."), "error")
             return redirect(url_for("main.consultants_list"))
 
         if not profile.availability:
-            flash(_("This consultant is currently not available."), "error")
+            flash(("This consultant is currently not available."), "error")
             return redirect(url_for("main.consultant_detail", profile_id=profile_id))
 
         # job_id uit form of querystring
@@ -1262,7 +1262,7 @@ def collaborate_with_consultant(profile_id):
         # Eerst unlock checken
         if not is_unlocked(db, user.id, UnlockTarget.consultant, profile_id):
             flash(
-                _("First unlock this consultant before starting a collaboration."),
+                ("First unlock this consultant before starting a collaboration."),
                 "error",
             )
             # 🔹 job_id meegeven zodat detailpagina het behoudt
@@ -1284,7 +1284,7 @@ def collaborate_with_consultant(profile_id):
                 .first()
             )
             if not job:
-                flash(_("Selected job not found or not owned by your company."), "error")
+                flash(("Selected job not found or not owned by your company."), "error")
                 return redirect(url_for("main.consultant_detail", profile_id=profile_id))
 
         collab = Collaboration(
@@ -1308,7 +1308,7 @@ def collaborate_with_consultant(profile_id):
 
         if job:
             flash(
-                _(
+                (
                     "You are now collaborating with this consultant on the selected job. "
                     "The job has been closed and the consultant is unavailable."
                 ),
@@ -1316,7 +1316,7 @@ def collaborate_with_consultant(profile_id):
             )
         else:
             flash(
-                _(
+                (
                     "You are now collaborating with this consultant. "
                     "They have been marked as unavailable."
                 ),
@@ -1343,16 +1343,16 @@ def unlock_job(job_id):
         user = get_current_user(db)
 
         if user.role != UserRole.consultant:
-            flash(_("Only consultants can reveal companies' contact details."), "error")
+            flash(("Only consultants can reveal companies' contact details."), "error")
             return redirect(url_for("main.job_detail", job_id=job_id))
 
         job_post = db.query(JobPost).filter_by(id=job_id).first()
         if not job_post:
-            flash(_("Job post not found."), "error")
+            flash(("Job post not found."), "error")
             return redirect(url_for("main.dashboard"))
 
         if is_unlocked(db, user.id, UnlockTarget.job, job_id):
-            flash(_("Contact details have already been released."), "info")
+            flash(("Contact details have already been released."), "info")
             return redirect(url_for("main.job_detail", job_id=job_id))
 
         new_unlock = Unlock(
@@ -1363,7 +1363,7 @@ def unlock_job(job_id):
         db.add(new_unlock)
         db.commit()
 
-        flash(_("Contact details successfully released!"), "success")
+        flash(("Contact details successfully released!"), "success")
         return redirect(url_for("main.job_detail", job_id=job_id))
 
 
@@ -1381,30 +1381,30 @@ def collaborate_on_job(job_id):
         user = get_current_user(db)
 
         if not user or user.role != UserRole.consultant:
-            flash(_("Only consultants can start a collaboration for a job."), "error")
+            flash(("Only consultants can start a collaboration for a job."), "error")
             return redirect(url_for("main.job_detail", job_id=job_id))
 
         job = db.query(JobPost).filter_by(id=job_id).first()
         if not job:
-            flash(_("Job post not found."), "error")
+            flash(("Job post not found."), "error")
             return redirect(url_for("main.jobs_list"))
 
         if not job.is_active:
-            flash(_("This job is no longer available."), "error")
+            flash(("This job is no longer available."), "error")
             return redirect(url_for("main.job_detail", job_id=job_id))
 
         profile = db.query(ConsultantProfile).filter_by(user_id=user.id).first()
         if not profile:
-            flash(_("Consultant profile not found."), "error")
+            flash(("Consultant profile not found."), "error")
             return redirect(url_for("main.dashboard"))
 
         if not profile.availability:
-            flash(_("You are currently marked as unavailable."), "error")
+            flash(("You are currently marked as unavailable."), "error")
             return redirect(url_for("main.job_detail", job_id=job_id))
 
         # Job moet eerst unlocked zijn
         if not is_unlocked(db, user.id, UnlockTarget.job, job_id):
-            flash(_("First unlock this job before starting a collaboration."), "error")
+            flash(("First unlock this job before starting a collaboration."), "error")
             return redirect(url_for("main.job_detail", job_id=job_id))
 
         collab = Collaboration(
@@ -1442,7 +1442,7 @@ def collaborate_on_job(job_id):
         db.commit()
 
         flash(
-            _(
+            (
                 "You are now collaborating with this company. The job is closed and you are set to unavailable."
             ),
             "success",
@@ -1467,7 +1467,7 @@ def jobs_list():
         user = get_current_user(db)
 
         if not user or user.role != UserRole.consultant:
-            flash(_("Only consultants can browse job posts."))
+            flash(("Only consultants can browse job posts."))
             return redirect(url_for("main.dashboard"))
 
         sort_by = request.args.get("sort_by", "relevance")
@@ -1635,10 +1635,10 @@ def jobs_list():
         all_skills = db.query(Skill).order_by(Skill.name).all()
 
         possible_contract_types = [
-            ("Freelance", _("Freelance")),
-            ("Full-time", _("Full-time")),
-            ("Part-time", _("Part-time")),
-            ("Project-based", _("Project-based")),
+            ("Freelance", ("Freelance")),
+            ("Full-time", ("Full-time")),
+            ("Part-time", ("Part-time")),
+            ("Project-based", ("Project-based")),
         ]
 
         return render_template(
@@ -1667,7 +1667,7 @@ def job_detail(job_id):
 
         job = db.query(JobPost).filter(JobPost.id == job_id).first()
         if not job:
-            flash(_("Job not found"))
+            flash(("Job not found"))
             return redirect(url_for("main.jobs_list"))
 
         company_posting = job.company
@@ -1676,7 +1676,7 @@ def job_detail(job_id):
 
         # Inactieve job → alleen eigenaar mag het detail nog zien
         if not job.is_active and not is_owner:
-            flash(_("This job is no longer available."))
+            flash(("This job is no longer available."))
             return redirect(url_for("main.jobs_list"))
 
         is_unlocked_status = False
@@ -1705,7 +1705,7 @@ def job_new():
     with get_session() as db:
         user = get_current_user(db)
         if not user or user.role != UserRole.company:
-            flash(_("Only companies can create job posts"))
+            flash(("Only companies can create job posts"))
             return redirect(url_for("main.login"))
 
         company = db.query(Company).filter(Company.user_id == user.id).first()
@@ -1721,7 +1721,7 @@ def job_new():
             selected_skill_ids = [int(x) for x in request.form.getlist("skills")]
 
             if not title:
-                flash(_("Title is required"))
+                flash(("Title is required"))
                 return redirect(url_for("main.job_new"))
 
             # Geocode job-locatie
@@ -1765,23 +1765,23 @@ def job_edit(job_id):
         user = get_current_user(db)
 
         if not user or user.role != UserRole.company:
-            flash(_("Only companies can edit job posts"))
+            flash(("Only companies can edit job posts"))
             return redirect(url_for("main.login"))
 
         company = db.query(Company).filter_by(user_id=user.id).first()
         job = db.query(JobPost).filter_by(id=job_id, company_id=company.id).first()
 
         if not job:
-            flash(_("Job not found or you are not the owner"))
+            flash(("Job not found or you are not the owner"))
             return redirect(url_for("main.jobs_list"))
 
         all_skills = db.query(Skill).order_by(Skill.name).all()
 
         possible_contract_types = [
-            ("Freelance", _("Freelance")),
-            ("Full-time", _("Full-time")),
-            ("Part-time", _("Part-time")),
-            ("Project-based", _("Project-based")),
+            ("Freelance", ("Freelance")),
+            ("Full-time", ("Full-time")),
+            ("Part-time", ("Part-time")),
+            ("Project-based", ("Project-based")),
         ]
 
         if request.method == "POST":
@@ -1806,7 +1806,7 @@ def job_edit(job_id):
             )
 
             db.commit()
-            flash(_("Job updated!"))
+            flash(("Job updated!"))
             return redirect(url_for("main.job_detail", job_id=job.id))
 
         return render_template(
@@ -1826,19 +1826,19 @@ def job_delete(job_id):
         user = get_current_user(db)
 
         if not user or user.role != UserRole.company:
-            flash(_("Only companies can delete job posts"))
+            flash(("Only companies can delete job posts"))
             return redirect(url_for("main.login"))
 
         company = db.query(Company).filter_by(user_id=user.id).first()
         job = db.query(JobPost).filter_by(id=job_id, company_id=company.id).first()
 
         if not job:
-            flash(_("Job not found or you are not the owner"))
+            flash(("Job not found or you are not the owner"))
             return redirect(url_for("main.jobs_list"))
 
         db.delete(job)
         db.commit()
-        flash(_("Job deleted"))
+        flash(("Job deleted"))
         return redirect(url_for("main.jobs_list"))
 
 
@@ -1856,7 +1856,7 @@ def admin_required(f):
             return redirect(url_for("main.login"))
 
         if session.get("role") != UserRole.admin.value:
-            flash(_("You do not have access to this page."))
+            flash(("You do not have access to this page."))
             return redirect(url_for("main.dashboard"))
 
         return f(*args, **kwargs)
