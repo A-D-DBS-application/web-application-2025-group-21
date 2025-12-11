@@ -1918,4 +1918,3 @@ def admin_dashboard():
 def vision_page():
     """Statische pagina voor 'Vision'."""
     return render_template("vision.html")
-
