@@ -13,6 +13,10 @@ Link to video recordings:
 
 Link to Supabase: 
     https://supabase.com/dashboard/project/yezkgrihchdjhiypfykc
+
+ERD model:
+    https://dbdiagram.io/d/693aebc1e877c630747c59ac
+    
 Installment:
 # Installation & Running the App (Local)
 
