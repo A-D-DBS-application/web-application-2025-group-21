@@ -70,7 +70,6 @@ class ConsultantProfile(Base):
     location_city = Column(String(120))
     country = Column(String(120))
     availability = Column(Boolean, nullable=False, default=True)
-    rate_value = Column(DECIMAL(10, 2))
     created_at = Column(TIMESTAMP, nullable=False, server_default=func.now())
     years_experience = Column(Integer, nullable=True)
 
