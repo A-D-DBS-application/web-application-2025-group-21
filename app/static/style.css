@@ -1113,6 +1113,7 @@ nav a:hover {
     border: none;
     cursor: pointer;
     font-size: 0.98rem;
+    box-sizing: border-box;
 }
 
 /* Primary = light blue */
