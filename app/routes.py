@@ -906,7 +906,7 @@ def consultants_list():
         user = get_current_user(db)
 
         if not user or user.role != UserRole.company:
-            flash(("Only companies can browse consultant profiles."))
+            flash(_("Only companies can browse consultant profiles."))
             return redirect(url_for("main.dashboard"))
 
         sort_by = request.args.get("sort_by", "relevance")
@@ -953,33 +953,37 @@ def consultants_list():
         company_jobs = []
 
         if company_profile:
+            # 🔹 Alleen ACTIEVE jobs tonen in dropdown & gebruiken voor matching
             company_jobs = (
                 db.query(JobPost)
-                .filter(JobPost.company_id == company_profile.id)
+                .filter(
+                    JobPost.company_id == company_profile.id,
+                    JobPost.is_active == True      # <--- hier zit de truc
+                )
                 .order_by(JobPost.created_at.desc())
                 .all()
             )
 
-            # Eerst proberen: job_id uit query
+            # Probeer eerst job_id uit query
             if selected_job_id:
                 required_job = next(
                     (job for job in company_jobs if job.id == selected_job_id),
                     None,
                 )
 
-            # Geen geldige gekozen job → fallback naar nieuwste job
+            # Geen geldige gekozen job → fallback naar nieuwste job (ook actief)
             if not required_job and company_jobs:
                 required_job = company_jobs[0]
-                selected_job_id = required_job.id  # 🔹 ook selected_job_id zetten
 
             if required_job:
                 required_skill_ids = {s.id for s in required_job.skills}
 
-        # In relevance-modus moet er een job zijn
+        # In relevance-modus moet er een (actieve) job zijn
         if not required_job and sort_by == "relevance":
             flash(
-                (
-                    "First, create a Job Post (or select one) to enable the IConsult relevance filter based on your needs."
+                _(
+                    "First, create an active Job Post (or select one) "
+                    "to enable the IConsult relevance filter based on your needs."
                 )
             )
 
@@ -998,14 +1002,8 @@ def consultants_list():
             origin_lon = required_job.longitude
 
             # Als job nog geen coords heeft → nu geocoden en opslaan
-            if (
-                (origin_lat is None or origin_lon is None)
-                and required_job.location_city
-                and required_job.country
-            ):
-                lat, lon = geocode_with_mapbox(
-                    required_job.location_city, required_job.country
-                )
+            if (origin_lat is None or origin_lon is None) and required_job.location_city and required_job.country:
+                lat, lon = geocode_with_mapbox(required_job.location_city, required_job.country)
                 origin_lat, origin_lon = lat, lon
                 required_job.latitude = lat
                 required_job.longitude = lon
@@ -1027,7 +1025,6 @@ def consultants_list():
                 query = query.filter(ConsultantProfile.location_city.ilike(f"%{city}%"))
             if country:
                 query = query.filter(ConsultantProfile.country.ilike(f"%{country}%"))
-
             if query_skills:
                 for skill_id in query_skills:
                     query = query.filter(
@@ -1039,13 +1036,11 @@ def consultants_list():
         # Locatie-filter (zelfde land + afstand tot job)
         filtered_consultants = []
         for profile in consultants:
-            # Zelfde land (optioneel)
             if same_country_only and company_country:
                 prof_country = (profile.country or "").strip().lower()
                 if prof_country and prof_country != company_country:
                     continue
 
-            # Afstand tot job-locatie
             if (
                 max_distance_km is not None
                 and origin_lat is not None
@@ -1058,7 +1053,7 @@ def consultants_list():
                     continue
 
                 distance = haversine_km(origin_lat, origin_lon, prof_lat, prof_lon)
-                profile.distance_km = distance  # voor eventuele weergave
+                profile.distance_km = distance
 
                 if distance is None or distance > max_distance_km:
                     continue
@@ -1067,7 +1062,7 @@ def consultants_list():
 
         consultants = filtered_consultants
 
-        # Unlock-status ophalen voor huidige company
+        # Unlock-status voor huidige company
         unlocked_profile_ids = set()
         if user and user.role == UserRole.company:
             unlocked_profiles_rows = (
@@ -1083,7 +1078,7 @@ def consultants_list():
         for consultant in consultants:
             consultant.is_unlocked_for_me = consultant.id in unlocked_profile_ids
 
-        # Relevance sorting (via helper)
+        # Relevance sorting
         if sort_by == "relevance":
             now = datetime.now(timezone.utc)
 
@@ -1115,9 +1110,7 @@ def consultants_list():
                 consultant.score_breakdown = score_data
                 scored_consultants.append(consultant)
 
-            consultants = sorted(
-                scored_consultants, key=lambda c: c.score, reverse=True
-            )
+            consultants = sorted(scored_consultants, key=lambda c: c.score, reverse=True)
 
         elif sort_by == "title":
             consultants = sorted(
@@ -1135,7 +1128,7 @@ def consultants_list():
             skills=all_skills,
             user=user,
             sort_by=sort_by,
-            company_jobs=company_jobs,
+            company_jobs=company_jobs,      # ← hier gaan nog steeds je jobs naar de template
             selected_job_id=selected_job_id,
             UserRole=UserRole,
         )
