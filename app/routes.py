@@ -1,17 +1,3 @@
-"""
-main.py - Hoofd-blueprint van de applicatie.
-
-Bevat:
-- Authenticatie (simple username + role login)
-- Dashboards voor consultant / company / admin
-- Matching-logica:
-    * Companies zoeken consultants
-    * Consultants zoeken jobs
-- Unlock-mechanisme voor contactgegevens
-- Collaborations (samenwerkingen) tussen consultants & companies
-- Admin-overzichten
-"""
-
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
 from datetime import datetime, timezone
 from functools import wraps
@@ -34,23 +20,17 @@ from .models import (
     Collaboration,
     CollaborationStatus,
 )
-
 import requests
 from math import radians, sin, cos, sqrt, atan2
 
-
-# ------------------ CONFIG & CONSTANTS ------------------
-
 MAPBOX_TOKEN = os.getenv("MAPBOX_TOKEN")
 
-# Weights voor de relevance-score van consultants (vanuit company-perspectief)
 CONSULTANT_SKILL_WEIGHT = 0.50
 CONSULTANT_TEXT_WEIGHT = 0.20
 CONSULTANT_RECENCY_WEIGHT = 0.20
 CONSULTANT_POPULARITY_WEIGHT = 0.10
 CONSULTANT_MAX_UNLOCKS = 50  # voor normalisatie van popularity
 
-# Weights voor de relevance-score van jobs (vanuit consultant-perspectief)
 JOB_SKILL_WEIGHT = 0.50
 JOB_TEXT_WEIGHT = 0.20
 JOB_RECENCY_WEIGHT = 0.20
