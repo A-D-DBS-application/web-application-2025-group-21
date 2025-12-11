@@ -165,7 +165,6 @@ class JobPost(Base):
     location_city = Column(String(120))
     country = Column(String(120))
     contract_type = Column(String(80))
-    anonymize = Column(Boolean, nullable=False, server_default="1")
     created_at = Column(TIMESTAMP, nullable=False, server_default=func.now())
 
     # ✅ actieve/inactieve status
