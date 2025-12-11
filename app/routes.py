@@ -906,7 +906,7 @@ def consultants_list():
         user = get_current_user(db)
 
         if not user or user.role != UserRole.company:
-            flash(_("Only companies can browse consultant profiles."))
+            flash(("Only companies can browse consultant profiles."))
             return redirect(url_for("main.dashboard"))
 
         sort_by = request.args.get("sort_by", "relevance")
@@ -981,7 +981,7 @@ def consultants_list():
         # In relevance-modus moet er een (actieve) job zijn
         if not required_job and sort_by == "relevance":
             flash(
-                _(
+                (
                     "First, create an active Job Post (or select one) "
                     "to enable the IConsult relevance filter based on your needs."
                 )
