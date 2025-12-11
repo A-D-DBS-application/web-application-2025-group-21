@@ -3,7 +3,16 @@
 
 {% block content %}
 
-<a href="{{ request.referrer or url_for('main.jobs_list') }}" class="btn btn-secondary btn-large" style="margin-bottom: 15px; display:inline-block;">
+<a
+   href="{% if user and user.role == UserRole.consultant %}
+             {{ url_for('main.jobs_list') }}
+         {% elif is_owner and user and user.role == UserRole.company %}
+             {{ url_for('main.company_jobs_list') }}
+         {% else %}
+             {{ url_for('main.dashboard') }}
+         {% endif %}"
+   class="btn btn-secondary btn-large"
+   style="margin-bottom: 15px; display:inline-block;">
     ← Go Back
 </a>
 
