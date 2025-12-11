@@ -3,14 +3,7 @@
 
 {% block content %}
 
-<a
-   href="{% if user and user.role == UserRole.company %}
-             {{ url_for('main.consultants_list') }}
-         {% elif is_owner %}
-             {{ url_for('main.dashboard') }}
-         {% else %}
-             {{ url_for('main.dashboard') }}
-         {% endif %}"
+<a href="{{ request.referrer or url_for('main.consultants_list') }}"
    class="btn btn-secondary btn-large"
    style="margin-bottom: 15px; display:inline-block;">
     ← Go Back
@@ -95,7 +88,9 @@
       {% else %}
           <p>The contact details of this consultant are hidden.</p>
           <p><strong>CV:</strong> Hidden</p>
-          <a href="{{ url_for('main.unlock_consultant', profile_id=profile.id) }}"
+          <a href="{{ url_for('main.unlock_consultant',
+                               profile_id=profile.id,
+                               job_id=request.args.get('job_id')) }}"
              class="btn btn-success"
              onclick="return confirm('Weet u zeker dat u de contactgegevens wilt vrijgeven?')">
               🔒 Unlock contact details (MVP Button)
@@ -131,6 +126,9 @@
           Do you want to start a collaboration with this consultant?
       </p>
       <form method="post" action="{{ url_for('main.collaborate_with_consultant', profile_id=profile.id) }}">
+          {% if request.args.get('job_id') %}
+              <input type="hidden" name="job_id" value="{{ request.args.get('job_id') }}">
+          {% endif %}
           <button type="submit" class="btn btn-success">
               Yes, collaborate
           </button>

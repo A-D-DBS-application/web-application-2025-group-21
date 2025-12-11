@@ -173,7 +173,12 @@
         <div class="consultant-card {% if c.is_unlocked_for_me %}unlocked-card{% endif %}">
             <div class="consultant-meta-top">
                 <span class="consultant-name">
-                    <a href="{{ url_for('main.consultant_detail', profile_id=c.id) }}">
+                    {% if selected_job_id is defined and selected_job_id %}
+                        {% set detail_url = url_for('main.consultant_detail', profile_id=c.id, job_id=selected_job_id) %}
+                    {% else %}
+                        {% set detail_url = url_for('main.consultant_detail', profile_id=c.id) %}
+                    {% endif %}
+                    <a href="{{ detail_url }}">
                         {% if c.is_unlocked_for_me %}
                             {{ c.display_name_masked or c.user.username }}
                         {% else %}
@@ -301,9 +306,20 @@
             {% endif %}
 
             <a class="btn btn-primary-card"
-               href="{{ url_for('main.consultant_detail', profile_id=c.id) }}">
+               href="{{ detail_url }}">
                 View consultant
             </a>
+
+            {% if current_sort == 'relevance' and selected_job_id is defined and selected_job_id %}
+                <form method="post"
+                      action="{{ url_for('main.collaborate_with_consultant', profile_id=c.id) }}"
+                      style="margin-top: 8px;">
+                    <input type="hidden" name="job_id" value="{{ selected_job_id }}">
+                    <button type="submit" class="btn btn-secondary-card">
+                        Collaborate for this job
+                    </button>
+                </form>
+            {% endif %}
         </div>
     {% endfor %}
 </div>
