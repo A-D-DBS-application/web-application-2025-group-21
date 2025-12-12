@@ -11,53 +11,46 @@
         <!-- COMPANY NAME -->
         <label class="field-label">
             Company name:
-            <input
-                type="text"
-                id="company_name"
-                name="company_name"
-                value="{{ company.company_name_masked or '' }}"
-                required
-            >
+            <input type="text"
+                   id="company_name"
+                   name="company_name"
+                   value="{{ company.company_name_masked or '' }}"
+                   required>
         </label>
 
         <!-- CITY -->
         <label class="field-label">
             City:
-            <input
-                type="text"
-                id="location_city"
-                name="location_city"
-                value="{{ company.location_city or '' }}"
-            >
+            <input type="text"
+                   id="location_city"
+                   name="location_city"
+                   value="{{ company.location_city or '' }}">
         </label>
 
         <!-- COUNTRY -->
         <label class="field-label">
             Country:
-            <input
-                type="text"
-                id="country"
-                name="country"
-                value="{{ company.country or '' }}"
-            >
+            <input type="text"
+                   id="country"
+                   name="country"
+                   value="{{ company.country or '' }}">
         </label>
 
-        <!-- INDUSTRIES -->
+        <!-- INDUSTRY (radio, checkbox look) -->
         <label class="field-label">
-            Industries:
+            Industry:
 
-            {% set selected = (company.industries or "").split(", ") %}
+            {% set selected = (company.industries or "").split(", ")[0] %}
 
             <div class="industry-options">
                 {% for option in ["Technology", "Healthcare", "Finance", "Logistics", "Consulting"] %}
-                    <label class="industry-item">
-                        <input
-                            type="checkbox"
-                            name="industries"
-                            value="{{ option }}"
-                            {% if option in selected %}checked{% endif %}
-                        >
-                        {{ option }}
+                    <label class="industry-box">
+                        <input type="radio"
+                               name="industry"
+                               value="{{ option }}"
+                               {% if option == selected %}checked{% endif %}>
+                        <span class="custom-box"></span>
+                        <span class="industry-text">{{ option }}</span>
                     </label>
                 {% endfor %}
             </div>
@@ -67,26 +60,20 @@
 
         <h3>Contact information (shown when unlocked)</h3>
 
-        <!-- EMAIL -->
         <label class="field-label">
             Email address:
-            <input
-                type="email"
-                id="contact_email"
-                name="contact_email"
-                value="{{ company.contact_email or '' }}"
-            >
+            <input type="email"
+                   id="contact_email"
+                   name="contact_email"
+                   value="{{ company.contact_email or '' }}">
         </label>
 
-        <!-- PHONE -->
         <label class="field-label">
             Phone number:
-            <input
-                type="tel"
-                id="phone_number"
-                name="phone_number"
-                value="{{ company.phone_number or '' }}"
-            >
+            <input type="tel"
+                   id="phone_number"
+                   name="phone_number"
+                   value="{{ company.phone_number or '' }}">
         </label>
 
         <hr>
@@ -94,122 +81,68 @@
         <button class="btn" type="submit">Save changes</button>
     </form>
 
-    <!-- BLUE FIELD HELPER POPUP (zonder JS) -->
-    <div id="field-helper" class="field-helper">
-        <div class="field-helper-title">
-            <span>Field guide</span>
-        </div>
-        <div class="field-helper-text">
-            <p class="help help-default">
-                Click a field to get instructions.
-            </p>
-            <p class="help help-company_name">
-                Use your official company or brand name. This is shown to consultants once they unlock your jobs.
-            </p>
-            <p class="help help-location_city">
-                Enter the city where your main office or hiring location is.
-            </p>
-            <p class="help help-country">
-                Enter the country in which this office or hiring location is based. This helps consultants filter and match.
-            </p>
-            <p class="help help-contact_email">
-                This email is shared with consultants after they unlock your job posts. Use an inbox that is actively monitored.
-            </p>
-            <p class="help help-phone_number">
-                A direct phone number can increase trust and response speed once you start collaborating, and will be made available once you are unlocked by a consultant.
-            </p>
-        </div>
-    </div>
-
 </div>
 
 <style>
-/* wrapper zodat :has kan werken */
-.edit-company-page {
-    position: relative;
-}
-
-/* Form labels */
+/* Layout */
 .field-label {
     display: flex;
     flex-direction: column;
     margin-bottom: 0.75rem;
 }
+
 .field-label input {
     margin-top: 4px;
 }
 
-/* Blauwe popup rechtsonder */
-.field-helper {
-    position: fixed;
-    right: 20px;
-    bottom: 20px;
-    max-width: 320px;
-    background: #0d6efd;          /* blauw */
-    color: #fff;
-    padding: 12px 16px;
-    border-radius: 8px;
-    box-shadow: 0 4px 18px rgba(0,0,0,0.2);
-    font-size: 0.9rem;
-    opacity: 0;
-    pointer-events: none;
-    transform: translateY(10px);
-    transition: opacity 0.2s ease, transform 0.2s ease;
+/* Industry selector */
+.industry-options {
+    margin-top: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
-/* Header in popup */
-.field-helper-title {
-    font-weight: 600;
-    margin-bottom: 4px;
-}
-
-/* Alle teksten verbergen, behalve default */
-.field-helper .help {
-    display: none;
-}
-.field-helper .help-default {
-    display: block;
-}
-
-/* Popup pas tonen zodra een relevant veld focus heeft */
-.edit-company-page:has(
-    #company_name:focus,
-    #location_city:focus,
-    #country:focus,
-    #contact_email:focus,
-    #phone_number:focus
-) .field-helper {
-    opacity: 1;
-    pointer-events: auto;
-    transform: translateY(0);
-}
-
-/* Default-text verbergen zodra één van de velden focus heeft */
-.edit-company-page:has(
-    #company_name:focus,
-    #location_city:focus,
-    #country:focus,
-    #contact_email:focus,
-    #phone_number:focus
-) .field-helper .help-default {
+/* Hide real radio */
+.industry-box input {
     display: none;
 }
 
-/* Per veld de juiste tekst tonen */
-.edit-company-page:has(#company_name:focus) .field-helper .help-company_name {
-    display: block;
+/* Box wrapper */
+.industry-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
 }
-.edit-company-page:has(#location_city:focus) .field-helper .help-location_city {
-    display: block;
+
+/* Fake checkbox */
+.custom-box {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #adb5bd;
+    border-radius: 4px; /* square = checkbox look */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
 }
-.edit-company-page:has(#country:focus) .field-helper .help-country {
-    display: block;
+
+/* Checked state */
+.industry-box input:checked + .custom-box {
+    background: #0d6efd;
+    border-color: #0d6efd;
 }
-.edit-company-page:has(#contact_email:focus) .field-helper .help-contact_email {
-    display: block;
+
+.industry-box input:checked + .custom-box::after {
+    content: "✓";
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
 }
-.edit-company-page:has(#phone_number:focus) .field-helper .help-phone_number {
-    display: block;
+
+.industry-text {
+    font-weight: 500;
 }
 </style>
 
