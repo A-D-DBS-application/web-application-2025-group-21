@@ -16,6 +16,11 @@ Link to Supabase:
 
 ERD model:
     https://dbdiagram.io/d/693aebc1e877c630747c59ac
+
+Database backup: Due to network restrictions when connecting to Supabase with pg_dump,
+                 a direct SQL dump was not possible. The database backup is therefore provided as CSV exports per table.
+                 Location:/database_backup/
+                 Each CSV file represents the full contents of a database table and can be re-imported into PostgreSQL or Supabase.
     
 Installment:
 # Installation & Running the App (Local)
