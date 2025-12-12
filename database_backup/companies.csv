@@ -1,0 +1,22 @@
+id,user_id,company_name_masked,location_city,country,created_at,contact_email,phone_number,industries
+1,8,bedrijftest BV,,,2025-11-08 11:20:55.987785+00,,,
+2,9,elegast BV,Zarren,België,2025-11-08 11:39:34.585478+00,elegas@gmail.com,0455555547,"Healthcare, Logistics"
+4,16,elegast bv BV,,,2025-11-11 14:24:03.371541+00,,,
+11,46,Workforce Insight Group,Gent,Belgium,2025-11-22 12:45:10.754471+00,WIG@gmail.com,0465334532,Healthcare
+15,59,DHL,New York,United States,2025-11-23 11:11:14.13381+00,DHL@telenet.com,32527895215,Logistics
+24,110,northwave analytics,Zürich,Switserland,2025-12-07 11:28:20.6179+00,northwave@mail.com,184512848,"Logistics, Consulting"
+25,111,brightline infrastructure,Amsterdam,Netherlands,2025-12-07 11:34:48.703949+00,brightline@infrastructure.com,25653155631,"Technology, Logistics"
+26,112,helix process solutions,Paris,France,2025-12-07 11:37:51.107874+00,helix@mail.com,55451545121,"Logistics, Consulting"
+27,113,kpmg,Warsaw,Poland,2025-12-07 12:40:30.653553+00,kpmg.poland@gmail.com,48982256225,Consulting
+28,120,Brabantec Solutions,Antwerp,Belgium,2025-12-07 13:45:39.825471+00,info@brabantec-solutions.be,034567890,"Technology, Logistics, Consulting"
+29,121,Flandrex Consulting Services,Gent,Belgium,2025-12-07 13:55:27.915592+00,contact@flandrex-consulting.be,092341188,"Healthcare, Finance, Consulting"
+30,122,Belvion Strategy & Advisory,Leuven,Belgium,2025-12-07 14:00:41.469627+00,hello@belvion-advisory.be,016778445,"Technology, Finance, Consulting"
+32,130,Datagenix Consulting,Toronto,Canada,2025-12-07 18:31:34.485587+00,dconsulting@yahoo.com,0459685033,Technology
+33,131,pulse & co.,Brussels,Belgium,2025-12-07 18:41:09.076477+00,pandc@hotmail.com,0459684320,Consulting
+34,134,Sugar Company,Ghent,Belgium,2025-12-11 14:03:49.990836+00,info@sugarcompany.com,0489 68 59 85,"Technology, Logistics"
+36,136,pirelli,,,2025-12-11 15:42:56.150074+00,,,
+37,137,bestcompany,,,2025-12-11 16:04:37.899845+00,,,
+38,138,fanta,,,2025-12-11 16:16:33.098262+00,,,
+39,139,comp,,,2025-12-11 16:38:59.169377+00,,,
+40,140,nvidia,Brussels,Belgium,2025-12-12 12:39:25.560717+00,nvidia@gmail.com,03822825650,Technology
+41,141,dell,,,2025-12-12 12:51:40.972405+00,,,
