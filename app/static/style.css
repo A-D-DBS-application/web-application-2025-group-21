@@ -994,12 +994,17 @@ nav a:hover {
   #location_city:focus,
   #country:focus,
   #contact_email:focus,
-  #phone_number:focus
+  #phone_number:focus,
+  .industry-item input:focus
 ) .field-helper {
   opacity: 1;
   pointer-events: auto;
   transform: translateY(0);
 }
+.edit-company-page:has(.industry-item input:focus) .field-helper .help-industries {
+  display: block;
+}
+
 
 .edit-company-page:has(
   #company_name:focus,
@@ -1472,6 +1477,48 @@ nav a:hover {
 
 .industry-item { display: flex; align-items: center; gap: 6px; cursor: pointer; }
 .industry-item input[type="checkbox"] { width: 16px; height: 16px; }
+/* hide native radio */
+.industry-item input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* fake checkbox */
+.fake-checkbox {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #2563eb;
+  border-radius: 3px; /* ← vierkant */
+  display: inline-block;
+  margin-right: 8px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* checked state */
+.industry-item input[type="radio"]:checked + .fake-checkbox {
+  background: #2563eb;
+}
+
+/* checkmark */
+.industry-item input[type="radio"]:checked + .fake-checkbox::after {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: 0px;
+  width: 4px;
+  height: 8px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* hover feedback */
+.industry-item:hover .fake-checkbox {
+  background: rgba(37, 99, 235, 0.08);
+}
+
 
 /* =========================================================
    LOGIN

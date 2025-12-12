@@ -1159,7 +1159,7 @@ def edit_company_profile():
             company.phone_number = request.form.get("phone_number")
 
             # Industries opslaan als één string
-            selected = request.form.get("industry")  # 1 value
+            selected = request.form.get("industries")  # 1 value
             company.industries = selected or None
 
             db.add(company)
