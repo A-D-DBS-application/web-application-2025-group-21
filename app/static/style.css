@@ -2673,3 +2673,26 @@ body {
         margin: 0 auto;
     }
 }
+
+/* ===== NAVBAR: alles altijd op één rij ===== */
+nav {
+  flex-wrap: nowrap !important;
+}
+
+nav a {
+  white-space: nowrap; /* voorkomt dat "My profile" breekt */
+}
+
+/* Zorg dat rechts (login/logout) niet naar nieuwe lijn gaat */
+.nav-right {
+  width: auto !important;
+  margin-left: auto;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Als het te smal is op mobiel: laat de links horizontaal kunnen scrollen i.p.v. wrappen */
+nav {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}

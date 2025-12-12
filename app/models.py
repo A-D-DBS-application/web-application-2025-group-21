@@ -54,6 +54,12 @@ class User(Base):
         uselist=False
     )
 
+    # ✅ NEW: user.unlocks
+    unlocks = relationship(
+        "Unlock",
+        back_populates="user"
+    )
+
 
 class ConsultantProfile(Base):
     __tablename__ = "consultant_profiles"
@@ -99,6 +105,13 @@ class ConsultantProfile(Base):
     collaborations = relationship(
         "Collaboration",
         back_populates="consultant"
+    )
+
+    # ✅ NEW: profile.current_company + company.current_consultants
+    current_company = relationship(
+        "Company",
+        foreign_keys=[current_company_id],
+        backref="current_consultants"
     )
 
     @property
@@ -186,10 +199,14 @@ class JobPost(Base):
         secondary="job_skills",
         back_populates="jobs"
     )
+
+    # ✅ UPDATED: backref zodat consultant.hired_jobs bestaat
     hired_consultant = relationship(
         "ConsultantProfile",
-        foreign_keys=[hired_consultant_id]
+        foreign_keys=[hired_consultant_id],
+        backref="hired_jobs"
     )
+
     collaborations = relationship("Collaboration", back_populates="job_post")
 
 
@@ -209,6 +226,9 @@ class Unlock(Base):
     target_type = Column(Enum(UnlockTarget), nullable=False)
     target_id = Column(Integer, nullable=False)
     created_at = Column(TIMESTAMP, nullable=False, server_default=func.now())
+
+    # ✅ NEW: unlock.user + user.unlocks
+    user = relationship("User", back_populates="unlocks")
 
 
 Index("idx_unlocks_user_id", Unlock.user_id)
