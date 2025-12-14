@@ -1,14 +1,14 @@
 {% extends "base.html" %}
-{% block title %}{{ _("Create New Job Post") }}{% endblock %}
+{% block title %}Create New Job Post{% endblock %}
 
 {% block content %}
-<h1 class="page-title">{{ _("Post a New Job") }}</h1>
+<h1 class="page-title">Post a New Job</h1>
 
 <div class="form-card">
     <form method="POST" action="{{ url_for('main.job_new') }}" class="job-edit-form">
 
         <label class="field-label">
-            <strong>{{ _("Job Title") }}</strong>
+            <strong>Job Title</strong>
             <input
                 type="text"
                 id="title"
@@ -18,7 +18,7 @@
         </label>
 
         <label class="field-label">
-            <strong>{{ _("Description") }}</strong>
+            <strong>Description</strong>
             <textarea
                 id="description"
                 name="description"
@@ -28,7 +28,7 @@
 
         <div class="job-form-row">
             <label class="field-label">
-                <strong>{{ _("City") }}</strong>
+                <strong>City</strong>
                 <input
                     type="text"
                     id="location_city"
@@ -37,7 +37,7 @@
             </label>
 
             <label class="field-label">
-                <strong>{{ _("Country") }}</strong>
+                <strong>Country</strong>
                 <input
                     type="text"
                     id="country"
@@ -47,30 +47,30 @@
         </div>
 
         <label class="field-label">
-            <strong>{{ _("Contract Type") }}</strong>
+            <strong>Contract Type</strong>
             <select id="contract_type" name="contract_type">
                 <option value="Freelance"
                     {% if request.form.get('contract_type') == 'Freelance' or not request.form.get('contract_type') %}selected{% endif %}>
-                    {{ _("Freelance") }}
+                    Freelance
                 </option>
                 <option value="Full-time"
                     {% if request.form.get('contract_type') == 'Full-time' %}selected{% endif %}>
-                    {{ _("Full-time") }}
+                    Full-time
                 </option>
                 <option value="Part-time"
                     {% if request.form.get('contract_type') == 'Part-time' %}selected{% endif %}>
-                    {{ _("Part-time") }}
+                    Part-time
                 </option>
                 <option value="Project-based"
                     {% if request.form.get('contract_type') == 'Project-based' %}selected{% endif %}>
-                    {{ _("Project-based") }}
+                    Project-based
                 </option>
             </select>
         </label>
 
-        <h3 class="section-title">{{ _("Required Skills") }}</h3>
+        <h3 class="section-title">Required Skills</h3>
         <p class="form-instruction">
-            {{ _("Select all skills required for this job.") }}
+            Select all skills required for this job.
         </p>
 
         {% set selected_skills = request.form.getlist('skills') | map('int') | list %}
@@ -89,7 +89,7 @@
         </div>
 
         <button type="submit" class="btn-primary" style="margin-top: 16px;">
-            {{ _("Post Job") }}
+            Post Job
         </button>
     </form>
 </div>
