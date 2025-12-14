@@ -799,10 +799,15 @@ def dashboard():
                     .options(
                         joinedload(Collaboration.consultant),
                         joinedload(Collaboration.job_post),
+                        joinedload(Collaboration.company),
                     )
                     .filter(
-                        Collaboration.company_id == company.id,
                         Collaboration.status == CollaborationStatus.active,
+                        or_(
+                            Collaboration.company_id == company.id,
+                            Collaboration.job_post.has(JobPost.company_id == company.id),
+                        ),
+                        
                     )
                     .order_by(Collaboration.started_at.desc())
                     .all()
@@ -1134,10 +1139,16 @@ def consultants_list():
                     (job for job in company_jobs if job.id == selected_job_id),
                     None,
                 )
+            
+            if required_job and not selected_job_id:
+                selected_job_id = required_job.id
 
             # Geen geldige gekozen job → fallback naar nieuwste job (ook actief)
             if not required_job and company_jobs:
                 required_job = company_jobs[0]
+            
+            if required_job and not selected_job_id:
+                selected_job_id = required_job.id
 
             if required_job:
                 required_skill_ids = {s.id for s in required_job.skills}

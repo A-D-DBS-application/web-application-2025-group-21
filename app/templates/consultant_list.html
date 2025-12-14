@@ -11,12 +11,12 @@
 <div class="mode-selector-container">
     <h2 class="h5"></h2>
 
-    <a href="{{ url_for('main.consultants_list', sort_by='relevance') }}"
+    <a href="{{ url_for('main.consultants_list', sort_by='relevance', job_id=selected_job_id) }}"
        class="mode-btn {% if current_sort == 'relevance' %}active-mode{% else %}inactive-mode{% endif %}">
         🧠 IConsult Match
     </a>
 
-    <a href="{{ url_for('main.consultants_list', sort_by='title') }}"
+    <a href="{{ url_for('main.consultants_list', sort_by='title', job_id=selected_job_id) }}"
        class="mode-btn {% if current_sort != 'relevance' %}active-mode{% else %}inactive-mode{% endif %}">
         🔧 Manual filter & sorting
     </a>
@@ -146,7 +146,7 @@
         </div>
 
         <button type="submit" class="btn btn-primary apply-btn">Apply filters</button>
-        <a href="{{ url_for('main.consultants_list', sort_by='title') }}"
+        <a href="{{ url_for('main.consultants_list', sort_by='title', job_id=selected_job_id) }}"
            class="btn btn-secondary reset-btn">Reset filters</a>
 
     {% else %}

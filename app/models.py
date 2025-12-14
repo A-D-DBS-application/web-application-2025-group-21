@@ -138,7 +138,7 @@ class Company(Base):
     )
 
     company_name_masked = Column(String(160), nullable=False)
-    industries = Column(Enum(IndustryEnum), nullable=True)
+    industries = Column(String(255), nullable=True)
     location_city = Column(String(120))
     country = Column(String(120))
     created_at = Column(TIMESTAMP, nullable=False, server_default=func.now())
