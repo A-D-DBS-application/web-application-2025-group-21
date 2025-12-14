@@ -1199,13 +1199,23 @@ def unlock_consultant(profile_id):
         # job_id uit querystring (kan None zijn)
         job_id = request.args.get("job_id", type=int)
 
+        # ✅ next uit querystring (kan None zijn)
+        next_url = request.args.get("next")
+
         if is_unlocked(db, user.id, UnlockTarget.consultant, profile_id):
             flash(("Contact details have already been released."), "info")
             if job_id:
                 return redirect(
-                    url_for("main.consultant_detail", profile_id=profile_id, job_id=job_id)
+                    url_for(
+                        "main.consultant_detail",
+                        profile_id=profile_id,
+                        job_id=job_id,
+                        next=next_url,
+                    )
                 )
-            return redirect(url_for("main.consultant_detail", profile_id=profile_id))
+            return redirect(
+                url_for("main.consultant_detail", profile_id=profile_id, next=next_url)
+            )
 
         new_unlock = Unlock(
             user_id=user.id,
@@ -1219,10 +1229,16 @@ def unlock_consultant(profile_id):
 
         if job_id:
             return redirect(
-                url_for("main.consultant_detail", profile_id=profile_id, job_id=job_id)
+                url_for(
+                    "main.consultant_detail",
+                    profile_id=profile_id,
+                    job_id=job_id,
+                    next=next_url,
+                )
             )
-        return redirect(url_for("main.consultant_detail", profile_id=profile_id))
-
+        return redirect(
+            url_for("main.consultant_detail", profile_id=profile_id, next=next_url)
+        )
 
 @main.route("/consultant/<int:profile_id>/collaborate", methods=["POST"])
 @login_required

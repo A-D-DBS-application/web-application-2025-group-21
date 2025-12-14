@@ -3,7 +3,7 @@
 
 {% block content %}
 
-<a href="{{ request.referrer or url_for('main.consultants_list') }}"
+<a href="{{ request.args.get('next', request.referrer or url_for('main.consultants_list')) }}"
    class="btn btn-secondary btn-large"
    style="margin-bottom: 15px; display:inline-block;">
     ← Go Back
@@ -90,7 +90,8 @@
           <p><strong>CV:</strong> Hidden</p>
           <a href="{{ url_for('main.unlock_consultant',
                                profile_id=profile.id,
-                               job_id=request.args.get('job_id')) }}"
+                               job_id=request.args.get('job_id'),
+                               next=request.args.get('next')) }}"
              class="btn btn-success"
              onclick="return confirm('Weet u zeker dat u de contactgegevens wilt vrijgeven?')">
               🔒 Unlock contact details (MVP Button)

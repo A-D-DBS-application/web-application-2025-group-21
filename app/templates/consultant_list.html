@@ -174,9 +174,9 @@
             <div class="consultant-meta-top">
                 <span class="consultant-name">
                     {% if selected_job_id is defined and selected_job_id %}
-                        {% set detail_url = url_for('main.consultant_detail', profile_id=c.id, job_id=selected_job_id) %}
+                        {% set detail_url = url_for('main.consultant_detail', profile_id=c.id, job_id=selected_job_id, next=request.full_path) %}
                     {% else %}
-                        {% set detail_url = url_for('main.consultant_detail', profile_id=c.id) %}
+                        {% set detail_url = url_for('main.consultant_detail', profile_id=c.id, next=request.full_path) %}
                     {% endif %}
                     <a href="{{ detail_url }}">
                         {% if c.is_unlocked_for_me %}
@@ -347,3 +347,4 @@
 </script>
 
 {% endblock %}
+
