@@ -1037,6 +1037,9 @@ def consultant_detail(profile_id):
                         db.add(new_unlock)
                         db.commit()
 
+    
+        job_id = request.args.get("job_id", type=int)
+
         return render_template(
             "consultant_detail.html",
             profile=profile,
@@ -1044,6 +1047,7 @@ def consultant_detail(profile_id):
             UserRole=UserRole,
             is_owner=is_owner,
             is_unlocked=is_unlocked_status,
+            job_id=job_id,   # ✅ belangrijk
         )
 
 

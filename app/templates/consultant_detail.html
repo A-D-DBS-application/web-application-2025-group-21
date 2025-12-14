@@ -126,15 +126,22 @@
           You have unlocked this consultant's contact details.<br>
           Do you want to start a collaboration with this consultant?
       </p>
-      <form method="post" action="{{ url_for('main.collaborate_with_consultant', profile_id=profile.id) }}">
-          {% if request.args.get('job_id') %}
-              <input type="hidden" name="job_id" value="{{ request.args.get('job_id') }}">
-          {% endif %}
+
+      <form method="post"
+            action="{{ url_for('main.collaborate_with_consultant',
+                               profile_id=profile.id,
+                               job_id=request.args.get('job_id')) }}">
+
+          <input type="hidden"
+                 name="job_id"
+                 value="{{ request.args.get('job_id') }}">
+
           <button type="submit" class="btn btn-success">
               Yes, collaborate
           </button>
       </form>
   </div>
 {% endif %}
+
 
 {% endblock %}
