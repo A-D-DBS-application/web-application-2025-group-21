@@ -47,7 +47,16 @@
             Industries:
 
             {# keep backward compatibility if old data had "A, B" #}
-            {% set selected = (company.industries or "").split(", ")[0] %}
+            {% set raw = company.industries %}
+            {% if raw is none %}
+              {% set selected = "" %}
+            {% elif raw is string %}
+              {% set selected = raw.split(", ")[0] %}
+            {% else %}
+            {# Enum: neem de tekstwaarde #}
+            {% set selected = raw.value %}
+            {% endif %}
+
 
             <!-- wrapper so the field-guide can react to focus-within -->
             <div class="industry-options" id="industries_group" tabindex="-1">
