@@ -13,6 +13,7 @@ from .models import (
     Company,
     JobPost,
     UserRole,
+    IndustryEnum,
     Skill,
     Unlock,
     UnlockTarget,
@@ -1134,13 +1135,12 @@ def consultants_list():
         )
 
 # ------------------ COMPANY PROFILE ------------------
-
 @main.route("/company/edit", methods=["GET", "POST"])
 def edit_company_profile():
     """
     Company kan zijn eigen profiel aanpassen:
     - Naam, locatie, contactgegevens
-    - Industries (comma-separated string)
+    - Industry (Enum)
     """
     with get_session() as db:
         user = get_current_user(db)
@@ -1158,18 +1158,19 @@ def edit_company_profile():
             company.contact_email = request.form.get("contact_email")
             company.phone_number = request.form.get("phone_number")
 
-            # Industries opslaan als één string
+            # Industry opslaan als Enum (1 value)
             selected = request.form.get("industries")  # 1 value
             company.industries = selected or None
 
-            db.add(company)
 
+            db.add(company)
             db.commit()
 
             flash(("Company profile updated"))
             return redirect(url_for("main.dashboard"))
 
         return render_template("edit_company_profile.html", company=company)
+
 
 
 # ------------------ UNLOCK LOGICA ------------------
