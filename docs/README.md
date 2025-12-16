@@ -78,14 +78,14 @@ python app.py
 ```
 
 ## Basic Usage
-# Consultants
+### Consultants
 1. Register / log in as consultant
 2. Complete your profile (headline, location, experience, skills)
 3. Upload your CV and profile picture
 4. Browse job posts
 5. Unlock job contact details to start a collaboration
 
-# Companies
+### Companies
 1. Register / log in as company
 2. Complete your company profile (name, location, industries)
 3. Create job posts with required skills and contract type
