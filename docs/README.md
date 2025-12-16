@@ -77,28 +77,17 @@ python app.py
 # http://localhost:5000
 ```
 
-Basic Usage
+## Basic Usage
+# Consultants
+1. Register / log in as consultant
+2. Complete your profile (headline, location, experience, skills)
+3. Upload your CV and profile picture
+4. Browse job posts
+5. Unlock job contact details to start a collaboration
 
-Consultants
-
-Register / log in as consultant
-
-Complete your profile (headline, location, experience, skills)
-
-Upload your CV and profile picture
-
-Browse job posts
-
-Unlock job contact details to start a collaboration
-
-Companies
-
-Register / log in as company
-
-Complete your company profile (name, location, industries)
-
-Create job posts with required skills and contract type
-
-Browse available consultants
-
-Unlock consultant contact details and start collaborations
+# Companies
+1. Register / log in as company
+2. Complete your company profile (name, location, industries)
+3. Create job posts with required skills and contract type
+4. Browse available consultants
+5. Unlock consultant contact details and start collaborations
