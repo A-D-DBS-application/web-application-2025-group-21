@@ -13,7 +13,6 @@ from .models import (
     Company,
     JobPost,
     UserRole,
-    IndustryEnum,
     Skill,
     Unlock,
     UnlockTarget,
@@ -568,16 +567,11 @@ def compute_job_relevance(
 
 
 # ------------------ HOME ------------------
-
 @main.route("/company/jobs", methods=["GET"])
 def company_jobs_list():
     """
     Toon alle JobPosts die door het ingelogde bedrijf aangemaakt zijn.
-    Gebruikt dezelfde template als de algemene jobslijst, maar:
-    - sort_by='none'
-    - show_mode_selector=False
-    - simple_search=True
-    """
+    Gebruikt dezelfde template als de algemene jobslijst"""
     with get_session() as db:
         user = get_current_user(db)
 
@@ -600,7 +594,15 @@ def company_jobs_list():
 
         q = request.args.get("q", "").strip()
 
-        query = db.query(JobPost).filter(JobPost.company_id == company.id)
+        query = (
+            db.query(JobPost)
+            .options(
+                joinedload(JobPost.company),
+                joinedload(JobPost.hired_consultant),
+                selectinload(JobPost.skills),
+            )
+            .filter(JobPost.company_id == company.id)
+        )
 
         # Eenvoudige text search op title/description
         if q:
@@ -613,7 +615,7 @@ def company_jobs_list():
 
         jobs = query.order_by(JobPost.created_at.desc()).all()
 
-        all_skills = []  # template verwacht 'skills'
+        all_skills = []  
 
         return render_template(
             "job_list.html",
@@ -628,7 +630,6 @@ def company_jobs_list():
             current_contract_type=None,
             UserRole=UserRole,
         )
-
 
 @main.route("/", methods=["GET"])
 def index():
@@ -745,11 +746,6 @@ def logout():
 
 @main.route("/dashboard", methods=["GET"])
 def dashboard():
-    """
-    Toon dashboard afhankelijk van role:
-    - Consultant: eigen profiel + actieve collaborations
-    - Company: eigen company + jobposts + actieve collaborations
-    """
     with get_session() as db:
         user = get_current_user(db)
 
@@ -762,23 +758,20 @@ def dashboard():
         company_jobs = []
         company_active_collaborations = []
         consultant_active_collaborations = []
-        collabs_by_job_id = {}  # 🔹 standaard lege mapping
 
         if user.role == UserRole.consultant:
             profile = (
                 db.query(ConsultantProfile)
-                .options(selectinload(ConsultantProfile.skills))
+                .options(selectinload(ConsultantProfile.skills))  # template gebruikt profile.skills
                 .filter_by(user_id=user.id)
                 .first()
             )
-
 
             if profile:
                 consultant_active_collaborations = (
                     db.query(Collaboration)
                     .options(
-                        joinedload(Collaboration.company),
-                        joinedload(Collaboration.job_post),
+                        joinedload(Collaboration.company)  # template gebruikt collab.company.company_name_masked
                     )
                     .filter(
                         Collaboration.consultant_id == profile.id,
@@ -792,9 +785,11 @@ def dashboard():
             company = db.query(Company).filter_by(user_id=user.id).first()
 
             if company:
+                # Je toont company_jobs niet in dashboard.html, dus dit mag je zelfs weglaten.
+                # Als je het toch wil blijven doorgeven: hired_consultant is dan ook niet nodig
+                # tenzij je die in template toont.
                 company_jobs = (
                     db.query(JobPost)
-                    .options(joinedload(JobPost.hired_consultant))
                     .filter(JobPost.company_id == company.id)
                     .order_by(JobPost.created_at.desc())
                     .all()
@@ -803,9 +798,7 @@ def dashboard():
                 company_active_collaborations = (
                     db.query(Collaboration)
                     .options(
-                        joinedload(Collaboration.consultant),
-                        joinedload(Collaboration.job_post),
-                        joinedload(Collaboration.company),
+                        joinedload(Collaboration.consultant),  # template gebruikt collab.consultant.*
                     )
                     .filter(
                         Collaboration.status == CollaborationStatus.active,
@@ -813,13 +806,11 @@ def dashboard():
                             Collaboration.company_id == company.id,
                             Collaboration.job_post.has(JobPost.company_id == company.id),
                         ),
-                        
                     )
                     .order_by(Collaboration.started_at.desc())
                     .all()
                 )
 
-        # Check of profiel voldoende is ingevuld
         check_profile_completion(user, profile, company)
 
         return render_template(
@@ -999,6 +990,10 @@ def consultant_detail(profile_id):
     with get_session() as db:
         profile = (
             db.query(ConsultantProfile)
+            .options(
+                selectinload(ConsultantProfile.skills),
+                joinedload(ConsultantProfile.user),  # optioneel, maar handig als we ooit profile.user gebruiken
+            )
             .filter(ConsultantProfile.id == profile_id)
             .first()
         )
@@ -1133,7 +1128,7 @@ def consultants_list():
                 .options(selectinload(JobPost.skills))
                 .filter(
                     JobPost.company_id == company_profile.id,
-                    JobPost.is_active == True      # <--- hier zit de truc
+                    JobPost.is_active == True
                 )
                 .order_by(JobPost.created_at.desc())
                 .all()
@@ -1145,14 +1140,14 @@ def consultants_list():
                     (job for job in company_jobs if job.id == selected_job_id),
                     None,
                 )
-            
+
             if required_job and not selected_job_id:
                 selected_job_id = required_job.id
 
             # Geen geldige gekozen job → fallback naar nieuwste job (ook actief)
             if not required_job and company_jobs:
                 required_job = company_jobs[0]
-            
+
             if required_job and not selected_job_id:
                 selected_job_id = required_job.id
 
@@ -1162,10 +1157,8 @@ def consultants_list():
         # In relevance-modus moet er een (actieve) job zijn
         if not required_job and sort_by == "relevance":
             flash(
-                
-                    "First, create an active Job Post (or select one) "
-                    "to enable the IConsult relevance filter based on your needs."
-                
+                "First, create an active Job Post (or select one) "
+                "to enable the IConsult relevance filter based on your needs."
             )
 
         # same_country_only moet op basis van de job-locatie werken (zelfde referentie als distance)
@@ -1185,13 +1178,19 @@ def consultants_list():
             origin_lat = required_job.latitude
             origin_lon = required_job.longitude
 
-            # Als job nog geen coords heeft → nu geocoden en opslaan
-            if (origin_lat is None or origin_lon is None) and required_job.location_city and required_job.country:
-                lat, lon = geocode_with_mapbox(required_job.location_city, required_job.country)
-                origin_lat, origin_lon = lat, lon
-                required_job.latitude = lat
-                required_job.longitude = lon
-                db.commit()
+            # ✅ STRICT: als afstandsfilter actief is maar job heeft geen coords → geen consultants tonen
+            if origin_lat is None or origin_lon is None:
+                consultants = []
+                return render_template(
+                    "consultant_list.html",
+                    consultants=consultants,
+                    skills=get_all_skills(db, ordered=True),
+                    user=user,
+                    sort_by=sort_by,
+                    company_jobs=company_jobs,
+                    selected_job_id=selected_job_id,
+                    UserRole=UserRole,
+                )
 
         # Basisquery
         query = (
@@ -1205,6 +1204,10 @@ def consultants_list():
 
         if min_experience is not None:
             query = query.filter(ConsultantProfile.years_experience >= min_experience)
+
+        # ✅ Backend filtering voor same_country_only (niet aan distance/geocode komen)
+        if same_country_only and company_country:
+            query = query.filter(func.lower(ConsultantProfile.country) == company_country)
 
         # Handmatige filters gelden alleen als niet 'relevance'
         if sort_by != "relevance":
@@ -1220,14 +1223,9 @@ def consultants_list():
 
         consultants = query.all()
 
-        # Locatie-filter (zelfde land + afstand tot job)
+        # Locatie-filter (afstand tot job) — bewust Python-level laten (distance/geocode met rust laten)
         filtered_consultants = []
         for profile in consultants:
-            if same_country_only and company_country:
-                prof_country = (profile.country or "").strip().lower()
-                if prof_country and prof_country != company_country:
-                    continue
-
             if (
                 max_distance_km is not None
                 and origin_lat is not None
@@ -1300,10 +1298,11 @@ def consultants_list():
             skills=all_skills,
             user=user,
             sort_by=sort_by,
-            company_jobs=company_jobs,      # ← hier gaan nog steeds je jobs naar de template
+            company_jobs=company_jobs,
             selected_job_id=selected_job_id,
             UserRole=UserRole,
         )
+
 
 # ------------------ COMPANY PROFILE ------------------
 @main.route("/company/edit", methods=["GET", "POST"])
@@ -1380,7 +1379,17 @@ def unlock_consultant(profile_id):
         if guard:
             return guard
 
-        consultant_profile = db.query(ConsultantProfile).filter_by(id=profile_id).first()
+        # ✅ AANGEPAST: eager load skills + user
+        consultant_profile = (
+            db.query(ConsultantProfile)
+            .options(
+                selectinload(ConsultantProfile.skills),
+                joinedload(ConsultantProfile.user),
+            )
+            .filter(ConsultantProfile.id == profile_id)
+            .first()
+        )
+
         consultant_profile, guard = get_or_redirect(
             consultant_profile,
             ("Consultant profile not found."),
@@ -1433,6 +1442,7 @@ def unlock_consultant(profile_id):
         return redirect(
             url_for("main.consultant_detail", profile_id=profile_id, next=next_url)
         )
+
 
 @main.route("/consultant/<int:profile_id>/collaborate", methods=["POST"])
 @login_required
@@ -1786,6 +1796,13 @@ def jobs_list():
         if contract_type:
             query = query.filter(JobPost.contract_type == contract_type)
 
+        # ✅ Backend filtering voor same_country_only (distance/geocode met rust laten)
+        if same_country_only and consultant_country:
+            query = (
+                query.join(JobPost.company)
+                .filter(func.lower(func.coalesce(JobPost.country, Company.country)) == consultant_country)
+            )
+
         # Overige manual filters niet in relevance-modus
         if sort_by != "relevance":
             if city:
@@ -1798,20 +1815,9 @@ def jobs_list():
 
         jobs = query.all()
 
-        # Locatie-filter: zelfde land + afstand tot consultant
+        # Locatie-filter: afstand tot consultant — bewust Python-level laten (distance/geocode met rust laten)
         filtered_jobs = []
         for job in jobs:
-            company = job.company
-
-            if same_country_only and consultant_country:
-                job_country = (
-                    job.country
-                    or (company.country if company else "")
-                    or ""
-                ).strip().lower()
-                if job_country and job_country != consultant_country:
-                    continue
-
             # Afstand via job-coördinaten
             if (
                 not ignore_distance
@@ -1889,7 +1895,6 @@ def jobs_list():
             show_mode_selector=True,
             UserRole=UserRole,
         )
-
 
 @main.route("/jobs/<int:job_id>", methods=["GET"])
 def job_detail(job_id):
@@ -2152,22 +2157,18 @@ def admin_required(f):
 @login_required
 @admin_required
 def admin_consultants():
-    """
-    Admin-overzicht van alle consultants.
-    - Simpele text search op display_name_masked.
-    """
-    q = request.args.get("q", "").lower()
+    q = (request.args.get("q") or "").strip()
 
     with get_session() as db:
-        consultants = db.query(ConsultantProfile).all()
+        query = db.query(ConsultantProfile)
 
-    if q:
-        consultants = [
-            c for c in consultants
-            if q in (c.display_name_masked or "").lower()
-        ]
+        if q:
+            query = query.filter(ConsultantProfile.display_name_masked.ilike(f"%{q}%"))
+
+        consultants = query.order_by(ConsultantProfile.id.desc()).all()
 
     return render_template("admin_consultants.html", consultants=consultants)
+
 
 
 #------------------- ADMIN COMPANIES + JOBS ---------------------
