@@ -8,9 +8,9 @@ https://www.figma.com/make/xumkoQNSaaOEKy52ykyEZP/User-Account-Management?node-i
 https://miro.com/app/board/uXjVJz_l5cU=/?share_link_id=471385065574
 
 ## Feedback sessions
-### meeting 1 
+### Meeting 1 
 https://ugentbe-my.sharepoint.com/personal/lennerdc_declerck_ugent_be/_layouts/15/stream.aspx?id=%2Fpersonal%2Flennerdc%5Fdeclerck%5Fugent%5Fbe%2FDocuments%2FOpnamen%2FIConsult%2D20251113%5F165941%2DMeeting%20Recording%2Emp4&referrer=StreamWebApp%2EWeb&referrerScenario=AddressBarCopied%2Eview%2Ea3aa3ba2%2D55fc%2D49a8%2D9acc%2D95e076f93d63
-### meeting 2
+### Meeting 2
 https://ugentbe-my.sharepoint.com/personal/lennerdc_declerck_ugent_be/_layouts/15/stream.aspx?id=%2Fpersonal%2Flennerdc%5Fdeclerck%5Fugent%5Fbe%2FDocuments%2FOpnamen%2FIConsult%2D20251204%5F181647%2DMeeting%20Recording%2Emp4&referrer=StreamWebApp%2EWeb&referrerScenario=AddressBarCopied%2Eview%2E82a7315c%2Dd9f9%2D43dc%2Dba51%2D3ff034ed658a
 
 ## Supabase
@@ -19,11 +19,13 @@ https://supabase.com/dashboard/project/yezkgrihchdjhiypfykc
 ## ERD model
 https://dbdiagram.io/d/693aebc1e877c630747c59ac
 
-## Database backup: 
+## Database backup 
 Due to network restrictions when connecting to Supabase with pg_dump,a direct SQL dump was not possible. The database backup is therefore provided as CSV exports per table.
 Location:/database_backup/
 Each CSV file represents the full contents of a database table and can be re-imported into PostgreSQL or Supabase.
-    
+
+## Demo
+<video controls src="Demo project.mp4" title="Title"></video>
 
 # Installation & Running the App (Local)
 
