@@ -1796,7 +1796,7 @@ def jobs_list():
         if contract_type:
             query = query.filter(JobPost.contract_type == contract_type)
 
-        # ✅ Backend filtering voor same_country_only (distance/geocode met rust laten)
+        # ✅ Backend filtering voor same_country_only 
         if same_country_only and consultant_country:
             query = (
                 query.join(JobPost.company)
@@ -1815,7 +1815,7 @@ def jobs_list():
 
         jobs = query.all()
 
-        # Locatie-filter: afstand tot consultant — bewust Python-level laten (distance/geocode met rust laten)
+        # Locatie-filter: afstand tot consultant 
         filtered_jobs = []
         for job in jobs:
             # Afstand via job-coördinaten
