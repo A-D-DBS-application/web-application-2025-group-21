@@ -23,6 +23,9 @@ https://supabase.com/dashboard/project/yezkgrihchdjhiypfykc
 ## ERD model
 https://dbdiagram.io/d/693aebc1e877c630747c59ac
 
+## Render
+https://web-application-2025-group-21.onrender.com
+
 ## Database backup 
 Due to network restrictions when connecting to Supabase with pg_dump,a direct SQL dump was not possible. The database backup is therefore provided as CSV exports per table.
 Location:/database_backup/
