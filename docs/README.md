@@ -21,7 +21,7 @@ https://ugentbe-my.sharepoint.com/personal/lennerdc_declerck_ugent_be/_layouts/1
 https://supabase.com/dashboard/project/yezkgrihchdjhiypfykc
 
 ## ERD model
-https://dbdiagram.io/d/693aebc1e877c630747c59ac
+https://dbdiagram.io/d/Copy-of-Untitled-Diagram-6942f37ee4bb1dd3a978d6a8 
 
 ## Database backup 
 Due to network restrictions when connecting to Supabase with pg_dump,a direct SQL dump was not possible. The database backup is therefore provided as CSV exports per table.
