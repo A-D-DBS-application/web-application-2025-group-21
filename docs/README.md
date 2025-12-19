@@ -11,6 +11,10 @@ https://miro.com/app/board/uXjVJz_l5cU=/?share_link_id=471385065574
 ## Render link
 https://web-application-2025-group-21.onrender.com
 
+## powerpoint
+URL=https://onedrive.live.com/personal/49646a0c4413a732/_layouts/15/Doc.aspx?sourcedoc=%7B05e2122e-9a65-460e-84b9-3bcad7fbcb4c%7D&action=default&redeem=aHR0cHM6Ly8xZHJ2Lm1zL3AvYy80OTY0NmEwYzQ0MTNhNzMyL0lRQXVFdUlGWlpvT1JvUzVPOHJYLTh0TUFaX1V0aUl0aDZXVFp0SHdSZFFHVGpj&slrid=104de4a1-f0c1-b000-139d-6d43fd646f3d&originalPath=aHR0cHM6Ly8xZHJ2Lm1zL3AvYy80OTY0NmEwYzQ0MTNhNzMyL0lRQXVFdUlGWlpvT1JvUzVPOHJYLTh0TUFaX1V0aUl0aDZXVFp0SHdSZFFHVGpjP3J0aW1lPU5kWURKbUEtM2tn&CID=52ff8e26-d623-4881-a9d7-7214ae35c674&_SRM=0:G:48&file=Management%20Consulting%20Toolkit%20_%20by%20Slidesgo.pptx
+
+
 ## Feedback sessions
 ### Meeting 1 
 https://ugentbe-my.sharepoint.com/personal/lennerdc_declerck_ugent_be/_layouts/15/stream.aspx?id=%2Fpersonal%2Flennerdc%5Fdeclerck%5Fugent%5Fbe%2FDocuments%2FOpnamen%2FIConsult%2D20251113%5F165941%2DMeeting%20Recording%2Emp4&referrer=StreamWebApp%2EWeb&referrerScenario=AddressBarCopied%2Eview%2Ea3aa3ba2%2D55fc%2D49a8%2D9acc%2D95e076f93d63
